@@ -1,3 +1,10 @@
+import Hero from "@/components/sections/hero";
+
 export default function Home() {
-  return <div>Ozbo 1973 Portfolio</div>;
+  return (
+    <main>
+      <Hero />
+      {/* Other components */}
+    </main>
+  );
 }
