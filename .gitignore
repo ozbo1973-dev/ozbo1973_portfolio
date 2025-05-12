@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+/playground
 
 # debug
 npm-debug.log*
