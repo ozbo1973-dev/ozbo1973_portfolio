@@ -1,33 +1,13 @@
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import SectionWrapper from "./wrapper";
+import SectionHeader from "./header";
+import { SectionMainButton } from "./main-button";
 
 export default function About() {
   return (
-    <section className="w-full min-h-screen bg-background">
+    <SectionWrapper>
       {/* Header - Responsive */}
-      <div
-        className={cn(
-          "w-full flex-1",
-          "min-h-14 md:min-h-16 lg:min-h-24",
-          "px-4 md:px-6 lg:px-8 py-2.5",
-          "bg-slate-800 lg:bg-background",
-          "flex justify-center items-center"
-        )}
-      >
-        <div className="flex-1 text-center">
-          {/* Mobile & Tablet */}
-          <h2 className="text-4xl md:text-5xl font-bold font-['Inter'] leading-[60.10px] text-primary lg:hidden">
-            About Me
-          </h2>
-          {/* Desktop */}
-          <h2 className="hidden lg:inline-block text-5xl font-bold font-['Inter'] leading-[60.10px]">
-            <span className="text-foreground">A</span>
-            <span className="text-primary">bout </span>
-            <span className="text-foreground">M</span>
-            <span className="text-primary">e</span>
-          </h2>
-        </div>
-      </div>
+      <SectionHeader>About Me</SectionHeader>
 
       {/* Content Container */}
       <div
@@ -73,23 +53,10 @@ export default function About() {
 
       {/* Resume Button */}
       <div className="w-full py-10 flex justify-center">
-        <Button
-          asChild
-          variant="default"
-          className={cn(
-            "bg-primary hover:bg-primary/90",
-            "h-8 lg:h-12",
-            "w-full md:w-96 lg:w-[500px]",
-            "max-w-80 md:max-w-96 lg:max-w-[500px]",
-            "rounded-3xl",
-            "text-2xl font-bold font-['Mulish']"
-          )}
-        >
-          <a href="/resume.pdf" download>
-            Download Resume
-          </a>
-        </Button>
+        <SectionMainButton href="/resume.pdf" download>
+          Download Resume
+        </SectionMainButton>
       </div>
-    </section>
+    </SectionWrapper>
   );
 }
