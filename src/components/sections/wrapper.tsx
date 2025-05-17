@@ -1,8 +1,28 @@
 import React from "react";
+import { cn } from "@/lib/utils";
 
-function SectionWrapper({ children }: { children: React.ReactNode }) {
+interface SectionWrapperProps {
+  children: React.ReactNode;
+  bgImage?: string;
+}
+
+function SectionWrapper({ children, bgImage }: SectionWrapperProps) {
   return (
-    <section className="w-full min-h-screen bg-background">{children}</section>
+    <section
+      className={cn("w-full min-h-screen bg-background")}
+      style={
+        bgImage
+          ? {
+              backgroundImage: `url(${bgImage})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }
+          : undefined
+      }
+    >
+      {children}
+    </section>
   );
 }
 
