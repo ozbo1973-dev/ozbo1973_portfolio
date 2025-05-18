@@ -38,7 +38,7 @@ export function NavigationProvider({
       const currentSection = sections.find((section) => {
         const element = document.getElementById(section);
         if (element) {
-          const rect = element.getBoundingClientRect();
+          // const rect = element.getBoundingClientRect();
           const offsetTop = element.offsetTop;
           const offsetBottom = offsetTop + element.offsetHeight;
           return scrollPosition >= offsetTop && scrollPosition < offsetBottom;

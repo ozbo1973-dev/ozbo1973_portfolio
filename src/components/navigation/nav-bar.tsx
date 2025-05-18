@@ -1,10 +1,12 @@
 "use client";
 import React from "react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
 import { useNavigation } from "@/context/navigation-context";
 import { navLinks } from "@/lib/config";
+import { MobileMenu } from "./mobile-menu";
+import { ContactButton } from "./contact-button";
+import { NavButton } from "./nav-button";
+import { SectionType } from "@/types";
 
 function Navbar() {
   const { activeSection, isScrolled, scrollToSection } = useNavigation();
@@ -52,11 +54,11 @@ function Navbar() {
           {navLinks.map((link) => {
             if (link.href !== "/")
               return (
-                <button
+                <NavButton
                   key={link.href}
-                  onClick={() => scrollToSection(link.href as any)}
+                  href={link.href as SectionType}
                   className={cn(
-                    "font-bold font-['Mulish'] transition-all duration-300",
+                    "font-bold font-['Mulish']",
                     isScrolled ? "text-sm" : "text-base",
                     activeSection === link.href
                       ? "text-primary"
@@ -65,39 +67,16 @@ function Navbar() {
                   )}
                 >
                   {link.label}
-                </button>
+                </NavButton>
               );
           })}
-        </div>
+        </div>{" "}
         {/* Contact Button - Tablet & Desktop */}
         <div className="hidden sm:block">
-          <Button
-            onClick={() => scrollToSection("/contact")}
-            className={cn(
-              "border-2 border-primary bg-transparent hover:bg-primary/10",
-              "transition-all duration-300",
-              isScrolled
-                ? "h-10 w-40 md:h-12 md:w-48"
-                : "md:h-16 md:w-72 lg:h-20 lg:w-72",
-              "rounded-[24px] text-shadow-white"
-            )}
-          >
-            Contact
-          </Button>
-        </div>
-        {/* Mobile Menu Button */}
-        <Button
-          size="icon"
-          className={cn("lg:hidden", isScrolled ? "h-8 w-8" : "h-10 w-10")}
-        >
-          <Menu
-            className={cn(
-              "transition-all duration-300",
-              isScrolled ? "h-5 w-5" : "h-6 w-6"
-            )}
-          />
-          <span className="sr-only">Menu</span>
-        </Button>
+          <ContactButton isScrolled={isScrolled} />
+        </div>{" "}
+        {/* Mobile Menu */}
+        <MobileMenu isScrolled={isScrolled} />
       </div>
     </nav>
   );
