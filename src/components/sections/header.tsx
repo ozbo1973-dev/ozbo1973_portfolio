@@ -20,7 +20,7 @@ function SectionHeader({ children }: SectionHeaderProps) {
         "w-full flex-1",
         "min-h-14 md:min-h-16 lg:min-h-24",
         "px-4 md:px-6 lg:px-8 py-2.5",
-        "bg-slate-800 lg:bg-background",
+        "bg-slate-800 lg:bg-transparent",
         "flex justify-center items-center"
       )}
     >

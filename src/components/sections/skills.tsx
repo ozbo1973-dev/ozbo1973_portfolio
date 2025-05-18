@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import SectionWrapper from "./wrapper";
-import SectionHeader from "./header";
 import { SectionMainButton } from "./main-button";
 
 type SkillProps = {
@@ -45,11 +44,10 @@ function SkillCard({ name, level, progress, icon }: SkillProps) {
   );
 }
 
-export default function Skills() {
+export default function SkillsSection() {
   return (
-    <SectionWrapper>
+    <SectionWrapper id="skills" title="My Skills">
       {/* Header - Responsive */}
-      <SectionHeader>My Skills</SectionHeader>
 
       {/* Skills Grid - Responsive */}
       <div
