@@ -1,13 +1,11 @@
 import { cn } from "@/lib/utils";
 import SectionWrapper from "./wrapper";
-import SectionHeader from "./header";
 import { SectionMainButton } from "./main-button";
 
-export default function About() {
+export default function AboutSection() {
   return (
-    <SectionWrapper>
+    <SectionWrapper id="about" title="About Me">
       {/* Header - Responsive */}
-      <SectionHeader>About Me</SectionHeader>
 
       {/* Content Container */}
       <div

@@ -1,7 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import SectionWrapper from "./wrapper";
-import SectionHeader from "./header";
 import { SectionMainButton } from "./main-button";
 
 type ProjectCardProps = {
@@ -81,9 +80,7 @@ function ProjectCard({ name, description, imageUrl }: ProjectCardProps) {
 
 function ProjectsSection() {
   return (
-    <SectionWrapper>
-      <SectionHeader>Featured Projects</SectionHeader>
-
+    <SectionWrapper id="projects" title="Featured Projects">
       {/* Projects Grid */}
       <div
         className={cn(

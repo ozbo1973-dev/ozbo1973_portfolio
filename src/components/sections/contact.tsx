@@ -3,12 +3,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import SectionWrapper from "./wrapper";
-import SectionHeader from "./header";
 
 export default function ContactSection() {
   return (
-    <SectionWrapper bgImage="/images/contact-bg.png">
-      <SectionHeader>Contact Me</SectionHeader>
+    <SectionWrapper
+      id="contact"
+      bgImage="/images/contact-bg.png"
+      title="Contact Me"
+    >
       <div className="flex flex-col mx-auto items-center justify-center w-[75%] min-h-screen">
         <div
           className={cn(
