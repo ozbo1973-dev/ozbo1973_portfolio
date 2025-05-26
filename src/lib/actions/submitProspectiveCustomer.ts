@@ -5,6 +5,14 @@ import ProspectiveCustomer from "../models/ProspectiveCustomer";
 import { Resend } from "resend";
 import { EmailTemplate } from "@/components/email-template";
 import { CustomerConfirmationEmail } from "@/components/customer-confirmation-email";
+import { headers } from "next/headers";
+import { blockedUserAgents } from "../config";
+import { addSuspiciousIP } from "../security/suspiciousIP";
+import {
+  checkActionRateLimit,
+  trackFailedAttempt,
+  isBlacklisted,
+} from "../security/rateLimit";
 
 // Initialize Resend
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -19,7 +27,66 @@ const customerSchema = z.object({
 
 export type CustomerFormData = z.infer<typeof customerSchema>;
 
-export async function submitProspectiveCustomer(formData: CustomerFormData) {
+export async function submitProspectiveCustomer(
+  formData: CustomerFormData & { company?: string }
+) {
+  // Server-side header checks
+  const headersList = await headers();
+  const userAgent = headersList.get("user-agent") || "";
+  const referer = headersList.get("referer") || "";
+  const ip =
+    headersList.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    headersList.get("x-real-ip") ||
+    headersList.get("cf-connecting-ip") ||
+    "unknown";
+
+  if (blockedUserAgents.some((ua) => userAgent.toLowerCase().includes(ua))) {
+    await addSuspiciousIP(ip, "Suspicious user agent");
+    return {
+      success: false,
+      error: "Suspicious user agent detected. Submission blocked.",
+    };
+  }
+
+  // Server-side honeypot check
+  if (formData.company && formData.company.trim() !== "") {
+    await addSuspiciousIP(ip, "Honeypot field filled");
+    return {
+      success: false,
+      error: "Bot detected. Submission blocked.",
+    };
+  }
+
+  // Block if referer is missing or suspicious
+  if (
+    !referer ||
+    (!referer.includes(process.env.NEXT_PUBLIC_APP_URL || "") &&
+      !referer.includes("localhost"))
+  ) {
+    await addSuspiciousIP(ip, "Suspicious referer");
+    return {
+      success: false,
+      error: "Suspicious referer. Submission blocked.",
+    };
+  }
+
+  // Rate limiting and blacklist check
+  if (isBlacklisted(ip)) {
+    await addSuspiciousIP(ip, "Blacklisted IP");
+    return {
+      success: false,
+      error: "Too many failed attempts. Try again later.",
+    };
+  }
+  if (!checkActionRateLimit(ip)) {
+    await addSuspiciousIP(ip, "Rate limit exceeded");
+    trackFailedAttempt(ip);
+    return {
+      success: false,
+      error: "Too many requests. Please wait and try again.",
+    };
+  }
+
   try {
     // Validate the input data
     const validatedData = customerSchema.parse(formData);

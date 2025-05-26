@@ -12,11 +12,14 @@ import { toast } from "sonner";
 
 export default function ContactSection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState<CustomerFormData>({
+  const [formData, setFormData] = useState<
+    CustomerFormData & { company?: string }
+  >({
     firstName: "",
     lastName: "",
     email: "",
     description: "",
+    company: "",
   });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -49,7 +52,7 @@ export default function ContactSection() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev: CustomerFormData) => ({
+    setFormData((prev: CustomerFormData & { company?: string }) => ({
       ...prev,
       [name]: value,
     }));
@@ -92,7 +95,22 @@ export default function ContactSection() {
             <form
               onSubmit={handleSubmit}
               className="w-full max-w-[900px] space-y-8"
+              autoComplete="off"
             >
+              {/* Honeypot field for bot detection */}
+              <div style={{ display: "none" }} aria-hidden="true">
+                <label htmlFor="company">Company</label>
+                <input
+                  type="text"
+                  id="company"
+                  name="company"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={formData.company || ""}
+                  onChange={handleChange}
+                />
+              </div>
+
               {/* Name Fields */}
               <div
                 className={cn(
