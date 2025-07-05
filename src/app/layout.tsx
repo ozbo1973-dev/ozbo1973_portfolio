@@ -34,8 +34,80 @@ const mulish = Mulish({
 });
 
 export const metadata: Metadata = {
-  title: "OzBo1973 || Portfolio",
-  description: "Protfoilio of Brady Bovero for frelance web development",
+  metadataBase: new URL("https://ozbo1973.com"),
+  title: {
+    default: "OzBo1973 || Portfolio",
+    template: "%s | OzBo1973",
+  },
+  description:
+    "Portfolio of Brady Bovero for freelance web development, specializing in React, Next.js, and AI-powered solutions.",
+  keywords: [
+    "Brady Bovero",
+    "OzBo1973",
+    "Portfolio",
+    "Web Developer",
+    "Freelance",
+    "React",
+    "Next.js",
+    "AI",
+    "Frontend",
+    "Fullstack",
+    "JavaScript",
+    "TypeScript",
+    "Projects",
+    "Contact",
+    "Skills",
+  ],
+  authors: [{ name: "Brady Bovero", url: "https://ozbo1973.com" }],
+  creator: "Brady Bovero",
+  publisher: "Brady Bovero",
+  openGraph: {
+    title: "OzBo1973 || Portfolio",
+    description:
+      "Portfolio of Brady Bovero for freelance web development, specializing in React, Next.js, and AI-powered solutions.",
+    url: "https://ozbo1973.com",
+    siteName: "OzBo1973 Portfolio",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "OzBo1973 Portfolio OG Image",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      noimageindex: false,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/apple-icon.png",
+  },
+  manifest: "/manifest.json",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
+  ],
 };
 
 export default function RootLayout({
