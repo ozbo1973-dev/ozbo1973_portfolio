@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useNavigation } from "@/context/navigation-context";
 import { navLinks } from "@/lib/config";
@@ -32,12 +33,21 @@ function Navbar() {
           onClick={() => scrollToSection("/")}
           className="flex items-center gap-0.5 hover:opacity-80 transition-opacity"
         >
-          <div
-            className={cn(
-              "bg-primary rounded-full transition-all duration-300",
-              isScrolled ? "w-8 h-8 md:w-10 md:h-10" : "w-8 h-9 md:w-14 md:h-14"
-            )}
-          />
+          <div className="relative">
+            <Image
+              src="/images/logo.svg"
+              alt="OzBo1973 Logo"
+              width={isScrolled ? 32 : 56}
+              height={isScrolled ? 32 : 56}
+              className={cn(
+                "transition-all duration-300",
+                isScrolled
+                  ? "w-8 h-8 md:w-10 md:h-10"
+                  : "w-8 h-9 md:w-14 md:h-14"
+              )}
+              priority
+            />
+          </div>
           <span
             className={cn(
               "font-bold font-['Inter'] text-shadow-white transition-all duration-300",
