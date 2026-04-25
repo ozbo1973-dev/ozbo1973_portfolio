@@ -1,4 +1,4 @@
-// middleware.ts - Protection for landing page and contact API
+// proxy.ts - Protection for landing page and contact API
 import { NextRequest, NextResponse } from "next/server";
 import { isRateLimited } from "@/lib/security/rateLimit";
 import { maxRequestsData } from "./lib/config";
@@ -12,7 +12,7 @@ function getClientIP(request: NextRequest): string {
   return forwarded?.split(",")[0]?.trim() || realIP || cfIP || "unknown";
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const ip = getClientIP(request);
   const pathname = request.nextUrl.pathname;
   const method = request.method;

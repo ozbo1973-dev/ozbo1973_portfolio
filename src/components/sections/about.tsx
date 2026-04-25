@@ -50,11 +50,9 @@ export default function AboutSection() {
       </div>
 
       {/* Resume Button */}
-      <div className="w-full py-10 flex justify-center">
-        <SectionMainButton href="/resume.pdf" download>
-          Download Resume
-        </SectionMainButton>
-      </div>
+      <SectionMainButton href="/resume.pdf" download="resume.pdf">
+        Download Resume
+      </SectionMainButton>
     </SectionWrapper>
   );
 }

@@ -1,10 +1,10 @@
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface SectionMainButtonProps {
   children: React.ReactNode;
   href: string;
-  download?: boolean;
+  download?: string;
 }
 
 export function SectionMainButton({
@@ -14,10 +14,11 @@ export function SectionMainButton({
 }: SectionMainButtonProps) {
   return (
     <div className="w-full py-10 flex justify-center">
-      <Button
-        asChild
-        variant="default"
+      <a
+        href={href}
+        download={download}
         className={cn(
+          buttonVariants({ variant: "default" }),
           "bg-primary hover:bg-primary/90",
           "h-8 lg:h-12",
           "w-full md:w-96 lg:w-[500px]",
@@ -26,10 +27,8 @@ export function SectionMainButton({
           "text-2xl font-bold font-['Mulish']"
         )}
       >
-        <a href={href} {...(download && { download })}>
-          {children}
-        </a>
-      </Button>
+        {children}
+      </a>
     </div>
   );
 }
