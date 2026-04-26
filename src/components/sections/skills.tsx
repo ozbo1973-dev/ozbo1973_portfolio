@@ -1,32 +1,76 @@
 import { cn } from "@/lib/utils";
 import SectionWrapper from "./wrapper";
 import { SectionMainButton } from "./main-button";
+import {
+  SiReact,
+  SiNextdotjs,
+  SiTypescript,
+  SiNodedotjs,
+  SiPython,
+  SiAmazonwebservices,
+} from "@icons-pack/react-simple-icons";
 
 type SkillProps = {
   name: string;
   level: string;
   progress: number;
-  icon?: React.ReactNode;
+  icon: React.ReactNode;
 };
 
 const skills: SkillProps[] = [
-  { name: "React", level: "Advanced", progress: 90 },
-  { name: "Next.js", level: "Advanced", progress: 85 },
-  { name: "TypeScript", level: "Advanced", progress: 85 },
-  { name: "Node.js", level: "Intermediate", progress: 75 },
-  { name: "Python", level: "Intermediate", progress: 70 },
-  { name: "AWS", level: "Intermediate", progress: 65 },
+  {
+    name: "React",
+    level: "Advanced",
+    progress: 90,
+    icon: <SiReact className="text-primary w-12 h-12" />,
+  },
+  {
+    name: "Next.js",
+    level: "Advanced",
+    progress: 85,
+    icon: <SiNextdotjs className="text-primary w-12 h-12" />,
+  },
+  {
+    name: "TypeScript",
+    level: "Advanced",
+    progress: 85,
+    icon: <SiTypescript className="text-primary w-12 h-12" />,
+  },
+  {
+    name: "Node.js",
+    level: "Intermediate",
+    progress: 75,
+    icon: <SiNodedotjs className="text-primary w-12 h-12" />,
+  },
+  {
+    name: "Python",
+    level: "Intermediate",
+    progress: 70,
+    icon: <SiPython className="text-primary w-12 h-12" />,
+  },
+  {
+    name: "AWS",
+    level: "Intermediate",
+    progress: 65,
+    icon: <SiAmazonwebservices className="text-primary w-12 h-12" />,
+  },
 ];
 
-function SkillCard({ name, level, progress, icon }: SkillProps) {
+type SkillCardProps = SkillProps & { index: number };
+
+function SkillCard({ name, level, progress, icon, index }: SkillCardProps) {
   return (
-    <div className="w-36 h-48 p-4 bg-card flex flex-col justify-start items-center gap-3">
-      <div className="w-full h-20 max-w-32 relative overflow-hidden">
-        {icon ? (
-          icon
-        ) : (
-          <div className="w-24 h-14 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 outline-4 outline-offset-[-2px] outline-border" />
-        )}
+    <div
+      className={cn(
+        "w-36 h-48 p-4 bg-card",
+        "flex flex-col justify-start items-center gap-3",
+        "border-t-2 border-primary",
+        "animate-fade-in"
+      )}
+      style={{ animationDelay: `${index * 100}ms` }}
+    >
+      <div className="w-full h-20 max-w-32 flex items-center justify-center">
+        {icon}
       </div>
       <div className="w-56 text-center text-foreground text-base font-extrabold font-['Mulish'] uppercase tracking-wider">
         {name}
@@ -34,9 +78,9 @@ function SkillCard({ name, level, progress, icon }: SkillProps) {
       <div className="self-stretch text-center text-foreground/80 text-xs font-light font-['Mulish'] uppercase tracking-wide">
         {level}
       </div>
-      <div className="self-stretch h-5 relative bg-muted">
+      <div className="self-stretch h-2 relative bg-muted rounded-full overflow-hidden">
         <div
-          className="h-5 absolute left-0 top-0 bg-primary/30"
+          className="h-2 absolute left-0 top-0 bg-primary rounded-full"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -47,9 +91,6 @@ function SkillCard({ name, level, progress, icon }: SkillProps) {
 export default function SkillsSection() {
   return (
     <SectionWrapper id="skills" title="My Skills">
-      {/* Header - Responsive */}
-
-      {/* Skills Grid - Responsive */}
       <div
         className={cn(
           "w-full",
@@ -61,12 +102,11 @@ export default function SkillsSection() {
           "flex-wrap content-start"
         )}
       >
-        {skills.map((skill) => (
-          <SkillCard key={skill.name} {...skill} />
+        {skills.map((skill, index) => (
+          <SkillCard key={skill.name} {...skill} index={index} />
         ))}
       </div>
 
-      {/* Resume Button */}
       <SectionMainButton href="/resume.pdf" download="resume.pdf">
         Download Resume
       </SectionMainButton>
