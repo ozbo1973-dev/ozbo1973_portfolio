@@ -5,16 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import SectionWrapper from "./wrapper";
-import { submitProspectiveCustomer } from "@/lib/actions/submitProspectiveCustomer";
+import { submitContactForm } from "@/app/actions/submitContactForm";
 import { useState } from "react";
-import type { CustomerFormData } from "@/lib/actions/submitProspectiveCustomer";
+import type { ContactFormData } from "@/app/actions/submitContactForm";
 import { toast } from "sonner";
 
 export default function ContactSection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState<
-    CustomerFormData & { company?: string }
-  >({
+  const [formData, setFormData] = useState<ContactFormData>({
     firstName: "",
     lastName: "",
     email: "",
@@ -27,7 +25,7 @@ export default function ContactSection() {
     setIsSubmitting(true);
 
     try {
-      const result = await submitProspectiveCustomer(formData);
+      const result = await submitContactForm(formData);
 
       if (result.success) {
         toast.success("Your message has been sent successfully.");
@@ -52,7 +50,7 @@ export default function ContactSection() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev: CustomerFormData & { company?: string }) => ({
+    setFormData((prev: ContactFormData) => ({
       ...prev,
       [name]: value,
     }));

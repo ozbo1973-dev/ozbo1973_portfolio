@@ -3,17 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { isRateLimited } from "@/lib/security/rateLimit";
 import { maxRequestsData } from "./lib/config";
 import { isSuspiciousRequest } from "./lib/security/suspiciousAgent";
-
-function getClientIP(request: NextRequest): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  const realIP = request.headers.get("x-real-ip");
-  const cfIP = request.headers.get("cf-connecting-ip"); // Cloudflare
-
-  return forwarded?.split(",")[0]?.trim() || realIP || cfIP || "unknown";
-}
+import { getClientIP } from "./lib/utils";
 
 export async function proxy(request: NextRequest) {
-  const ip = getClientIP(request);
+  const ip = getClientIP(request.headers);
   const pathname = request.nextUrl.pathname;
   const method = request.method;
 
