@@ -3,7 +3,7 @@ import Link from "next/link";
 
 function Footer() {
   return (
-    <footer className="w-full bg-slate-800 px-4 py-4 md:py-8">
+    <footer className="w-full bg-card border-t border-border px-4 py-4 md:py-8">
       <div className="container mx-auto flex flex-col items-center justify-center gap-4 md:gap-6">
         <div className="flex flex-row gap-6 md:gap-8">
           <Link

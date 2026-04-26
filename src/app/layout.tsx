@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ABeeZee, Inter, Mulish } from "next/font/google";
+import { ABeeZee, Inter, Mulish, Playfair_Display } from "next/font/google";
 import Navbar from "@/components/navigation/nav-bar";
 import { NavigationProvider } from "@/context/navigation-context";
 import "./globals.css";
@@ -31,6 +31,12 @@ const inter = Inter({
 const mulish = Mulish({
   subsets: ["latin"],
   variable: "--font-mulish",
+});
+
+const playfairDisplay = Playfair_Display({
+  weight: ["700"],
+  subsets: ["latin"],
+  variable: "--font-playfair",
 });
 
 export const metadata: Metadata = {
@@ -118,7 +124,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${abeeZee.variable} ${inter.variable} ${mulish.variable} min-h-screen antialiased font-serif`}
+        className={`${geistSans.variable} ${geistMono.variable} ${abeeZee.variable} ${inter.variable} ${mulish.variable} ${playfairDisplay.variable} min-h-screen antialiased font-serif`}
       >
         <NavigationProvider>
           <Navbar />

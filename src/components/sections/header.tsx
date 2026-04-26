@@ -5,15 +5,6 @@ interface SectionHeaderProps {
 }
 
 function SectionHeader({ children }: SectionHeaderProps) {
-  // Split the text into words for desktop styling
-  const words = children.split(" ");
-  const styledWords = words.map((word) => (
-    <span key={word}>
-      <span className="text-foreground">{word.charAt(0)}</span>
-      <span className="text-primary">{word.slice(1)} </span>
-    </span>
-  ));
-
   return (
     <div
       className={cn(
@@ -24,16 +15,17 @@ function SectionHeader({ children }: SectionHeaderProps) {
         "flex justify-center items-center"
       )}
     >
-      <div className="flex-1 text-center border-b-4 border-slate-800 lg:border-b-0 ">
+      <div className="flex-1 text-center">
         <h2
           className={cn(
-            "text-4xl font-bold font-['Inter'] leading-[60.10px] text-primary",
-            " md:text-5xl ",
+            "text-4xl font-bold font-[family-name:var(--font-playfair)] leading-[60.10px] text-primary",
+            "md:text-5xl",
             "lg:inline-block"
           )}
         >
-          {styledWords}
+          {children}
         </h2>
+        <div className="h-1 w-16 bg-primary mx-auto mt-2" />
       </div>
     </div>
   );

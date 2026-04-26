@@ -13,7 +13,7 @@ export default function HeroSection() {
           <div className="flex-1 max-w-[720px] space-y-8 sm:space-y-14 lg:space-y-16">
             {/* Heading */}
             <div className="space-y-4 sm:space-y-6">
-              <h1 className="text-3xl xs:text-4xl sm:text-5xl font-bold font-['Inter'] leading-tight">
+              <h1 className="text-3xl xs:text-4xl sm:text-5xl font-bold font-[family-name:var(--font-playfair)] leading-tight">
                 <span className="text-primary">Hello I'm Brady,</span>{" "}
                 <span className="text-foreground">Freelance Developer</span>
               </h1>
