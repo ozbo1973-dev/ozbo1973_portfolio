@@ -7,6 +7,8 @@ import SectionWrapper from "./wrapper";
 export default function HeroSection() {
   return (
     <SectionWrapper id="home" bgImage="/images/hero-bg.png">
+      {/* Dark overlay so text stays readable over the background image */}
+      <div className="absolute inset-0 bg-background/60 z-0" />
       <div className="container mx-auto h-[calc(100vh-6rem)] md:h-[calc(100vh-6rem)] flex items-center justify-center">
         <div className="relative z-10 px-4 py-16 flex flex-col lg:flex-row items-center justify-between gap-8">
           {/* Text Content */}
@@ -37,7 +39,7 @@ export default function HeroSection() {
               className={cn(
                 "flex flex-col xs:flex-row gap-4",
                 "justify-center xs:justify-start",
-                "w-full max-w-[320px] xs:max-w-none mx-auto xs:mx-0"
+                "w-full max-w-[320px] xs:max-w-none mx-auto xs:mx-0",
               )}
             >
               <Button
@@ -48,7 +50,7 @@ export default function HeroSection() {
                   "w-full xs:w-auto",
                   "h-14",
                   "px-8",
-                  "text-base font-medium"
+                  "text-base font-medium",
                 )}
               >
                 <Link href="/projects">View Projects</Link>
@@ -61,7 +63,7 @@ export default function HeroSection() {
                   "w-full xs:w-auto",
                   "h-14",
                   "px-8",
-                  "text-base font-medium"
+                  "text-base font-medium",
                 )}
               >
                 <Link href="/contact">Hire Me</Link>

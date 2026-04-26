@@ -17,7 +17,7 @@ function SectionWrapper({ children, bgImage, id, title }: SectionWrapperProps) {
   return (
     <section
       id={id}
-      className={cn("w-full min-h-screen bg-background", "scroll-mt-24")}
+      className={cn("relative w-full min-h-screen bg-background", "scroll-mt-24")}
       style={{
         ...(bgImage
           ? {
