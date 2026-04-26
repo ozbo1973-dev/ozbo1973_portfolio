@@ -1,12 +1,11 @@
 import { cn } from "@/lib/utils";
 import SectionWrapper from "./wrapper";
 import { SectionMainButton } from "./main-button";
+import { UserRound } from "lucide-react";
 
 export default function AboutSection() {
   return (
     <SectionWrapper id="about" title="About Me">
-      {/* Header - Responsive */}
-
       {/* Content Container */}
       <div
         className={cn(
@@ -18,7 +17,7 @@ export default function AboutSection() {
           "gap-20 md:gap-12 lg:gap-36"
         )}
       >
-        {/* Image Container */}
+        {/* Image Placeholder — swap for Next.js Image when ready */}
         <div
           className={cn(
             "w-full relative overflow-hidden",
@@ -26,8 +25,19 @@ export default function AboutSection() {
             "max-w-[350px] md:max-w-[450px] lg:max-w-[550px]"
           )}
         >
-          <div className="absolute md:mt-5 lg:mt-0 inset-0 bg-zinc-200" />
-          <div className="absolute w-16 h-16 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+          <div
+            className={cn(
+              "absolute inset-0",
+              "bg-card",
+              "border-2 border-dashed border-primary/60",
+              "flex flex-col items-center justify-center gap-3"
+            )}
+          >
+            <UserRound className="text-primary/70 w-16 h-16" strokeWidth={1} />
+            <span className="text-foreground/40 text-xs uppercase tracking-widest font-['Mulish']">
+              Photo coming soon
+            </span>
+          </div>
         </div>
 
         {/* Text Content */}
@@ -35,8 +45,9 @@ export default function AboutSection() {
           className={cn(
             "w-full lg:flex-1",
             "max-w-[600px]",
-            " text-xl md:text-2xl font-normal font-['Inter'] leading-7",
-            "text-foreground text-center lg:text-left"
+            "text-xl md:text-2xl font-normal font-['Inter'] leading-7",
+            "text-foreground text-center lg:text-left",
+            "border-l-4 border-primary/50 pl-4 lg:pl-6"
           )}
         >
           With 20+ years of experience in solutioning problems with coding and
