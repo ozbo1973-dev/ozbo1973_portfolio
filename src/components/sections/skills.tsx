@@ -42,18 +42,18 @@ const skills: SkillProps[] = [
     progress: 75,
     icon: <SiNodedotjs className="text-primary w-12 h-12" />,
   },
-  {
-    name: "Python",
-    level: "Intermediate",
-    progress: 70,
-    icon: <SiPython className="text-primary w-12 h-12" />,
-  },
-  {
-    name: "AWS",
-    level: "Intermediate",
-    progress: 65,
-    icon: <SiAmazonwebservices className="text-primary w-12 h-12" />,
-  },
+  // {
+  //   name: "Python",
+  //   level: "Intermediate",
+  //   progress: 70,
+  //   icon: <SiPython className="text-primary w-12 h-12" />,
+  // },
+  // {
+  //   name: "AWS",
+  //   level: "Intermediate",
+  //   progress: 65,
+  //   icon: <SiAmazonwebservices className="text-primary w-12 h-12" />,
+  // },
 ];
 
 type SkillCardProps = SkillProps & { index: number };
@@ -65,7 +65,7 @@ function SkillCard({ name, level, progress, icon, index }: SkillCardProps) {
         "w-36 h-48 p-4 bg-card",
         "flex flex-col justify-start items-center gap-3",
         "border-t-2 border-primary",
-        "animate-fade-in"
+        "animate-fade-in",
       )}
       style={{ animationDelay: `${index * 100}ms` }}
     >
@@ -99,7 +99,7 @@ export default function SkillsSection() {
           "pb-12 md:pb-16 lg:pb-20",
           "inline-flex justify-center",
           "items-start gap-8",
-          "flex-wrap content-start"
+          "flex-wrap content-start",
         )}
       >
         {skills.map((skill, index) => (
