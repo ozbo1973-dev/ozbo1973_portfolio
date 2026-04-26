@@ -65,22 +65,14 @@ export default function ContactSection() {
       <div className="flex flex-col mx-auto items-center justify-center w-[95%] md:w-[75%] min-h-screen">
         <div
           className={cn(
-            "w-full",
-            "p-1 md:p-6 lg:p-7",
-            " my-auto rounded-[3px]",
-            " bg-slate-800"
+            "w-full my-auto",
+            "p-4 md:p-6 lg:px-14 lg:py-8",
+            "bg-card",
+            "border border-primary/20 border-t-[3px] border-t-primary",
+            "flex flex-col justify-center items-center",
+            "gap-7 md:gap-12 lg:gap-11"
           )}
         >
-          <div
-            className={cn(
-              "w-full h-full",
-              "p-4 md:p-6 lg:px-14 lg:py-2.5",
-              "bg-card border-4 border-slate-800",
-              "outline-8 outline-offset-[-9px] outline-border",
-              "flex flex-col justify-center items-center",
-              "gap-7 md:gap-12 lg:gap-11"
-            )}
-          >
             {/* Form Header */}
             <div className="w-full text-center">
               <h3 className="text-3xl md:text-3xl lg:text-5xl font-bold font-['Inter'] leading-[60.10px]">
@@ -183,12 +175,12 @@ export default function ContactSection() {
               />
 
               {/* Submit Button */}
-              <div className="flex justify-center md:justify-end">
+              <div className="flex justify-end">
                 <Button
                   type="submit"
                   disabled={isSubmitting}
                   className={cn(
-                    "w-56 md:w-96 lg:w-40",
+                    "w-full md:w-auto md:min-w-40",
                     "h-14",
                     "rounded-3xl",
                     "bg-primary hover:bg-primary/90",
@@ -200,7 +192,6 @@ export default function ContactSection() {
               </div>
             </form>
           </div>
-        </div>
       </div>
     </SectionWrapper>
   );
