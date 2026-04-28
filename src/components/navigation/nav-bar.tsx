@@ -16,7 +16,7 @@ function Navbar() {
     <nav
       className={cn(
         "fixed top-0 left-0 right-0 z-50",
-        "w-full bg-slate-800 text-white border-b border-border",
+        "w-full bg-card text-white border-b border-border",
         "transition-all duration-300 ease-in-out",
         isScrolled ? "h-16" : "h-24"
       )}

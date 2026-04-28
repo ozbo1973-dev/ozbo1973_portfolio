@@ -1,4 +1,3 @@
-import React from "react";
 import { cn } from "@/lib/utils";
 import SectionWrapper from "./wrapper";
 import { SectionMainButton } from "./main-button";
@@ -27,7 +26,7 @@ function ProjectCard({ name, description, imageUrl }: ProjectCardProps) {
     <div
       className={cn(
         "w-full flex flex-col justify-start items-start gap-2",
-        "max-w-96 md:max-w-[550px] lg:max-w-[527px]"
+        "max-w-96 md:max-w-[550px] lg:max-w-[527px]",
       )}
     >
       {/* Image Container */}
@@ -36,14 +35,14 @@ function ProjectCard({ name, description, imageUrl }: ProjectCardProps) {
           className={cn(
             "absolute inset-0 bg-zinc-200",
             "w-96 md:w-[550px] lg:w-[527px]",
-            "h-44 lg:h-72"
+            "h-44 lg:h-72",
           )}
         />
         <div
           className={cn(
             "absolute w-16 h-16",
             "left-[188px] md:left-[239px] lg:left-[228px]",
-            "top-[50px] lg:top-[112px]"
+            "top-[50px] lg:top-[112px]",
           )}
         />
       </div>
@@ -53,10 +52,10 @@ function ProjectCard({ name, description, imageUrl }: ProjectCardProps) {
         <div
           className={cn(
             "text-center justify-center",
-            "text-slate-800 text-2xl lg:text-3xl",
+            "text-primary text-2xl lg:text-3xl",
             "font-bold font-['Mulish']",
             "h-10",
-            "w-96 md:flex-1 lg:w-60"
+            "w-96 md:flex-1 lg:w-60",
           )}
         >
           {name}
@@ -67,9 +66,9 @@ function ProjectCard({ name, description, imageUrl }: ProjectCardProps) {
       <div
         className={cn(
           "self-stretch text-center",
-          "h-28",
-          "text-black text-xl lg:text-3xl",
-          "font-normal font-['Mulish']"
+          "h-auto",
+          "text-foreground text-xl lg:text-2xl",
+          "font-normal font-['Mulish']",
         )}
       >
         {description}
@@ -90,7 +89,7 @@ function ProjectsSection() {
           "flex flex-col lg:flex-row",
           "justify-center items-center",
           "gap-4 md:gap-4 lg:gap-40",
-          "flex-wrap content-center"
+          "flex-wrap content-center",
         )}
       >
         {projects.map((project, index) => (
