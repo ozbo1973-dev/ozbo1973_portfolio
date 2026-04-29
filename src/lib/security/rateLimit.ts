@@ -1,8 +1,5 @@
 // In-memory rate limiting (replace with Redis for production)
-const actionRateLimitStore = new Map<
-  string,
-  { count: number; resetTime: number }
->();
+const actionRateLimitStore = new Map<string, { count: number; resetTime: number }>();
 const failedAttempts = new Map<string, number>();
 
 export function checkActionRateLimit(
@@ -31,9 +28,8 @@ export function trackFailedAttempt(ip: string): number {
   const newAttempts = attempts + 1;
   failedAttempts.set(ip, newAttempts);
 
-  // Clean up old entries periodically
   if (newAttempts % 10 === 0) {
-    setTimeout(() => failedAttempts.delete(ip), 30 * 60 * 1000); // 30 min cleanup
+    setTimeout(() => failedAttempts.delete(ip), 30 * 60 * 1000);
   }
 
   return newAttempts;
@@ -41,11 +37,12 @@ export function trackFailedAttempt(ip: string): number {
 
 export function isBlacklisted(ip: string): boolean {
   const attempts = failedAttempts.get(ip) || 0;
-  return attempts >= 10; // Block after 10 failed attempts
+  return attempts >= 10;
 }
 
-// For middleware (less strict, customizable)
+// For middleware — less strict, customizable
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
 export function isRateLimited(
   ip: string,
   maxRequests = 15,

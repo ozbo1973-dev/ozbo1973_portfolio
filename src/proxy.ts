@@ -4,6 +4,7 @@ import { isRateLimited } from "@/lib/security/rateLimit";
 import { maxRequestsData } from "./lib/config";
 import { isSuspiciousRequest } from "./lib/security/suspiciousAgent";
 import { getClientIP } from "./lib/utils";
+import { isIPSuspicious } from "./lib/dal";
 
 export async function proxy(request: NextRequest) {
   const ip = getClientIP(request.headers);
@@ -17,6 +18,11 @@ export async function proxy(request: NextRequest) {
 
   if (!isProtectedRoute) {
     return NextResponse.next();
+  }
+
+  // DB-backed blacklist — survives server restarts
+  if (await isIPSuspicious(ip)) {
+    return new NextResponse("Access Denied", { status: 403 });
   }
 
   // Rate limiting (more lenient for homepage visits)

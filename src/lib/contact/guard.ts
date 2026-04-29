@@ -15,38 +15,44 @@ export interface GuardContext {
 
 export interface GuardResult {
   ok: boolean;
+  reason?: string;
   error?: string;
 }
 
-export async function runSecurityGuard(ctx: GuardContext): Promise<GuardResult> {
+/** Pure in-memory decision — no DB calls. */
+export function runSecurityGuard(ctx: GuardContext): GuardResult {
   const { ip, userAgent, referer, honeypot } = ctx;
 
   if (blockedUserAgents.some((ua) => userAgent.toLowerCase().includes(ua))) {
-    await recordSuspiciousIP(ip, "Suspicious user agent");
-    return { ok: false, error: "Suspicious user agent detected. Submission blocked." };
+    return { ok: false, reason: "Suspicious user agent", error: "Suspicious user agent detected. Submission blocked." };
   }
 
   if (honeypot && honeypot.trim() !== "") {
-    await recordSuspiciousIP(ip, "Honeypot field filled");
-    return { ok: false, error: "Bot detected. Submission blocked." };
+    return { ok: false, reason: "Honeypot field filled", error: "Bot detected. Submission blocked." };
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
   if (!referer || (!referer.includes(appUrl) && !referer.includes("localhost"))) {
-    await recordSuspiciousIP(ip, "Suspicious referer");
-    return { ok: false, error: "Suspicious referer. Submission blocked." };
+    return { ok: false, reason: "Suspicious referer", error: "Suspicious referer. Submission blocked." };
   }
 
   if (isBlacklisted(ip)) {
-    await recordSuspiciousIP(ip, "Blacklisted IP");
-    return { ok: false, error: "Too many failed attempts. Try again later." };
+    return { ok: false, reason: "Blacklisted IP", error: "Too many failed attempts. Try again later." };
   }
 
   if (!checkActionRateLimit(ip)) {
-    await recordSuspiciousIP(ip, "Rate limit exceeded");
     trackFailedAttempt(ip);
-    return { ok: false, error: "Too many requests. Please wait and try again." };
+    return { ok: false, reason: "Rate limit exceeded", error: "Too many requests. Please wait and try again." };
   }
 
   return { ok: true };
+}
+
+/** Fire-and-forget DB recording. Logs on failure; never throws. */
+export async function recordGuardRejection(ip: string, reason: string): Promise<void> {
+  try {
+    await recordSuspiciousIP(ip, reason);
+  } catch (err) {
+    console.error("Failed to record guard rejection:", err);
+  }
 }

@@ -3,8 +3,8 @@
 import { z } from "zod";
 import { headers } from "next/headers";
 import { getClientIP } from "@/lib/utils";
-import { runSecurityGuard } from "@/lib/contact/guard";
-import { saveProspect } from "@/lib/contact/saveProspect";
+import { runSecurityGuard, recordGuardRejection } from "@/lib/contact/guard";
+import { createProspect } from "@/lib/dal";
 import { sendNotifications } from "@/lib/contact/sendNotifications";
 
 const contactSchema = z.object({
@@ -25,20 +25,23 @@ export async function submitContactForm(formData: ContactFormData): Promise<Acti
   const h = await headers();
   const ip = getClientIP(h);
 
-  const guard = await runSecurityGuard({
+  const guard = runSecurityGuard({
     ip,
     userAgent: h.get("user-agent") ?? "",
     referer: h.get("referer") ?? "",
     honeypot: formData.company,
   });
 
-  if (!guard.ok) return { success: false, error: guard.error };
+  if (!guard.ok) {
+    void recordGuardRejection(ip, guard.reason!);
+    return { success: false, error: guard.error };
+  }
 
   const parsed = contactSchema.safeParse(formData);
   if (!parsed.success) return { success: false, error: parsed.error.errors[0].message };
 
   try {
-    const prospect = await saveProspect(parsed.data);
+    const prospect = await createProspect(parsed.data);
     await sendNotifications(prospect);
     return { success: true };
   } catch (error) {
