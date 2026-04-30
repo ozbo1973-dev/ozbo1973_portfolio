@@ -7,14 +7,18 @@ import { runSecurityGuard, recordGuardRejection } from "@/lib/contact/guard";
 import { createProspect } from "@/lib/dal";
 import { sendNotifications } from "@/lib/contact/sendNotifications";
 
-const contactSchema = z.object({
+const submissionSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
   description: z.string().min(1, "Project description is required"),
+  company: z.string().optional(),
 });
 
-export type ContactFormData = z.infer<typeof contactSchema> & { company?: string };
+const prospectSchema = submissionSchema.omit({ company: true });
+
+export type ContactFormData = z.infer<typeof submissionSchema>;
+type ProspectData = z.infer<typeof prospectSchema>;
 
 export interface ActionResult {
   success: boolean;
@@ -25,11 +29,14 @@ export async function submitContactForm(formData: ContactFormData): Promise<Acti
   const h = await headers();
   const ip = getClientIP(h);
 
+  const parsed = submissionSchema.safeParse(formData);
+  if (!parsed.success) return { success: false, error: parsed.error.errors[0].message };
+
   const guard = runSecurityGuard({
     ip,
     userAgent: h.get("user-agent") ?? "",
     referer: h.get("referer") ?? "",
-    honeypot: formData.company,
+    honeypot: parsed.data.company,
   });
 
   if (!guard.ok) {
@@ -37,11 +44,10 @@ export async function submitContactForm(formData: ContactFormData): Promise<Acti
     return { success: false, error: guard.error };
   }
 
-  const parsed = contactSchema.safeParse(formData);
-  if (!parsed.success) return { success: false, error: parsed.error.errors[0].message };
+  const prospectData: ProspectData = prospectSchema.parse(parsed.data);
 
   try {
-    const prospect = await createProspect(parsed.data);
+    const prospect = await createProspect(prospectData);
     await sendNotifications(prospect);
     return { success: true };
   } catch (error) {
