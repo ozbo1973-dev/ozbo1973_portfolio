@@ -32,7 +32,13 @@ export function runSecurityGuard(ctx: GuardContext): GuardResult {
   }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
-  if (!referer || (!referer.includes(appUrl) && !referer.includes("localhost"))) {
+  // VERCEL_URL is set automatically per-deployment (no protocol prefix)
+  const vercelUrl = process.env.VERCEL_URL || "";
+  const isAllowedReferer =
+    referer.includes("localhost") ||
+    (appUrl && referer.includes(appUrl)) ||
+    (vercelUrl && referer.includes(vercelUrl));
+  if (!referer || !isAllowedReferer) {
     return { ok: false, reason: "Suspicious referer", error: "Suspicious referer. Submission blocked." };
   }
 
