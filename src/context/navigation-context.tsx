@@ -1,6 +1,9 @@
 "use client";
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { SectionType } from "@/types";
+import { SECTION_IDS, NAV_HEIGHT_SCROLLED, NAV_HEIGHT_DEFAULT } from "@/lib/config";
+import { getActiveSection } from "@/lib/navigation-utils";
+import type { SectionDescriptor } from "@/lib/navigation-utils";
 
 interface NavigationContextType {
   activeSection: SectionType;
@@ -31,26 +34,21 @@ export function NavigationProvider({
         setIsScrolled(scrolled);
       }
 
-      // Update active section based on scroll position
-      const sections = ["home", "about", "skills", "projects", "contact"];
-      const scrollPosition = window.scrollY + (isScrolled ? 64 : 96); // Account for navbar height
-
-      const currentSection = sections.find((section) => {
-        const element = document.getElementById(section);
-        if (element) {
-          // const rect = element.getBoundingClientRect();
-          const offsetTop = element.offsetTop;
-          const offsetBottom = offsetTop + element.offsetHeight;
-          return scrollPosition >= offsetTop && scrollPosition < offsetBottom;
-        }
-        return false;
+      // Build section descriptors from DOM and delegate to pure function
+      const navbarHeight = isScrolled ? NAV_HEIGHT_SCROLLED : NAV_HEIGHT_DEFAULT;
+      const sectionDescriptors: SectionDescriptor[] = SECTION_IDS.flatMap((id) => {
+        const el = document.getElementById(id);
+        if (!el) return [];
+        return [{ id, top: el.offsetTop, height: el.offsetHeight }];
       });
 
-      if (currentSection) {
+      const activeSectionId = getActiveSection(window.scrollY, sectionDescriptors, navbarHeight);
+
+      if (activeSectionId) {
         setActiveSection(
-          currentSection === "home"
+          activeSectionId === "home"
             ? "/"
-            : (`/${currentSection}` as SectionType)
+            : (`/${activeSectionId}` as SectionType)
         );
       }
     };
@@ -63,7 +61,7 @@ export function NavigationProvider({
   const scrollToSection = (section: SectionType) => {
     const element = document.getElementById(section.replace("/", "") || "home");
     if (element) {
-      const navHeight = isScrolled ? 64 : 96; // 4rem or 6rem in pixels
+      const navHeight = isScrolled ? NAV_HEIGHT_SCROLLED : NAV_HEIGHT_DEFAULT;
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.scrollY - navHeight;
 

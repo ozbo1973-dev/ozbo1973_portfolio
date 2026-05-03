@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import SectionWrapper from "./wrapper";
 import { SectionMainButton } from "./main-button";
+import { SECTION_IDS } from "@/lib/config";
 import {
   SiReact,
   SiNextdotjs,
@@ -90,7 +91,7 @@ function SkillCard({ name, level, progress, icon, index }: SkillCardProps) {
 
 export default function SkillsSection() {
   return (
-    <SectionWrapper id="skills" title="My Skills">
+    <SectionWrapper id={SECTION_IDS[2]} title="My Skills">
       <div
         className={cn(
           "w-full",

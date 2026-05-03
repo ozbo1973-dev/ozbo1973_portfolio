@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import SectionWrapper from "./wrapper";
 import { SectionMainButton } from "./main-button";
+import { SECTION_IDS } from "@/lib/config";
 
 type ProjectCardProps = {
   name: string;
@@ -79,7 +80,7 @@ function ProjectCard({ name, description, imageUrl }: ProjectCardProps) {
 
 function ProjectsSection() {
   return (
-    <SectionWrapper id="projects" title="Featured Projects">
+    <SectionWrapper id={SECTION_IDS[3]} title="Featured Projects">
       {/* Projects Grid */}
       <div
         className={cn(

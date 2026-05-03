@@ -2,9 +2,13 @@ import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 
 vi.mock("@/components/sections/wrapper", () => ({
-  default: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
+  default: ({
+    children,
+    id,
+  }: {
+    children: React.ReactNode;
+    id?: string;
+  }) => <div data-section-id={id}>{children}</div>,
 }));
 
 vi.mock("@/components/sections/main-button", () => ({
@@ -14,8 +18,16 @@ vi.mock("@/components/sections/main-button", () => ({
 }));
 
 import AboutSection from "../about";
+import { SECTION_IDS } from "@/lib/config";
 
 describe("AboutSection", () => {
+  it("passes the 'about' section ID from config to SectionWrapper", () => {
+    const { container } = render(<AboutSection />);
+    const wrapper = container.querySelector("[data-section-id]");
+    expect(wrapper).not.toBeNull();
+    expect(wrapper!.getAttribute("data-section-id")).toBe(SECTION_IDS[1]);
+  });
+
   it("image placeholder has amber dashed border (not raw bg-zinc-200)", () => {
     const { container } = render(<AboutSection />);
     // Should not have the raw grey placeholder
