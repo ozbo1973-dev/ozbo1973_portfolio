@@ -29,6 +29,11 @@ export async function createProspect(data: ProspectData): Promise<ProspectRecord
   };
 }
 
+export async function updateProspectUserId(id: string, userId: string): Promise<void> {
+  await connectDB();
+  await ProspectiveCustomer.findByIdAndUpdate(id, { userId });
+}
+
 export async function isIPSuspicious(ip: string): Promise<boolean> {
   await connectDB();
   const found = await SuspiciousID.findOne({ ip });
