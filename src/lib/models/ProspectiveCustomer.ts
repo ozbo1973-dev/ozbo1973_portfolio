@@ -5,6 +5,7 @@ export interface IProspectiveCustomer {
   lastName: string;
   email: string;
   description: string;
+  userId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,6 +32,10 @@ const ProspectiveCustomerSchema = new Schema<IProspectiveCustomer>(
     description: {
       type: String,
       required: [true, 'Project description is required'],
+      trim: true,
+    },
+    userId: {
+      type: String,
       trim: true,
     },
   },
