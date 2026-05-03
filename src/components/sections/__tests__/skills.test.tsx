@@ -2,9 +2,13 @@ import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 
 vi.mock("@/components/sections/wrapper", () => ({
-  default: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
+  default: ({
+    children,
+    id,
+  }: {
+    children: React.ReactNode;
+    id?: string;
+  }) => <div data-section-id={id}>{children}</div>,
 }));
 
 vi.mock("@/components/sections/main-button", () => ({
@@ -23,8 +27,16 @@ vi.mock("@icons-pack/react-simple-icons", () => ({
 }));
 
 import SkillsSection from "../skills";
+import { SECTION_IDS } from "@/lib/config";
 
 describe("SkillsSection", () => {
+  it("passes the 'skills' section ID from config to SectionWrapper", () => {
+    const { container } = render(<SkillsSection />);
+    const wrapper = container.querySelector("[data-section-id]");
+    expect(wrapper).not.toBeNull();
+    expect(wrapper!.getAttribute("data-section-id")).toBe(SECTION_IDS[2]);
+  });
+
   it("renders all six technology icons", () => {
     render(<SkillsSection />);
     expect(screen.getByTestId("icon-react")).toBeInTheDocument();

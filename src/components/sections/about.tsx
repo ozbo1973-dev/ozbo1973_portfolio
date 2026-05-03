@@ -2,10 +2,11 @@ import { cn } from "@/lib/utils";
 import SectionWrapper from "./wrapper";
 import { SectionMainButton } from "./main-button";
 import { UserRound } from "lucide-react";
+import { SECTION_IDS } from "@/lib/config";
 
 export default function AboutSection() {
   return (
-    <SectionWrapper id="about" title="About Me">
+    <SectionWrapper id={SECTION_IDS[1]} title="About Me">
       {/* Content Container */}
       <div
         className={cn(

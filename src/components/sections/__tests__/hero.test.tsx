@@ -20,14 +20,26 @@ vi.mock("next/link", () => ({
 }));
 
 vi.mock("@/components/sections/wrapper", () => ({
-  default: ({ children }: { children: React.ReactNode }) => (
-    <div>{children}</div>
-  ),
+  default: ({
+    children,
+    id,
+  }: {
+    children: React.ReactNode;
+    id?: string;
+  }) => <div data-section-id={id}>{children}</div>,
 }));
 
 import HeroSection from "../hero";
+import { SECTION_IDS } from "@/lib/config";
 
 describe("HeroSection", () => {
+  it("passes the 'home' section ID from config to SectionWrapper", () => {
+    const { container } = render(<HeroSection />);
+    const wrapper = container.querySelector("[data-section-id]");
+    expect(wrapper).not.toBeNull();
+    expect(wrapper!.getAttribute("data-section-id")).toBe(SECTION_IDS[0]);
+  });
+
   it("renders the hero h1 with Playfair Display font variable", () => {
     render(<HeroSection />);
     const heading = screen.getByRole("heading", { level: 1 });

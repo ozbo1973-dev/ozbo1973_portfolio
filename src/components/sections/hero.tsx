@@ -3,10 +3,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import SectionWrapper from "./wrapper";
+import { SECTION_IDS } from "@/lib/config";
 
 export default function HeroSection() {
   return (
-    <SectionWrapper id="home" bgImage="/images/hero-bg.png">
+    <SectionWrapper id={SECTION_IDS[0]} bgImage="/images/hero-bg.png">
       {/* Dark overlay so text stays readable over the background image */}
       <div className="absolute inset-0 bg-background/60 z-0" />
       <div className="container mx-auto h-[calc(100vh-6rem)] md:h-[calc(100vh-6rem)] flex items-center justify-center">
