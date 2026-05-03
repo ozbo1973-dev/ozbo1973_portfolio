@@ -22,8 +22,6 @@ vi.mock("@icons-pack/react-simple-icons", () => ({
   SiNextdotjs: () => <svg data-testid="icon-nextdotjs" />,
   SiTypescript: () => <svg data-testid="icon-typescript" />,
   SiNodedotjs: () => <svg data-testid="icon-nodedotjs" />,
-  SiPython: () => <svg data-testid="icon-python" />,
-  SiAmazonwebservices: () => <svg data-testid="icon-amazonwebservices" />,
 }));
 
 import SkillsSection from "../skills";
@@ -37,20 +35,18 @@ describe("SkillsSection", () => {
     expect(wrapper!.getAttribute("data-section-id")).toBe(SECTION_IDS[2]);
   });
 
-  it("renders all six technology icons", () => {
+  it("renders all four technology icons", () => {
     render(<SkillsSection />);
     expect(screen.getByTestId("icon-react")).toBeInTheDocument();
     expect(screen.getByTestId("icon-nextdotjs")).toBeInTheDocument();
     expect(screen.getByTestId("icon-typescript")).toBeInTheDocument();
     expect(screen.getByTestId("icon-nodedotjs")).toBeInTheDocument();
-    expect(screen.getByTestId("icon-python")).toBeInTheDocument();
-    expect(screen.getByTestId("icon-amazonwebservices")).toBeInTheDocument();
   });
 
   it("each skill card has amber top border accent class", () => {
     const { container } = render(<SkillsSection />);
     const cards = container.querySelectorAll("[class*='border-t-2']");
-    expect(cards.length).toBe(6);
+    expect(cards.length).toBe(4);
     cards.forEach((card) => {
       expect(card.className).toMatch(/border-primary/);
     });
@@ -60,8 +56,8 @@ describe("SkillsSection", () => {
     const { container } = render(<SkillsSection />);
     // The filled portion of progress bars should have amber fill and slim height
     const progressFills = container.querySelectorAll("[class*='bg-primary']");
-    // At least 6 fills (one per skill card) — may have more due to card borders
-    expect(progressFills.length).toBeGreaterThanOrEqual(6);
+    // At least 4 fills (one per skill card) — may have more due to card borders
+    expect(progressFills.length).toBeGreaterThanOrEqual(4);
     // Progress fill bars should not use tall h-5 class
     const tallProgressBars = container.querySelectorAll(
       "[style*='width'] .h-5"
@@ -73,6 +69,6 @@ describe("SkillsSection", () => {
     const { container } = render(<SkillsSection />);
     // Each card should have an inline animation-delay style
     const cards = container.querySelectorAll("[style*='animation-delay']");
-    expect(cards.length).toBe(6);
+    expect(cards.length).toBe(4);
   });
 });
