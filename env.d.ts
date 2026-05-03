@@ -4,5 +4,6 @@ declare namespace NodeJS {
     readonly DATABASE_URI: string;
     readonly RESEND_API_KEY: string;
     readonly NOTIFICATION_EMAIL: string;
+    readonly BETTER_AUTH_SECRET: string;
   }
 }
