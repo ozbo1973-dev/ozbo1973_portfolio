@@ -13,6 +13,9 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
+    env: {
+      DATABASE_URI: "mongodb://localhost/test",
+    },
   },
   resolve: {
     alias: {
