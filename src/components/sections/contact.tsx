@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import SectionWrapper from "./wrapper";
 import { submitContactForm } from "@/app/actions/submitContactForm";
+import { SECTION_IDS } from "@/lib/config";
 import { useState } from "react";
 import type { ContactFormData } from "@/app/actions/submitContactForm";
 import { toast } from "sonner";
@@ -58,7 +59,7 @@ export default function ContactSection() {
 
   return (
     <SectionWrapper
-      id="contact"
+      id={SECTION_IDS[4]}
       bgImage="/images/contact-bg.png"
       title="Contact Me"
     >
