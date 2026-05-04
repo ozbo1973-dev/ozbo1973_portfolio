@@ -6,7 +6,7 @@ import { getClientIP } from "@/lib/utils";
 import { runSecurityGuard, recordGuardRejection } from "@/lib/contact/guard";
 import { createProspect, updateProspectUserId } from "@/lib/dal";
 import { sendNotifications } from "@/lib/contact/sendNotifications";
-import { auth } from "@/lib/auth/auth";
+import { auth, registerMagicLinkCapture } from "@/lib/auth/auth";
 import { getUserIdByEmail } from "@/lib/auth/getUserIdByEmail";
 
 const submissionSchema = z.object({
@@ -51,12 +51,19 @@ export async function submitContactForm(formData: ContactFormData): Promise<Acti
 
   try {
     const prospect = await createProspect(prospectData);
-    await sendNotifications(prospect);
+
+    // Register capture before triggering signInMagicLink so the sendMagicLink
+    // callback resolves the promise instead of sending a standalone email.
+    const urlCapture = registerMagicLinkCapture(prospectData.email);
 
     await auth.api.signInMagicLink({
       body: { email: prospectData.email },
       headers: h,
     });
+
+    const magicLinkUrl = await urlCapture;
+
+    await sendNotifications(prospect, magicLinkUrl);
 
     const userId = await getUserIdByEmail(prospectData.email);
     if (userId) {

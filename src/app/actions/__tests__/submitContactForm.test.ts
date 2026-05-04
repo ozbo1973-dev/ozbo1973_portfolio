@@ -23,6 +23,7 @@ vi.mock("@/lib/auth/auth", () => ({
       signInMagicLink: vi.fn(),
     },
   },
+  registerMagicLinkCapture: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/getUserIdByEmail", () => ({
@@ -32,7 +33,7 @@ vi.mock("@/lib/auth/getUserIdByEmail", () => ({
 import { headers } from "next/headers";
 import { createProspect, updateProspectUserId } from "@/lib/dal";
 import { sendNotifications } from "@/lib/contact/sendNotifications";
-import { auth } from "@/lib/auth/auth";
+import { auth, registerMagicLinkCapture } from "@/lib/auth/auth";
 import { getUserIdByEmail } from "@/lib/auth/getUserIdByEmail";
 import { submitContactForm } from "@/app/actions/submitContactForm";
 import type { ProspectRecord } from "@/lib/dal";
@@ -43,6 +44,7 @@ const mockUpdateProspectUserId = updateProspectUserId as ReturnType<typeof vi.fn
 const mockSendNotifications = sendNotifications as ReturnType<typeof vi.fn>;
 const mockSignInMagicLink = auth.api.signInMagicLink as ReturnType<typeof vi.fn>;
 const mockGetUserIdByEmail = getUserIdByEmail as ReturnType<typeof vi.fn>;
+const mockRegisterMagicLinkCapture = registerMagicLinkCapture as ReturnType<typeof vi.fn>;
 
 function makeHeadersMap(overrides: Record<string, string> = {}) {
   const map: Record<string, string> = {
@@ -72,6 +74,8 @@ const prospect: ProspectRecord = {
   updatedAt: new Date(),
 };
 
+const MAGIC_LINK_URL = "https://example.com/magic?token=abc";
+
 describe("submitContactForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -80,8 +84,9 @@ describe("submitContactForm", () => {
   it("sends a magic link to the submitted email on valid submission", async () => {
     mockHeaders.mockResolvedValue(makeHeadersMap({ "x-forwarded-for": "10.1.0.1" }));
     mockCreateProspect.mockResolvedValue(prospect);
-    mockSendNotifications.mockResolvedValue(undefined);
+    mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
     mockSignInMagicLink.mockResolvedValue({ status: true });
+    mockSendNotifications.mockResolvedValue(undefined);
     mockGetUserIdByEmail.mockResolvedValue("user-id-123");
     mockUpdateProspectUserId.mockResolvedValue(undefined);
 
@@ -93,11 +98,26 @@ describe("submitContactForm", () => {
     );
   });
 
+  it("includes the magic link URL in the customer confirmation email", async () => {
+    mockHeaders.mockResolvedValue(makeHeadersMap({ "x-forwarded-for": "10.1.0.1" }));
+    mockCreateProspect.mockResolvedValue(prospect);
+    mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
+    mockSignInMagicLink.mockResolvedValue({ status: true });
+    mockSendNotifications.mockResolvedValue(undefined);
+    mockGetUserIdByEmail.mockResolvedValue("user-id-123");
+    mockUpdateProspectUserId.mockResolvedValue(undefined);
+
+    await submitContactForm(validData);
+
+    expect(mockSendNotifications).toHaveBeenCalledWith(prospect, MAGIC_LINK_URL);
+  });
+
   it("stores the userId from BetterAuth on the ProspectiveCustomer record", async () => {
     mockHeaders.mockResolvedValue(makeHeadersMap({ "x-forwarded-for": "10.1.0.1" }));
     mockCreateProspect.mockResolvedValue(prospect);
-    mockSendNotifications.mockResolvedValue(undefined);
+    mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
     mockSignInMagicLink.mockResolvedValue({ status: true });
+    mockSendNotifications.mockResolvedValue(undefined);
     mockGetUserIdByEmail.mockResolvedValue("user-id-123");
     mockUpdateProspectUserId.mockResolvedValue(undefined);
 
@@ -110,8 +130,9 @@ describe("submitContactForm", () => {
   it("returns { success: true, redirect: '/verify-email' } on valid submission", async () => {
     mockHeaders.mockResolvedValue(makeHeadersMap({ "x-forwarded-for": "10.1.0.1" }));
     mockCreateProspect.mockResolvedValue(prospect);
-    mockSendNotifications.mockResolvedValue(undefined);
+    mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
     mockSignInMagicLink.mockResolvedValue({ status: true });
+    mockSendNotifications.mockResolvedValue(undefined);
     mockGetUserIdByEmail.mockResolvedValue("user-id-123");
     mockUpdateProspectUserId.mockResolvedValue(undefined);
 
@@ -123,8 +144,9 @@ describe("submitContactForm", () => {
   it("returns { success: false } and does not send magic link when magic link send fails", async () => {
     mockHeaders.mockResolvedValue(makeHeadersMap({ "x-forwarded-for": "10.1.0.1" }));
     mockCreateProspect.mockResolvedValue(prospect);
-    mockSendNotifications.mockResolvedValue(undefined);
+    mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
     mockSignInMagicLink.mockRejectedValue(new Error("Resend API error"));
+    mockSendNotifications.mockResolvedValue(undefined);
     mockGetUserIdByEmail.mockResolvedValue("user-id-123");
     mockUpdateProspectUserId.mockResolvedValue(undefined);
 
