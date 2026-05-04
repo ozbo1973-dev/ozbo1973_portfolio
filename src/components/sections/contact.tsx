@@ -10,8 +10,10 @@ import { SECTION_IDS } from "@/lib/config";
 import { useState } from "react";
 import type { ContactFormData } from "@/app/actions/submitContactForm";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function ContactSection() {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<ContactFormData>({
     firstName: "",
@@ -29,14 +31,7 @@ export default function ContactSection() {
       const result = await submitContactForm(formData);
 
       if (result.success) {
-        toast.success("Your message has been sent successfully.");
-        // Reset form
-        setFormData({
-          firstName: "",
-          lastName: "",
-          email: "",
-          description: "",
-        });
+        router.push(result.redirect ?? "/verify-email");
       } else {
         toast.error(result.error || "Something went wrong. Please try again.");
       }

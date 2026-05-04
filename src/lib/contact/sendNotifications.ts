@@ -5,7 +5,7 @@ import type { ProspectData } from "@/lib/dal";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export async function sendNotifications(data: ProspectData): Promise<void> {
+export async function sendNotifications(data: ProspectData, magicLinkUrl?: string): Promise<void> {
   const { firstName, lastName, email, description } = data;
   const from = process.env.NOTIFICATION_EMAIL!;
 
@@ -21,7 +21,7 @@ export async function sendNotifications(data: ProspectData): Promise<void> {
       from: `Brady Bovero <${from}>`,
       to: email,
       subject: "Thank You for Contacting Brady Bovero",
-      react: await CustomerConfirmationEmail({ firstName, lastName }),
+      react: await CustomerConfirmationEmail({ firstName, lastName, magicLinkUrl }),
     });
   } catch (emailError) {
     console.error("Failed to send email notification:", emailError);
