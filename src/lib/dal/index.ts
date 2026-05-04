@@ -29,9 +29,22 @@ export async function createProspect(data: ProspectData): Promise<ProspectRecord
   };
 }
 
-export async function getSubmissionsByUserId(userId: string): Promise<ProspectRecord[]> {
+export async function getSubmissionsByUserId(userId: string, email?: string): Promise<ProspectRecord[]> {
   await connectDB();
-  const docs = await ProspectiveCustomer.find({ userId });
+  const query = email
+    ? { $or: [{ userId }, { email, userId: { $exists: false } }, { email, userId: null }] }
+    : { userId };
+  const docs = await ProspectiveCustomer.find(query);
+
+  // Backfill userId on any docs matched only by email (race condition recovery)
+  const unlinked = docs.filter((doc) => !doc.userId);
+  if (unlinked.length > 0) {
+    await ProspectiveCustomer.updateMany(
+      { _id: { $in: unlinked.map((d) => d._id) } },
+      { $set: { userId } }
+    );
+  }
+
   return docs.map((doc) => ({
     id: doc._id.toString(),
     firstName: doc.firstName,

@@ -18,7 +18,7 @@ export default async function PortalPage() {
     redirect("/");
   }
 
-  const submissions = await getSubmissionsByUserId(sessionData.user.id);
+  const submissions = await getSubmissionsByUserId(sessionData.user.id, sessionData.user.email);
 
   return (
     <div className="min-h-screen bg-background px-4 py-16">

@@ -57,7 +57,7 @@ export async function submitContactForm(formData: ContactFormData): Promise<Acti
     const urlCapture = registerMagicLinkCapture(prospectData.email);
 
     await auth.api.signInMagicLink({
-      body: { email: prospectData.email },
+      body: { email: prospectData.email, callbackURL: "/portal" },
       headers: h,
     });
 
