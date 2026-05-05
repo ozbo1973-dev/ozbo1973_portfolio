@@ -1,5 +1,5 @@
 import { blockedUserAgents } from "@/lib/config";
-import { recordSuspiciousIP } from "@/lib/dal";
+import { recordSuspiciousIP } from "@/lib/dal/security";
 import {
   checkActionRateLimit,
   isBlacklisted,
