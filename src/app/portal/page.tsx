@@ -1,7 +1,4 @@
-import { redirect } from "next/navigation";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth/auth";
-import { getSubmissionsByUserId } from "@/lib/dal";
+import { verifySession, getSubmissionsByUserId } from "@/lib/dal/prospects";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 
@@ -11,14 +8,8 @@ export const metadata: Metadata = {
 };
 
 export default async function PortalPage() {
-  const h = await headers();
-  const sessionData = await auth.api.getSession({ headers: h });
-
-  if (!sessionData?.user) {
-    redirect("/");
-  }
-
-  const submissions = await getSubmissionsByUserId(sessionData.user.id, sessionData.user.email);
+  await verifySession();
+  const submissions = await getSubmissionsByUserId();
 
   return (
     <div className="min-h-screen bg-background px-4 py-16">
