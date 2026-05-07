@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 import { EmailTemplate } from "@/components/email-template";
 import { CustomerConfirmationEmail } from "@/components/customer-confirmation-email";
-import type { ProspectData } from "@/lib/dal";
+import type { ProspectData } from "@/lib/dal/prospects";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 

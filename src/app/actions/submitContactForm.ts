@@ -4,7 +4,7 @@ import { z } from "zod";
 import { headers } from "next/headers";
 import { getClientIP } from "@/lib/utils";
 import { runSecurityGuard, recordGuardRejection } from "@/lib/contact/guard";
-import { createProspect, updateProspectUserId } from "@/lib/dal";
+import { createProspect, updateProspectUserId } from "@/lib/dal/prospects";
 import { sendNotifications } from "@/lib/contact/sendNotifications";
 import { auth, registerMagicLinkCapture } from "@/lib/auth/auth";
 import { getUserIdByEmail } from "@/lib/auth/getUserIdByEmail";
