@@ -7,7 +7,7 @@ vi.mock("next/headers", () => ({
   headers: vi.fn(),
 }));
 
-vi.mock("@/lib/dal", () => ({
+vi.mock("@/lib/dal/prospects", () => ({
   createProspect: vi.fn(),
   updateProspectUserId: vi.fn(),
   recordSuspiciousIP: vi.fn(),
@@ -31,12 +31,12 @@ vi.mock("@/lib/auth/getUserIdByEmail", () => ({
 }));
 
 import { headers } from "next/headers";
-import { createProspect, updateProspectUserId } from "@/lib/dal";
+import { createProspect, updateProspectUserId } from "@/lib/dal/prospects";
 import { sendNotifications } from "@/lib/contact/sendNotifications";
 import { auth, registerMagicLinkCapture } from "@/lib/auth/auth";
 import { getUserIdByEmail } from "@/lib/auth/getUserIdByEmail";
 import { submitContactForm } from "@/app/actions/submitContactForm";
-import type { ProspectRecord } from "@/lib/dal";
+import type { ProspectRecord } from "@/lib/dal/prospects";
 
 const mockHeaders = headers as ReturnType<typeof vi.fn>;
 const mockCreateProspect = createProspect as ReturnType<typeof vi.fn>;
