@@ -4,7 +4,7 @@ import { isRateLimited } from "@/lib/security/rateLimit";
 import { maxRequestsData } from "./lib/config";
 import { isSuspiciousRequest } from "./lib/security/suspiciousAgent";
 import { getClientIP } from "./lib/utils";
-import { isIPSuspicious } from "./lib/dal";
+import { isIPSuspicious } from "./lib/dal/security";
 
 export async function proxy(request: NextRequest) {
   const ip = getClientIP(request.headers);

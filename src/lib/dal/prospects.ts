@@ -1,3 +1,8 @@
+import "server-only";
+import { cache } from "react";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth/auth";
 import connectDB from "@/lib/db/connect";
 import ProspectiveCustomer from "@/lib/models/ProspectiveCustomer";
 
@@ -14,6 +19,13 @@ export interface ProspectRecord extends ProspectData {
   updatedAt: Date;
 }
 
+export const verifySession = cache(async (): Promise<{ userId: string; email: string }> => {
+  const h = await headers();
+  const session = await auth.api.getSession({ headers: h });
+  if (!session) redirect("/");
+  return { userId: session.session.userId, email: session.user.email };
+});
+
 export async function createProspect(data: ProspectData): Promise<ProspectRecord> {
   await connectDB();
   const doc = await ProspectiveCustomer.create(data);
@@ -28,14 +40,12 @@ export async function createProspect(data: ProspectData): Promise<ProspectRecord
   };
 }
 
-export async function getSubmissionsByUserId(userId: string, email?: string): Promise<ProspectRecord[]> {
+export async function getSubmissionsByUserId(): Promise<ProspectRecord[]> {
+  const { userId, email } = await verifySession();
   await connectDB();
-  const query = email
-    ? { $or: [{ userId }, { email, userId: { $exists: false } }, { email, userId: null }] }
-    : { userId };
+  const query = { $or: [{ userId }, { email, userId: { $exists: false } }, { email, userId: null }] };
   const docs = await ProspectiveCustomer.find(query);
 
-  // Backfill userId on any docs matched only by email (race condition recovery)
   const unlinked = docs.filter((doc) => !doc.userId);
   if (unlinked.length > 0) {
     await ProspectiveCustomer.updateMany(
@@ -59,4 +69,3 @@ export async function updateProspectUserId(id: string, userId: string): Promise<
   await connectDB();
   await ProspectiveCustomer.findByIdAndUpdate(id, { userId });
 }
-

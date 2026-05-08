@@ -1,5 +1,5 @@
-import { render, screen } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("@/components/sections/wrapper", () => ({
   default: ({
@@ -22,8 +22,17 @@ vi.mock("sonner", () => ({
   }),
 }));
 
+const mockPush = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
+
 import ContactSection from "../contact";
 import { SECTION_IDS } from "@/lib/config";
+import { submitContactForm } from "@/app/actions/submitContactForm";
+import { toast } from "sonner";
+
+const mockSubmitContactForm = submitContactForm as ReturnType<typeof vi.fn>;
 
 describe("ContactSection — section ID", () => {
   it("passes the 'contact' section ID from config to SectionWrapper", () => {
@@ -48,3 +57,39 @@ describe("ContactSection — form fields", () => {
   });
 });
 
+describe("ContactSection — form submission", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("navigates to /verify-email on successful submission", async () => {
+    mockSubmitContactForm.mockResolvedValue({ success: true, redirect: "/verify-email" });
+    render(<ContactSection />);
+
+    fireEvent.change(screen.getByPlaceholderText("First Name"), { target: { value: "Jane" } });
+    fireEvent.change(screen.getByPlaceholderText("Last Name"), { target: { value: "Doe" } });
+    fireEvent.change(screen.getByPlaceholderText("Email"), { target: { value: "jane@example.com" } });
+    fireEvent.change(screen.getByPlaceholderText("Question or brief description of project in mind"), {
+      target: { value: "Help me build something" },
+    });
+
+    fireEvent.submit(screen.getByRole("button", { name: /submit/i }).closest("form")!);
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith("/verify-email");
+    });
+    expect(toast.success).not.toHaveBeenCalled();
+  });
+
+  it("shows error toast on failed submission", async () => {
+    mockSubmitContactForm.mockResolvedValue({ success: false, error: "Something went wrong" });
+    render(<ContactSection />);
+
+    fireEvent.submit(screen.getByRole("button", { name: /submit/i }).closest("form")!);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith("Something went wrong");
+    });
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+});
