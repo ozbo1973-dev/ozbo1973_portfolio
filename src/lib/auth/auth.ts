@@ -15,8 +15,14 @@ export function registerMagicLinkCapture(email: string): Promise<string> {
   });
 }
 
+const productionUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+const productionHost = productionUrl.replace(/^https?:\/\//, "");
+
 export const auth = betterAuth({
-  baseURL: process.env.NEXT_PUBLIC_APP_URL,
+  baseURL: {
+    allowedHosts: [productionHost, "*.vercel.app", "localhost:3000"],
+    fallback: productionUrl,
+  },
   secret: process.env.BETTER_AUTH_SECRET,
   database: mongodbAdapter(db),
   plugins: [
