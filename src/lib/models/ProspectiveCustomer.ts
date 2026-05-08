@@ -6,6 +6,7 @@ export interface IProspectiveCustomer {
   email: string;
   description: string;
   userId?: string;
+  parentId?: mongoose.Types.ObjectId | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,6 +38,10 @@ const ProspectiveCustomerSchema = new Schema<IProspectiveCustomer>(
     userId: {
       type: String,
       trim: true,
+    },
+    parentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null,
     },
   },
   {
