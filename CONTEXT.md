@@ -28,6 +28,14 @@ _Avoid_: Login link, auth link
 The authenticated state of a User, managed by BetterAuth. Verified server-side via `verifySession()` before any protected data access.
 _Avoid_: Token, JWT, auth state
 
+**Sign-In Page**:
+The dedicated page at `/sign-in` where an existing User can request a new Magic Link by entering their email. Only Users who already have an account (created via form submission) can authenticate here.
+_Avoid_: Login page, auth page
+
+**Parent Submission**:
+An optional reference (`parentId`) on a Submission pointing to another Submission. Reserved for future admin threading — unused in the current UI.
+_Avoid_: Thread, parent message, reply
+
 ## Relationships
 
 - A **Prospect** has one or more **Submissions**
@@ -35,6 +43,8 @@ _Avoid_: Token, JWT, auth state
 - A **User** can view all their **Submissions** in the **Portal**
 - A **Session** belongs to exactly one **User**
 - A **Submission** is linked to a **User** via `userId` foreign key (see ADR-0002)
+- A **Submission** may optionally reference a **Parent Submission** via `parentId` (future threading)
+- Deleting a **User** cascade-deletes all their **Submissions**
 
 ## Example dialogue
 
