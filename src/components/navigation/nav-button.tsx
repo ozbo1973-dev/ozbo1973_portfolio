@@ -1,16 +1,13 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { useNavigation } from "@/context/navigation-context";
-import { SectionType } from "@/types";
 
-interface NavButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  href: SectionType;
+interface NavButtonProps {
+  href: string;
   children: React.ReactNode;
   className?: string;
-  variant?: "ghost" | "default" | "outline";
   isMobile?: boolean;
   setOpen?: (state: boolean) => void;
 }
@@ -19,29 +16,22 @@ export function NavButton({
   href,
   children,
   className,
-  variant = "ghost",
   isMobile = false,
   setOpen,
-  ...props
 }: NavButtonProps) {
-  const { scrollToSection } = useNavigation();
-
-  const handleNavClick = () => {
-    scrollToSection(href as any);
-    console.log(isMobile);
+  const handleClick = () => {
     if (isMobile && setOpen) {
       setOpen(false);
     }
   };
 
   return (
-    <Button
-      variant={variant}
-      onClick={handleNavClick}
+    <Link
+      href={href}
+      onClick={handleClick}
       className={cn("transition-all duration-300", className)}
-      {...props}
     >
       {children}
-    </Button>
+    </Link>
   );
 }

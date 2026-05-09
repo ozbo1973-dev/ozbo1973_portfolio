@@ -16,7 +16,6 @@ import { navLinks } from "@/lib/config";
 import { Menu } from "lucide-react";
 import { ContactButton } from "./contact-button";
 import { NavButton } from "./nav-button";
-import { SectionType } from "@/types";
 
 export function MobileMenu({ isScrolled }: { isScrolled: boolean }) {
   const { activeSection } = useNavigation();
@@ -49,8 +48,7 @@ export function MobileMenu({ isScrolled }: { isScrolled: boolean }) {
               key={link.href}
               setOpen={setOpen}
               isMobile={true}
-              href={link.href as SectionType}
-              variant="ghost"
+              href={link.href}
               className={cn(
                 "w-full justify-start text-lg gap-3",
                 activeSection === link.href
