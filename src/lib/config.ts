@@ -15,9 +15,9 @@ export const NAV_HEIGHT_DEFAULT = 96;
 
 export const navLinks = [
   { href: "/", label: "Home", icon: House },
-  { href: "/about", label: "About", icon: Contact },
-  { href: "/skills", label: "Skills", icon: Code },
-  { href: "/projects", label: "Projects", icon: FolderCode },
+  { href: "/#about", label: "About", icon: Contact },
+  { href: "/#skills", label: "Skills", icon: Code },
+  { href: "/#projects", label: "Projects", icon: FolderCode },
 ];
 
 export const maxRequestsData = { landing: 20, others: 10 };

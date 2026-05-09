@@ -1,16 +1,19 @@
 "use client";
 import React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useNavigation } from "@/context/navigation-context";
 import { navLinks } from "@/lib/config";
+import { authClient } from "@/lib/auth/auth-client";
 import { MobileMenu } from "./mobile-menu";
 import { ContactButton } from "./contact-button";
 import { NavButton } from "./nav-button";
-import { SectionType } from "@/types";
+import { SignOutButton } from "./sign-out-button";
 
 function Navbar() {
-  const { activeSection, isScrolled, scrollToSection } = useNavigation();
+  const { activeSection, isScrolled } = useNavigation();
+  const { data: session } = authClient.useSession();
 
   return (
     <nav
@@ -27,10 +30,9 @@ function Navbar() {
           "px-4 md:px-6 lg:px-8"
         )}
       >
-        {" "}
         {/* Logo - Responsive sizes */}
-        <button
-          onClick={() => scrollToSection("/")}
+        <Link
+          href="/"
           className="flex items-center gap-0.5 hover:opacity-80 transition-opacity"
         >
           <div className="relative">
@@ -58,7 +60,7 @@ function Navbar() {
           >
             zBo1973
           </span>
-        </button>
+        </Link>
         {/* Navigation Links - Desktop Only */}
         <div className="hidden lg:flex items-center gap-12">
           {navLinks.map((link) => {
@@ -66,7 +68,7 @@ function Navbar() {
               return (
                 <NavButton
                   key={link.href}
-                  href={link.href as SectionType}
+                  href={link.href}
                   className={cn(
                     "font-bold font-['Mulish']",
                     isScrolled ? "text-sm" : "text-base",
@@ -80,11 +82,12 @@ function Navbar() {
                 </NavButton>
               );
           })}
-        </div>{" "}
-        {/* Contact Button - Tablet & Desktop */}
-        <div className="hidden sm:block">
+        </div>
+        {/* Right side: Sign Out (when session active) + Contact Button - Tablet & Desktop */}
+        <div className="hidden sm:flex items-center gap-3">
+          {session && <SignOutButton />}
           <ContactButton isScrolled={isScrolled} />
-        </div>{" "}
+        </div>
         {/* Mobile Menu */}
         <MobileMenu isScrolled={isScrolled} />
       </div>
