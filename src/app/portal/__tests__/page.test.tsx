@@ -9,15 +9,28 @@ vi.mock("@/app/actions/deleteSubmission", () => ({
   deleteSubmissionAction: mockDeleteSubmissionAction,
 }));
 
-const { mockVerifySession, mockGetSubmissions } = vi.hoisted(() => ({
-  mockVerifySession: vi.fn(),
-  mockGetSubmissions: vi.fn(),
+const { mockDeleteAccountAction } = vi.hoisted(() => ({
+  mockDeleteAccountAction: vi.fn(),
+}));
+
+vi.mock("@/app/actions/deleteAccount", () => ({
+  deleteAccountAction: mockDeleteAccountAction,
+}));
+
+vi.mock("@/lib/auth/auth-client", () => ({
+  authClient: { signOut: vi.fn() },
 }));
 
 vi.mock("next/navigation", () => ({
   redirect: (url: string) => {
     throw new Error(`NEXT_REDIRECT:${url}`);
   },
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
+const { mockVerifySession, mockGetSubmissions } = vi.hoisted(() => ({
+  mockVerifySession: vi.fn(),
+  mockGetSubmissions: vi.fn(),
 }));
 
 vi.mock("@/lib/dal/prospects", () => ({
@@ -142,8 +155,14 @@ describe("PortalPage", () => {
 
       render(await PortalPage());
 
-      const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
+      const deleteButtons = screen.getAllByRole("button", { name: /delete submission/i });
       expect(deleteButtons).toHaveLength(2);
+    });
+
+    it("renders a delete account button", async () => {
+      render(await PortalPage());
+
+      expect(screen.getByRole("button", { name: /delete account/i })).toBeInTheDocument();
     });
   });
 });
