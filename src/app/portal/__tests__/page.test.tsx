@@ -1,6 +1,14 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 
+const { mockDeleteSubmissionAction } = vi.hoisted(() => ({
+  mockDeleteSubmissionAction: vi.fn(),
+}));
+
+vi.mock("@/app/actions/deleteSubmission", () => ({
+  deleteSubmissionAction: mockDeleteSubmissionAction,
+}));
+
 const { mockVerifySession, mockGetSubmissions } = vi.hoisted(() => ({
   mockVerifySession: vi.fn(),
   mockGetSubmissions: vi.fn(),
@@ -108,6 +116,34 @@ describe("PortalPage", () => {
 
       const heading = screen.getByRole("heading", { level: 1 });
       expect(heading.className).toMatch(/font-playfair|--font-playfair/);
+    });
+
+    it("renders a delete button for each submission", async () => {
+      mockGetSubmissions.mockResolvedValue([
+        {
+          id: "sub-1",
+          firstName: "Alice",
+          lastName: "Smith",
+          email: "alice@example.com",
+          description: "First project",
+          createdAt: new Date("2024-01-01"),
+          updatedAt: new Date("2024-01-02"),
+        },
+        {
+          id: "sub-2",
+          firstName: "Alice",
+          lastName: "Smith",
+          email: "alice@example.com",
+          description: "Second project",
+          createdAt: new Date("2024-02-01"),
+          updatedAt: new Date("2024-02-02"),
+        },
+      ]);
+
+      render(await PortalPage());
+
+      const deleteButtons = screen.getAllByRole("button", { name: /delete/i });
+      expect(deleteButtons).toHaveLength(2);
     });
   });
 });
