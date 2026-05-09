@@ -46,16 +46,16 @@ describe("verifySession", () => {
     vi.clearAllMocks();
   });
 
-  it("returns userId and email when a valid session exists", async () => {
+  it("returns userId, email, and name when a valid session exists", async () => {
     mockHeaders.mockResolvedValue({ get: () => null });
     mockGetSession.mockResolvedValue({
       session: { userId: "user-123" },
-      user: { email: "alice@example.com" },
+      user: { email: "alice@example.com", name: "Alice Smith" },
     });
 
     const result = await verifySession();
 
-    expect(result).toEqual({ userId: "user-123", email: "alice@example.com" });
+    expect(result).toEqual({ userId: "user-123", email: "alice@example.com", name: "Alice Smith" });
   });
 
   it("redirects to / when no session exists", async () => {
