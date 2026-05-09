@@ -19,11 +19,11 @@ export interface ProspectRecord extends ProspectData {
   updatedAt: Date;
 }
 
-export const verifySession = cache(async (): Promise<{ userId: string; email: string }> => {
+export const verifySession = cache(async (): Promise<{ userId: string; email: string; name: string }> => {
   const h = await headers();
   const session = await auth.api.getSession({ headers: h });
   if (!session) redirect("/");
-  return { userId: session.session.userId, email: session.user.email };
+  return { userId: session.session.userId, email: session.user.email, name: session.user.name ?? "" };
 });
 
 export async function createProspect(data: ProspectData): Promise<ProspectRecord> {

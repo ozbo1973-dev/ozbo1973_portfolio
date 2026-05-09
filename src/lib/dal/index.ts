@@ -6,10 +6,16 @@ export interface ProspectData {
   lastName: string;
   email: string;
   description: string;
+  userId?: string;
+  parentId?: string;
 }
 
-export interface ProspectRecord extends ProspectData {
+export interface ProspectRecord {
   id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  description: string;
   createdAt: Date;
   updatedAt: Date;
 }

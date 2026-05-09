@@ -17,6 +17,18 @@ vi.mock("@/app/actions/deleteAccount", () => ({
   deleteAccountAction: mockDeleteAccountAction,
 }));
 
+const { mockSubmitPortalRequest } = vi.hoisted(() => ({
+  mockSubmitPortalRequest: vi.fn(),
+}));
+
+vi.mock("@/app/actions/submitPortalRequest", () => ({
+  submitPortalRequest: mockSubmitPortalRequest,
+}));
+
+vi.mock("sonner", () => ({
+  toast: { success: vi.fn(), error: vi.fn() },
+}));
+
 vi.mock("@/lib/auth/auth-client", () => ({
   authClient: { signOut: vi.fn() },
 }));
@@ -43,7 +55,7 @@ import PortalPage from "../page";
 describe("PortalPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockVerifySession.mockResolvedValue({ userId: "user-abc", email: "alice@example.com" });
+    mockVerifySession.mockResolvedValue({ userId: "user-abc", email: "alice@example.com", name: "Alice Smith" });
     mockGetSubmissions.mockResolvedValue([]);
   });
 
@@ -105,23 +117,16 @@ describe("PortalPage", () => {
       expect(screen.getByText("E-commerce store")).toBeInTheDocument();
     });
 
-    it("renders no editable form elements — submissions are read-only", async () => {
-      mockGetSubmissions.mockResolvedValue([
-        {
-          id: "sub-1",
-          firstName: "Alice",
-          lastName: "Smith",
-          email: "alice@example.com",
-          description: "Some project",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ]);
-
+    it("renders a New Request form accessible within the portal", async () => {
       render(await PortalPage());
 
-      expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
-      expect(screen.queryByRole("button", { name: /submit|save|edit/i })).not.toBeInTheDocument();
+      expect(screen.getByRole("textbox", { name: /description/i })).toBeInTheDocument();
+    });
+
+    it("renders a submit button for the new request form", async () => {
+      render(await PortalPage());
+
+      expect(screen.getByRole("button", { name: /submit request/i })).toBeInTheDocument();
     });
 
     it("heading uses Playfair Display font class to match site design", async () => {

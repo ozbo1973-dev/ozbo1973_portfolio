@@ -1,8 +1,8 @@
 import { verifySession, getSubmissionsByUserId } from "@/lib/dal/prospects";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
-import SubmissionCard from "./_components/SubmissionCard";
 import DeleteAccountButton from "./_components/DeleteAccountButton";
+import PortalContent from "./_components/PortalContent";
 
 export const metadata: Metadata = {
   title: "Client Portal",
@@ -29,17 +29,7 @@ export default async function PortalPage() {
           Your submitted inquiries are shown below.
         </p>
 
-        {submissions.length === 0 ? (
-          <p className="text-muted-foreground font-['Mulish'] text-sm">
-            No submissions found. Your inquiries will appear here once you submit the contact form.
-          </p>
-        ) : (
-          <ul className="space-y-6">
-            {submissions.map((sub) => (
-              <SubmissionCard key={sub.id} submission={sub} />
-            ))}
-          </ul>
-        )}
+        <PortalContent initialSubmissions={submissions} />
 
         <div className="mt-16 border-t border-border pt-8">
           <h2 className="text-lg font-semibold text-destructive font-['Mulish'] mb-2">
