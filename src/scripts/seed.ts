@@ -23,19 +23,19 @@ export function buildSeedUsers(): SeedUser[] {
   return [
     {
       name: "Brady Bovero",
-      email: "bbbove20@gmail.com",
+      email: "bbbove20.dev@gmail.com",
       role: "admin",
       emailVerified: true,
     },
     {
       name: "John Doe",
-      email: "bbbove20+Test1@gmail.com",
+      email: "bbbove20.dev+Test1@gmail.com",
       role: "user",
       emailVerified: true,
     },
     {
       name: "Jane Doe",
-      email: "bbbove20+Test2@gmail.com",
+      email: "bbbove20.dev+Test2@gmail.com",
       role: "user",
       emailVerified: true,
     },
@@ -65,7 +65,13 @@ async function seed() {
   const db = client.db();
 
   // Drop BetterAuth and prospectivecustomers collections
-  const collections = ["user", "session", "account", "verification", "prospectivecustomers"];
+  const collections = [
+    "user",
+    "session",
+    "account",
+    "verification",
+    "prospectivecustomers",
+  ];
   for (const name of collections) {
     await db.collection(name).deleteMany({});
   }
@@ -98,7 +104,10 @@ async function seed() {
 }
 
 // Run when executed directly
-if (process.argv[1]?.endsWith("seed.ts") || process.argv[1]?.endsWith("seed.js")) {
+if (
+  process.argv[1]?.endsWith("seed.ts") ||
+  process.argv[1]?.endsWith("seed.js")
+) {
   seed().catch((err) => {
     console.error(err);
     process.exit(1);
