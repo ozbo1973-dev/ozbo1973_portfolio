@@ -18,9 +18,11 @@ vi.mock("@/lib/auth/auth", () => ({
 
 vi.mock("@/lib/db/connect", () => ({ default: vi.fn() }));
 
-const { mockFind, mockUpdateMany } = vi.hoisted(() => ({
+const { mockFind, mockUpdateMany, mockFindOneAndDelete, mockDeleteMany } = vi.hoisted(() => ({
   mockFind: vi.fn(),
   mockUpdateMany: vi.fn(),
+  mockFindOneAndDelete: vi.fn(),
+  mockDeleteMany: vi.fn(),
 }));
 
 vi.mock("@/lib/models/ProspectiveCustomer", () => ({
@@ -29,12 +31,15 @@ vi.mock("@/lib/models/ProspectiveCustomer", () => ({
     findByIdAndUpdate: vi.fn(),
     find: mockFind,
     updateMany: mockUpdateMany,
+    findOneAndDelete: mockFindOneAndDelete,
+    deleteMany: mockDeleteMany,
   },
 }));
 
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth/auth";
 import { getSubmissionsByUserId } from "@/lib/dal/prospects";
+import { deleteSubmission, deleteAllSubmissionsByUser } from "@/lib/dal/index";
 
 const mockHeaders = headers as ReturnType<typeof vi.fn>;
 const mockGetSession = auth.api.getSession as ReturnType<typeof vi.fn>;
@@ -123,5 +128,62 @@ describe("getSubmissionsByUserId", () => {
 
     expect(record.createdAt).toBe(createdAt);
     expect(record.updatedAt).toBe(updatedAt);
+  });
+});
+
+describe("deleteSubmission", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns true when the submission belongs to the user and is deleted", async () => {
+    mockFindOneAndDelete.mockResolvedValue({ _id: "doc-1", userId: "user-abc" });
+
+    const result = await deleteSubmission("doc-1", "user-abc");
+
+    expect(mockFindOneAndDelete).toHaveBeenCalledWith({ _id: "doc-1", userId: "user-abc" });
+    expect(result).toBe(true);
+  });
+
+  it("returns false and does not delete when the submission belongs to another user", async () => {
+    mockFindOneAndDelete.mockResolvedValue(null);
+
+    const result = await deleteSubmission("doc-1", "user-other");
+
+    expect(mockFindOneAndDelete).toHaveBeenCalledWith({ _id: "doc-1", userId: "user-other" });
+    expect(result).toBe(false);
+  });
+});
+
+describe("deleteAllSubmissionsByUser", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("removes all submissions for the given user and returns the count", async () => {
+    mockDeleteMany.mockResolvedValue({ deletedCount: 3 });
+
+    const count = await deleteAllSubmissionsByUser("user-abc");
+
+    expect(mockDeleteMany).toHaveBeenCalledWith({ userId: "user-abc" });
+    expect(count).toBe(3);
+  });
+
+  it("scopes the delete query to userId so other users' submissions are not affected", async () => {
+    mockDeleteMany.mockResolvedValue({ deletedCount: 2 });
+
+    await deleteAllSubmissionsByUser("user-abc");
+
+    const callArg = mockDeleteMany.mock.calls[0][0];
+    expect(callArg).toEqual({ userId: "user-abc" });
+    expect(callArg).not.toHaveProperty("email");
+  });
+
+  it("returns 0 when the user has no submissions", async () => {
+    mockDeleteMany.mockResolvedValue({ deletedCount: 0 });
+
+    const count = await deleteAllSubmissionsByUser("user-no-submissions");
+
+    expect(count).toBe(0);
   });
 });

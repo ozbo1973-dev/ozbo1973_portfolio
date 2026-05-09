@@ -60,3 +60,15 @@ export async function updateProspectUserId(id: string, userId: string): Promise<
   await ProspectiveCustomer.findByIdAndUpdate(id, { userId });
 }
 
+export async function deleteSubmission(id: string, userId: string): Promise<boolean> {
+  await connectDB();
+  const deleted = await ProspectiveCustomer.findOneAndDelete({ _id: id, userId });
+  return deleted !== null;
+}
+
+export async function deleteAllSubmissionsByUser(userId: string): Promise<number> {
+  await connectDB();
+  const result = await ProspectiveCustomer.deleteMany({ userId });
+  return result.deletedCount;
+}
+
