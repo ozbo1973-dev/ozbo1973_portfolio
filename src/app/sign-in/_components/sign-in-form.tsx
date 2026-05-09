@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { signIn } from "@/lib/auth/actions/signIn";
 
-export function SignInForm() {
-  const [submitted, setSubmitted] = useState(false);
+export function SignInForm({ initialSent = false }: { initialSent?: boolean }) {
+  const [submitted, setSubmitted] = useState(initialSent);
 
   async function handleSubmit(formData: FormData) {
     const email = formData.get("email") as string;

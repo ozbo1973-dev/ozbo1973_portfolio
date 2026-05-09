@@ -10,9 +10,15 @@ export const metadata: Metadata = {
   description: "Sign in to your client portal.",
 };
 
-export default async function SignInPage() {
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sent?: string }>;
+}) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (session) redirect("/portal");
+
+  const { sent } = await searchParams;
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
@@ -39,7 +45,7 @@ export default async function SignInPage() {
             Enter your email to receive a sign-in link.
           </p>
         </div>
-        <SignInForm />
+        <SignInForm initialSent={sent === "true"} />
       </div>
     </div>
   );

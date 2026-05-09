@@ -7,7 +7,7 @@ import { runSecurityGuard, recordGuardRejection } from "@/lib/contact/guard";
 import { createProspect, updateProspectUserId } from "@/lib/dal/prospects";
 import { sendNotifications } from "@/lib/contact/sendNotifications";
 import { auth, registerMagicLinkCapture } from "@/lib/auth/auth";
-import { getUserIdByEmail } from "@/lib/auth/getUserIdByEmail";
+import { getUserByEmail } from "@/lib/auth/getUserIdByEmail";
 
 const submissionSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -65,12 +65,13 @@ export async function submitContactForm(formData: ContactFormData): Promise<Acti
 
     await sendNotifications(prospect, magicLinkUrl);
 
-    const userId = await getUserIdByEmail(prospectData.email);
-    if (userId) {
-      await updateProspectUserId(prospect.id, userId);
+    const user = await getUserByEmail(prospectData.email);
+    if (user) {
+      await updateProspectUserId(prospect.id, user.id);
     }
 
-    return { success: true, redirect: "/verify-email" };
+    const redirect = user?.emailVerified ? "/sign-in?sent=true" : "/verify-email";
+    return { success: true, redirect };
   } catch (error) {
     console.error("Error submitting contact form:", error);
     return { success: false, error: "An error occurred while submitting. Please try again." };
