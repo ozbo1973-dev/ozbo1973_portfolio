@@ -57,6 +57,17 @@ describe("ContactSection — form fields", () => {
   });
 });
 
+describe("ContactSection — magic link notice", () => {
+  it("renders the magic link account notice between textarea and submit button", () => {
+    render(<ContactSection />);
+    expect(
+      screen.getByText(
+        "Submitting creates an account. You'll sign in via a magic link — no password needed."
+      )
+    ).toBeInTheDocument();
+  });
+});
+
 describe("ContactSection — form submission", () => {
   beforeEach(() => {
     vi.clearAllMocks();
