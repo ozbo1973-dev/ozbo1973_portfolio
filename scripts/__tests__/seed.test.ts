@@ -45,7 +45,7 @@ describe("seed data builders", () => {
   it("first seed user is Brady Bovero with admin role", () => {
     const [brady] = buildSeedUsers();
     expect(brady.name).toBe("Brady Bovero");
-    expect(brady.email).toBe("bbbove20@gmail.com");
+    expect(brady.email).toBe("bbbove20.dev@gmail.com");
     expect(brady.role).toBe("admin");
     expect(brady.emailVerified).toBe(true);
   });
@@ -53,7 +53,7 @@ describe("seed data builders", () => {
   it("second seed user is John Doe with user role", () => {
     const [, john] = buildSeedUsers();
     expect(john.name).toBe("John Doe");
-    expect(john.email).toBe("bbbove20+Test1@gmail.com");
+    expect(john.email).toBe("bbbove20.dev+Test1@gmail.com");
     expect(john.role).toBe("user");
     expect(john.emailVerified).toBe(true);
   });
@@ -61,7 +61,7 @@ describe("seed data builders", () => {
   it("third seed user is Jane Doe with user role", () => {
     const [, , jane] = buildSeedUsers();
     expect(jane.name).toBe("Jane Doe");
-    expect(jane.email).toBe("bbbove20+Test2@gmail.com");
+    expect(jane.email).toBe("bbbove20.dev+Test2@gmail.com");
     expect(jane.role).toBe("user");
     expect(jane.emailVerified).toBe(true);
   });

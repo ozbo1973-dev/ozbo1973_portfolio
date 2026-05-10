@@ -14,16 +14,24 @@ vi.mock("@/lib/auth/auth", () => ({
       signInMagicLink: vi.fn(),
     },
   },
+  registerMagicLinkCapture: vi.fn(),
+}));
+
+vi.mock("@/lib/contact/sendNotifications", () => ({
+  sendMagicLinkEmail: vi.fn(),
 }));
 
 import { headers } from "next/headers";
 import { getUserIdByEmail } from "@/lib/auth/getUserIdByEmail";
-import { auth } from "@/lib/auth/auth";
+import { auth, registerMagicLinkCapture } from "@/lib/auth/auth";
+import { sendMagicLinkEmail } from "@/lib/contact/sendNotifications";
 import { signIn } from "@/lib/auth/actions/signIn";
 
 const mockHeaders = headers as ReturnType<typeof vi.fn>;
 const mockGetUserIdByEmail = getUserIdByEmail as ReturnType<typeof vi.fn>;
 const mockSignInMagicLink = auth.api.signInMagicLink as ReturnType<typeof vi.fn>;
+const mockRegisterMagicLinkCapture = registerMagicLinkCapture as ReturnType<typeof vi.fn>;
+const mockSendMagicLinkEmail = sendMagicLinkEmail as ReturnType<typeof vi.fn>;
 
 function makeHeadersMap(overrides: Record<string, string> = {}) {
   const map: Record<string, string> = { ...overrides };
@@ -34,6 +42,8 @@ describe("signIn", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockHeaders.mockResolvedValue(makeHeadersMap());
+    mockRegisterMagicLinkCapture.mockResolvedValue("https://example.com/magic?token=abc");
+    mockSendMagicLinkEmail.mockResolvedValue(undefined);
   });
 
   it("returns { success: true } for a registered email", async () => {
@@ -53,7 +63,7 @@ describe("signIn", () => {
 
     expect(mockSignInMagicLink).toHaveBeenCalledOnce();
     expect(mockSignInMagicLink).toHaveBeenCalledWith(
-      expect.objectContaining({ body: { email: "registered@example.com" } })
+      expect.objectContaining({ body: expect.objectContaining({ email: "registered@example.com" }) })
     );
   });
 

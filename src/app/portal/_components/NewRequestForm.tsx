@@ -25,7 +25,7 @@ export default function NewRequestForm({ onSubmitted }: NewRequestFormProps) {
     return true;
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
     if (!validate()) return;
 
@@ -68,12 +68,15 @@ export default function NewRequestForm({ onSubmitted }: NewRequestFormProps) {
           aria-describedby={descriptionError ? "description-error" : undefined}
         />
         {descriptionError && (
-          <p id="description-error" className="text-sm text-destructive font-['Mulish']">
+          <p
+            id="description-error"
+            className="text-sm text-destructive font-['Mulish']"
+          >
             {descriptionError}
           </p>
         )}
       </div>
-      <Button type="submit" disabled={isSubmitting}>
+      <Button type="submit" disabled={isSubmitting || !description}>
         {isSubmitting ? "Submitting…" : "Submit Request"}
       </Button>
     </form>

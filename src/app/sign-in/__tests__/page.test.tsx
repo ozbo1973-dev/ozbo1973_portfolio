@@ -36,7 +36,7 @@ describe("SignInPage", () => {
   });
 
   it("renders an email input form for unauthenticated users", async () => {
-    render(await SignInPage());
+    render(await SignInPage({ searchParams: Promise.resolve({}) }));
 
     expect(screen.getByRole("textbox", { name: /email/i })).toBeInTheDocument();
   });
@@ -44,11 +44,18 @@ describe("SignInPage", () => {
   it("redirects authenticated users to /portal", async () => {
     mockGetSession.mockResolvedValue({ user: { email: "user@example.com" } });
 
-    await expect(SignInPage()).rejects.toThrow("NEXT_REDIRECT:/portal");
+    await expect(SignInPage({ searchParams: Promise.resolve({}) })).rejects.toThrow("NEXT_REDIRECT:/portal");
+  });
+
+  it("shows the 'check your inbox' success state immediately when redirected with ?sent=true", async () => {
+    render(await SignInPage({ searchParams: Promise.resolve({ sent: "true" }) }));
+
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   });
 
   it("shows a generic confirmation message after form submission regardless of email status", async () => {
-    render(await SignInPage());
+    render(await SignInPage({ searchParams: Promise.resolve({}) }));
 
     const input = screen.getByRole("textbox", { name: /email/i });
     const form = input.closest("form")!;

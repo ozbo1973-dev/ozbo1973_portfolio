@@ -27,14 +27,14 @@ vi.mock("@/lib/auth/auth", () => ({
 }));
 
 vi.mock("@/lib/auth/getUserIdByEmail", () => ({
-  getUserIdByEmail: vi.fn(),
+  getUserByEmail: vi.fn(),
 }));
 
 import { headers } from "next/headers";
 import { createProspect, updateProspectUserId } from "@/lib/dal/prospects";
 import { sendNotifications } from "@/lib/contact/sendNotifications";
 import { auth, registerMagicLinkCapture } from "@/lib/auth/auth";
-import { getUserIdByEmail } from "@/lib/auth/getUserIdByEmail";
+import { getUserByEmail } from "@/lib/auth/getUserIdByEmail";
 import { submitContactForm } from "@/app/actions/submitContactForm";
 import type { ProspectRecord } from "@/lib/dal/prospects";
 
@@ -43,7 +43,7 @@ const mockCreateProspect = createProspect as ReturnType<typeof vi.fn>;
 const mockUpdateProspectUserId = updateProspectUserId as ReturnType<typeof vi.fn>;
 const mockSendNotifications = sendNotifications as ReturnType<typeof vi.fn>;
 const mockSignInMagicLink = auth.api.signInMagicLink as ReturnType<typeof vi.fn>;
-const mockGetUserIdByEmail = getUserIdByEmail as ReturnType<typeof vi.fn>;
+const mockGetUserByEmail = getUserByEmail as ReturnType<typeof vi.fn>;
 const mockRegisterMagicLinkCapture = registerMagicLinkCapture as ReturnType<typeof vi.fn>;
 
 // Each test gets a unique IP to avoid in-memory rate-limit state bleed between tests.
@@ -93,7 +93,7 @@ describe("submitContactForm", () => {
     mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
     mockSignInMagicLink.mockResolvedValue({ status: true });
     mockSendNotifications.mockResolvedValue(undefined);
-    mockGetUserIdByEmail.mockResolvedValue("user-id-123");
+    mockGetUserByEmail.mockResolvedValue({ id: "user-id-123", emailVerified: false });
     mockUpdateProspectUserId.mockResolvedValue(undefined);
 
     await submitContactForm(validData);
@@ -110,7 +110,7 @@ describe("submitContactForm", () => {
     mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
     mockSignInMagicLink.mockResolvedValue({ status: true });
     mockSendNotifications.mockResolvedValue(undefined);
-    mockGetUserIdByEmail.mockResolvedValue("user-id-123");
+    mockGetUserByEmail.mockResolvedValue({ id: "user-id-123", emailVerified: false });
     mockUpdateProspectUserId.mockResolvedValue(undefined);
 
     await submitContactForm(validData);
@@ -124,12 +124,12 @@ describe("submitContactForm", () => {
     mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
     mockSignInMagicLink.mockResolvedValue({ status: true });
     mockSendNotifications.mockResolvedValue(undefined);
-    mockGetUserIdByEmail.mockResolvedValue("user-id-123");
+    mockGetUserByEmail.mockResolvedValue({ id: "user-id-123", emailVerified: false });
     mockUpdateProspectUserId.mockResolvedValue(undefined);
 
     await submitContactForm(validData);
 
-    expect(mockGetUserIdByEmail).toHaveBeenCalledWith("jane@example.com");
+    expect(mockGetUserByEmail).toHaveBeenCalledWith("jane@example.com");
     expect(mockUpdateProspectUserId).toHaveBeenCalledWith("abc123", "user-id-123");
   });
 
@@ -139,7 +139,7 @@ describe("submitContactForm", () => {
     mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
     mockSignInMagicLink.mockResolvedValue({ status: true });
     mockSendNotifications.mockResolvedValue(undefined);
-    mockGetUserIdByEmail.mockResolvedValue("user-id-123");
+    mockGetUserByEmail.mockResolvedValue({ id: "user-id-123", emailVerified: false });
     mockUpdateProspectUserId.mockResolvedValue(undefined);
 
     const result = await submitContactForm(validData);
@@ -153,13 +153,41 @@ describe("submitContactForm", () => {
     mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
     mockSignInMagicLink.mockRejectedValue(new Error("Resend API error"));
     mockSendNotifications.mockResolvedValue(undefined);
-    mockGetUserIdByEmail.mockResolvedValue("user-id-123");
+    mockGetUserByEmail.mockResolvedValue({ id: "user-id-123", emailVerified: false });
     mockUpdateProspectUserId.mockResolvedValue(undefined);
 
     const result = await submitContactForm(validData);
 
     expect(result).toMatchObject({ success: false });
     expect(mockUpdateProspectUserId).not.toHaveBeenCalled();
+  });
+
+  it("redirects verified existing users to /sign-in?sent=true instead of /verify-email", async () => {
+    mockHeaders.mockResolvedValue(makeHeadersMap({ "x-forwarded-for": "10.1.0.10" }));
+    mockCreateProspect.mockResolvedValue(prospect);
+    mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
+    mockSignInMagicLink.mockResolvedValue({ status: true });
+    mockSendNotifications.mockResolvedValue(undefined);
+    mockGetUserByEmail.mockResolvedValue({ id: "user-id-123", emailVerified: true });
+    mockUpdateProspectUserId.mockResolvedValue(undefined);
+
+    const result = await submitContactForm(validData);
+
+    expect(result).toEqual({ success: true, redirect: "/sign-in?sent=true" });
+  });
+
+  it("redirects unverified existing users to /verify-email", async () => {
+    mockHeaders.mockResolvedValue(makeHeadersMap({ "x-forwarded-for": "10.1.0.11" }));
+    mockCreateProspect.mockResolvedValue(prospect);
+    mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
+    mockSignInMagicLink.mockResolvedValue({ status: true });
+    mockSendNotifications.mockResolvedValue(undefined);
+    mockGetUserByEmail.mockResolvedValue({ id: "user-id-123", emailVerified: false });
+    mockUpdateProspectUserId.mockResolvedValue(undefined);
+
+    const result = await submitContactForm(validData);
+
+    expect(result).toEqual({ success: true, redirect: "/verify-email" });
   });
 
   it("returns { success: false } without calling createProspect when honeypot is filled", async () => {
@@ -188,7 +216,7 @@ describe("submitContactForm", () => {
     mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
     mockSignInMagicLink.mockResolvedValue({ status: true });
     mockSendNotifications.mockResolvedValue(undefined);
-    mockGetUserIdByEmail.mockResolvedValue("user-id-123");
+    mockGetUserByEmail.mockResolvedValue({ id: "user-id-123", emailVerified: false });
     mockUpdateProspectUserId.mockResolvedValue(undefined);
 
     await submitContactForm({ ...validData, email: "User@Example.com" });

@@ -4,6 +4,7 @@ import { render, screen } from "@testing-library/react";
 // Mock next/navigation
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
+  usePathname: () => "/",
 }));
 
 // Mock next/image
