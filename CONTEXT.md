@@ -51,6 +51,12 @@ _Avoid_: Thread, parent message, reply
 > **Dev:** "When a Prospect submits the form twice, do they get two magic links?"
 > **Domain expert:** "Yes — each Submission triggers a magic link. But once they're a User with an active Session, both Submissions appear in their Portal."
 
+## Invariants
+
+- **Email is always stored lowercase.** Normalization happens at the action entry point (`submitContactForm`, `signIn`) before any DB write or query. Never normalize only at query time.
+- **A returning email on the contact form creates a new Submission but not a new User.** BetterAuth reuses the existing User record and sends a fresh Magic Link.
+- **Client-side forms use `onSubmit` + `startTransition`.** Never use `form action={asyncFn}` without `startTransition`.
+
 ## Flagged ambiguities
 
 - "User" was sometimes used to mean the person filling out the form — resolved: that person is a **Prospect** until authenticated, then a **User**.
