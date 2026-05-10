@@ -123,4 +123,21 @@ describe("NewRequestForm", () => {
       expect((textarea as HTMLTextAreaElement).value).toBe("");
     });
   });
+
+  it("shows a toast error when submission fails", async () => {
+    mockSubmitPortalRequest.mockResolvedValue({
+      success: false,
+      fieldErrors: {},
+    });
+    render(<NewRequestForm {...defaultProps} />);
+
+    fireEvent.change(screen.getByRole("textbox", { name: /description/i }), {
+      target: { value: "Need a new website" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit|send/i }));
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalled();
+    });
+  });
 });
