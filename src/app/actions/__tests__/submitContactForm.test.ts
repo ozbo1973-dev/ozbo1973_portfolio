@@ -9,8 +9,6 @@ vi.mock("next/headers", () => ({
 
 vi.mock("@/lib/dal/prospects", () => ({
   createProspect: vi.fn(),
-  updateProspectUserId: vi.fn(),
-  recordSuspiciousIP: vi.fn(),
 }));
 
 vi.mock("@/lib/contact/sendNotifications", () => ({
@@ -31,16 +29,14 @@ vi.mock("@/lib/auth/getUserIdByEmail", () => ({
 }));
 
 import { headers } from "next/headers";
-import { createProspect, updateProspectUserId } from "@/lib/dal/prospects";
+import { createProspect } from "@/lib/dal/prospects";
 import { sendNotifications } from "@/lib/contact/sendNotifications";
 import { auth, registerMagicLinkCapture } from "@/lib/auth/auth";
 import { getUserByEmail } from "@/lib/auth/getUserIdByEmail";
 import { submitContactForm } from "@/app/actions/submitContactForm";
-import type { ProspectRecord } from "@/lib/dal/prospects";
 
 const mockHeaders = headers as ReturnType<typeof vi.fn>;
 const mockCreateProspect = createProspect as ReturnType<typeof vi.fn>;
-const mockUpdateProspectUserId = updateProspectUserId as ReturnType<typeof vi.fn>;
 const mockSendNotifications = sendNotifications as ReturnType<typeof vi.fn>;
 const mockSignInMagicLink = auth.api.signInMagicLink as ReturnType<typeof vi.fn>;
 const mockGetUserByEmail = getUserByEmail as ReturnType<typeof vi.fn>;
@@ -70,11 +66,9 @@ const validData = {
   company: "",
 };
 
-const prospect: ProspectRecord = {
+const prospect = {
   id: "abc123",
-  firstName: "Jane",
-  lastName: "Doe",
-  email: "jane@example.com",
+  userId: "user-id-123",
   description: "Help me build something",
   createdAt: new Date(),
   updatedAt: new Date(),
@@ -89,12 +83,11 @@ describe("submitContactForm", () => {
 
   it("sends a magic link to the submitted email on valid submission", async () => {
     mockHeaders.mockResolvedValue(makeHeadersMap());
-    mockCreateProspect.mockResolvedValue(prospect);
     mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
     mockSignInMagicLink.mockResolvedValue({ status: true });
-    mockSendNotifications.mockResolvedValue(undefined);
     mockGetUserByEmail.mockResolvedValue({ id: "user-id-123", emailVerified: false });
-    mockUpdateProspectUserId.mockResolvedValue(undefined);
+    mockCreateProspect.mockResolvedValue(prospect);
+    mockSendNotifications.mockResolvedValue(undefined);
 
     await submitContactForm(validData);
 
@@ -106,70 +99,69 @@ describe("submitContactForm", () => {
 
   it("includes the magic link URL in the customer confirmation email", async () => {
     mockHeaders.mockResolvedValue(makeHeadersMap());
-    mockCreateProspect.mockResolvedValue(prospect);
     mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
     mockSignInMagicLink.mockResolvedValue({ status: true });
-    mockSendNotifications.mockResolvedValue(undefined);
     mockGetUserByEmail.mockResolvedValue({ id: "user-id-123", emailVerified: false });
-    mockUpdateProspectUserId.mockResolvedValue(undefined);
+    mockCreateProspect.mockResolvedValue(prospect);
+    mockSendNotifications.mockResolvedValue(undefined);
 
     await submitContactForm(validData);
 
-    expect(mockSendNotifications).toHaveBeenCalledWith(prospect, MAGIC_LINK_URL);
+    expect(mockSendNotifications).toHaveBeenCalledWith(
+      expect.objectContaining({ firstName: "Jane", lastName: "Doe", email: "jane@example.com" }),
+      MAGIC_LINK_URL
+    );
   });
 
-  it("stores the userId from BetterAuth on the ProspectiveCustomer record", async () => {
+  it("creates the prospect with userId after magic link resolves", async () => {
     mockHeaders.mockResolvedValue(makeHeadersMap());
-    mockCreateProspect.mockResolvedValue(prospect);
     mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
     mockSignInMagicLink.mockResolvedValue({ status: true });
-    mockSendNotifications.mockResolvedValue(undefined);
     mockGetUserByEmail.mockResolvedValue({ id: "user-id-123", emailVerified: false });
-    mockUpdateProspectUserId.mockResolvedValue(undefined);
+    mockCreateProspect.mockResolvedValue(prospect);
+    mockSendNotifications.mockResolvedValue(undefined);
 
     await submitContactForm(validData);
 
     expect(mockGetUserByEmail).toHaveBeenCalledWith("jane@example.com");
-    expect(mockUpdateProspectUserId).toHaveBeenCalledWith("abc123", "user-id-123");
+    expect(mockCreateProspect).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: "user-id-123", description: "Help me build something" })
+    );
   });
 
   it("returns { success: true, redirect: '/verify-email' } on valid submission", async () => {
     mockHeaders.mockResolvedValue(makeHeadersMap());
-    mockCreateProspect.mockResolvedValue(prospect);
     mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
     mockSignInMagicLink.mockResolvedValue({ status: true });
-    mockSendNotifications.mockResolvedValue(undefined);
     mockGetUserByEmail.mockResolvedValue({ id: "user-id-123", emailVerified: false });
-    mockUpdateProspectUserId.mockResolvedValue(undefined);
+    mockCreateProspect.mockResolvedValue(prospect);
+    mockSendNotifications.mockResolvedValue(undefined);
 
     const result = await submitContactForm(validData);
 
     expect(result).toEqual({ success: true, redirect: "/verify-email" });
   });
 
-  it("returns { success: false } and does not send magic link when magic link send fails", async () => {
+  it("returns { success: false } and does not create prospect when magic link send fails", async () => {
     mockHeaders.mockResolvedValue(makeHeadersMap());
-    mockCreateProspect.mockResolvedValue(prospect);
     mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
     mockSignInMagicLink.mockRejectedValue(new Error("Resend API error"));
     mockSendNotifications.mockResolvedValue(undefined);
     mockGetUserByEmail.mockResolvedValue({ id: "user-id-123", emailVerified: false });
-    mockUpdateProspectUserId.mockResolvedValue(undefined);
 
     const result = await submitContactForm(validData);
 
     expect(result).toMatchObject({ success: false });
-    expect(mockUpdateProspectUserId).not.toHaveBeenCalled();
+    expect(mockCreateProspect).not.toHaveBeenCalled();
   });
 
   it("redirects verified existing users to /sign-in?sent=true instead of /verify-email", async () => {
     mockHeaders.mockResolvedValue(makeHeadersMap({ "x-forwarded-for": "10.1.0.10" }));
-    mockCreateProspect.mockResolvedValue(prospect);
     mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
     mockSignInMagicLink.mockResolvedValue({ status: true });
-    mockSendNotifications.mockResolvedValue(undefined);
     mockGetUserByEmail.mockResolvedValue({ id: "user-id-123", emailVerified: true });
-    mockUpdateProspectUserId.mockResolvedValue(undefined);
+    mockCreateProspect.mockResolvedValue(prospect);
+    mockSendNotifications.mockResolvedValue(undefined);
 
     const result = await submitContactForm(validData);
 
@@ -178,12 +170,11 @@ describe("submitContactForm", () => {
 
   it("redirects unverified existing users to /verify-email", async () => {
     mockHeaders.mockResolvedValue(makeHeadersMap({ "x-forwarded-for": "10.1.0.11" }));
-    mockCreateProspect.mockResolvedValue(prospect);
     mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
     mockSignInMagicLink.mockResolvedValue({ status: true });
-    mockSendNotifications.mockResolvedValue(undefined);
     mockGetUserByEmail.mockResolvedValue({ id: "user-id-123", emailVerified: false });
-    mockUpdateProspectUserId.mockResolvedValue(undefined);
+    mockCreateProspect.mockResolvedValue(prospect);
+    mockSendNotifications.mockResolvedValue(undefined);
 
     const result = await submitContactForm(validData);
 
@@ -210,34 +201,16 @@ describe("submitContactForm", () => {
     expect(mockSignInMagicLink).not.toHaveBeenCalled();
   });
 
-  it("redirects to /verify-email and skips updateProspectUserId when user is not found in BetterAuth", async () => {
-    mockHeaders.mockResolvedValue(makeHeadersMap());
-    mockCreateProspect.mockResolvedValue(prospect);
-    mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
-    mockSignInMagicLink.mockResolvedValue({ status: true });
-    mockSendNotifications.mockResolvedValue(undefined);
-    mockGetUserByEmail.mockResolvedValue(null);
-
-    const result = await submitContactForm(validData);
-
-    expect(result).toEqual({ success: true, redirect: "/verify-email" });
-    expect(mockUpdateProspectUserId).not.toHaveBeenCalled();
-  });
-
   it("normalizes a mixed-case email to lowercase before creating prospect and sending magic link", async () => {
     mockHeaders.mockResolvedValue(makeHeadersMap());
-    mockCreateProspect.mockResolvedValue({ ...prospect, email: "user@example.com" });
     mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
     mockSignInMagicLink.mockResolvedValue({ status: true });
-    mockSendNotifications.mockResolvedValue(undefined);
     mockGetUserByEmail.mockResolvedValue({ id: "user-id-123", emailVerified: false });
-    mockUpdateProspectUserId.mockResolvedValue(undefined);
+    mockCreateProspect.mockResolvedValue({ ...prospect, email: "user@example.com" });
+    mockSendNotifications.mockResolvedValue(undefined);
 
     await submitContactForm({ ...validData, email: "User@Example.com" });
 
-    expect(mockCreateProspect).toHaveBeenCalledWith(
-      expect.objectContaining({ email: "user@example.com" })
-    );
     expect(mockSignInMagicLink).toHaveBeenCalledWith(
       expect.objectContaining({ body: expect.objectContaining({ email: "user@example.com" }) })
     );

@@ -23,9 +23,7 @@ const baseSession = {
 
 const baseSubmission = {
   id: "sub-new",
-  firstName: "Alice",
-  lastName: "Smith",
-  email: "alice@example.com",
+  userId: "user-abc",
   description: "Need a new website",
   createdAt: new Date("2024-03-01"),
   updatedAt: new Date("2024-03-01"),
@@ -44,15 +42,21 @@ describe("submitPortalRequest", () => {
     expect(result).toEqual({ success: true, submission: baseSubmission });
   });
 
-  it("calls createProspect with userId and description-derived data", async () => {
+  it("calls createProspect with only userId and description", async () => {
     await submitPortalRequest({ description: "Need a new website" });
 
+    expect(mockCreateProspect).toHaveBeenCalledWith({
+      description: "Need a new website",
+      userId: "user-abc",
+    });
     expect(mockCreateProspect).toHaveBeenCalledWith(
-      expect.objectContaining({
-        description: "Need a new website",
-        email: "alice@example.com",
-        userId: "user-abc",
-      })
+      expect.not.objectContaining({ firstName: expect.anything() })
+    );
+    expect(mockCreateProspect).toHaveBeenCalledWith(
+      expect.not.objectContaining({ lastName: expect.anything() })
+    );
+    expect(mockCreateProspect).toHaveBeenCalledWith(
+      expect.not.objectContaining({ email: expect.anything() })
     );
   });
 
@@ -66,7 +70,7 @@ describe("submitPortalRequest", () => {
     expect(mockCreateProspect).not.toHaveBeenCalled();
   });
 
-  it("returns a fieldError when description is missing", async () => {
+  it("returns a fieldError when description is whitespace only", async () => {
     const result = await submitPortalRequest({ description: "   " });
 
     expect(result.success).toBe(false);
@@ -88,34 +92,6 @@ describe("submitPortalRequest", () => {
 
     expect(mockCreateProspect).toHaveBeenCalledWith(
       expect.objectContaining({ parentId: "parent-123" })
-    );
-  });
-
-  it("splits the session name into firstName and lastName", async () => {
-    await submitPortalRequest({ description: "Need help" });
-
-    expect(mockCreateProspect).toHaveBeenCalledWith(
-      expect.objectContaining({ firstName: "Alice", lastName: "Smith" })
-    );
-  });
-
-  it("handles single-word name by using it as firstName with empty lastName", async () => {
-    mockVerifySession.mockResolvedValue({ ...baseSession, name: "Alice" });
-
-    await submitPortalRequest({ description: "Need help" });
-
-    expect(mockCreateProspect).toHaveBeenCalledWith(
-      expect.objectContaining({ firstName: "Alice", lastName: "" })
-    );
-  });
-
-  it("handles multi-word name by using first word as firstName and rest as lastName", async () => {
-    mockVerifySession.mockResolvedValue({ ...baseSession, name: "Alice Marie Smith" });
-
-    await submitPortalRequest({ description: "Need help" });
-
-    expect(mockCreateProspect).toHaveBeenCalledWith(
-      expect.objectContaining({ firstName: "Alice", lastName: "Marie Smith" })
     );
   });
 

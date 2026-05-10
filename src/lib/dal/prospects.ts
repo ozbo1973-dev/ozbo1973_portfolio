@@ -7,14 +7,15 @@ import connectDB from "@/lib/db/connect";
 import ProspectiveCustomer from "@/lib/models/ProspectiveCustomer";
 
 export interface ProspectData {
-  firstName: string;
-  lastName: string;
-  email: string;
+  userId: string;
   description: string;
+  parentId?: string;
 }
 
-export interface ProspectRecord extends ProspectData {
+export interface ProspectRecord {
   id: string;
+  userId: string;
+  description: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,9 +32,7 @@ export async function createProspect(data: ProspectData): Promise<ProspectRecord
   const doc = await ProspectiveCustomer.create(data);
   return {
     id: doc._id.toString(),
-    firstName: doc.firstName,
-    lastName: doc.lastName,
-    email: doc.email,
+    userId: doc.userId,
     description: doc.description,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,
@@ -41,24 +40,13 @@ export async function createProspect(data: ProspectData): Promise<ProspectRecord
 }
 
 export async function getSubmissionsByUserId(): Promise<ProspectRecord[]> {
-  const { userId, email } = await verifySession();
+  const { userId } = await verifySession();
   await connectDB();
-  const query = { $or: [{ userId }, { email, userId: { $exists: false } }, { email, userId: null }] };
-  const docs = await ProspectiveCustomer.find(query);
-
-  const unlinked = docs.filter((doc) => !doc.userId);
-  if (unlinked.length > 0) {
-    await ProspectiveCustomer.updateMany(
-      { _id: { $in: unlinked.map((d) => d._id) } },
-      { $set: { userId } }
-    );
-  }
+  const docs = await ProspectiveCustomer.find({ userId });
 
   return docs.map((doc) => ({
     id: doc._id.toString(),
-    firstName: doc.firstName,
-    lastName: doc.lastName,
-    email: doc.email,
+    userId: doc.userId,
     description: doc.description,
     createdAt: doc.createdAt,
     updatedAt: doc.updatedAt,

@@ -75,7 +75,7 @@ describe("getSubmissionsByUserId", () => {
     vi.clearAllMocks();
   });
 
-  it("returns records matching userId and email from session", async () => {
+  it("queries by userId only (no email-based fallback)", async () => {
     mockHeaders.mockResolvedValue({ get: () => null });
     mockGetSession.mockResolvedValue({
       session: { userId: "user-abc" },
@@ -85,11 +85,8 @@ describe("getSubmissionsByUserId", () => {
     const mockDocs = [
       {
         _id: { toString: () => "doc-1" },
-        firstName: "Alice",
-        lastName: "Smith",
-        email: "alice@example.com",
-        description: "Need a website",
         userId: "user-abc",
+        description: "Need a website",
         createdAt: new Date("2024-01-01"),
         updatedAt: new Date("2024-01-02"),
       },
@@ -98,13 +95,9 @@ describe("getSubmissionsByUserId", () => {
 
     const results = await getSubmissionsByUserId();
 
-    expect(mockFind).toHaveBeenCalledWith(
-      expect.objectContaining({
-        $or: expect.arrayContaining([{ userId: "user-abc" }]),
-      })
-    );
+    expect(mockFind).toHaveBeenCalledWith({ userId: "user-abc" });
     expect(results).toHaveLength(1);
-    expect(results[0]).toMatchObject({ id: "doc-1", firstName: "Alice" });
+    expect(results[0]).toMatchObject({ id: "doc-1", description: "Need a website" });
   });
 
   it("returns empty array when no submissions exist", async () => {

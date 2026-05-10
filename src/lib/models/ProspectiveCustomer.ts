@@ -1,11 +1,8 @@
 import mongoose, { Schema } from 'mongoose';
 
 export interface IProspectiveCustomer {
-  firstName: string;
-  lastName: string;
-  email: string;
+  userId: string;
   description: string;
-  userId?: string;
   parentId?: mongoose.Types.ObjectId | null;
   createdAt: Date;
   updatedAt: Date;
@@ -13,30 +10,14 @@ export interface IProspectiveCustomer {
 
 const ProspectiveCustomerSchema = new Schema<IProspectiveCustomer>(
   {
-    firstName: {
+    userId: {
       type: String,
-      required: [true, 'First name is required'],
+      required: [true, 'User ID is required'],
       trim: true,
-    },
-    lastName: {
-      type: String,
-      default: '',
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: [true, 'Email is required'],
-      trim: true,
-      lowercase: true,
-      match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email'],
     },
     description: {
       type: String,
       required: [true, 'Project description is required'],
-      trim: true,
-    },
-    userId: {
-      type: String,
       trim: true,
     },
     parentId: {
@@ -45,11 +26,11 @@ const ProspectiveCustomerSchema = new Schema<IProspectiveCustomer>(
     },
   },
   {
-    timestamps: true, // This enables automatic createdAt and updatedAt fields
+    timestamps: true,
   }
 );
 
-const ProspectiveCustomer = mongoose.models.ProspectiveCustomer || 
+const ProspectiveCustomer = mongoose.models.ProspectiveCustomer ||
   mongoose.model('ProspectiveCustomer', ProspectiveCustomerSchema);
 
 export default ProspectiveCustomer;

@@ -58,21 +58,15 @@ describe("getSubmissionsByUserId", () => {
     const mockDocs = [
       {
         _id: { toString: () => "doc-1" },
-        firstName: "Alice",
-        lastName: "Smith",
-        email: "alice@example.com",
-        description: "Need a website",
         userId: "user-abc",
+        description: "Need a website",
         createdAt: new Date("2024-01-01"),
         updatedAt: new Date("2024-01-02"),
       },
       {
         _id: { toString: () => "doc-2" },
-        firstName: "Alice",
-        lastName: "Smith",
-        email: "alice@example.com",
-        description: "Second inquiry",
         userId: "user-abc",
+        description: "Second inquiry",
         createdAt: new Date("2024-02-01"),
         updatedAt: new Date("2024-02-02"),
       },
@@ -84,9 +78,7 @@ describe("getSubmissionsByUserId", () => {
     expect(results).toHaveLength(2);
     expect(results[0]).toMatchObject({
       id: "doc-1",
-      firstName: "Alice",
-      lastName: "Smith",
-      email: "alice@example.com",
+      userId: "user-abc",
       description: "Need a website",
     });
     expect(results[1]).toMatchObject({ id: "doc-2", description: "Second inquiry" });
@@ -114,11 +106,8 @@ describe("getSubmissionsByUserId", () => {
     mockFind.mockResolvedValue([
       {
         _id: { toString: () => "doc-3" },
-        firstName: "Bob",
-        lastName: "Jones",
-        email: "bob@example.com",
-        description: "Project",
         userId: "user-xyz",
+        description: "Project",
         createdAt,
         updatedAt,
       },
