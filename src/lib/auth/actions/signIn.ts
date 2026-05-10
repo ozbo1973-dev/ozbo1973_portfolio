@@ -9,10 +9,11 @@ export interface SignInResult {
 }
 
 export async function signIn(email: string): Promise<SignInResult> {
-  const userId = await getUserIdByEmail(email);
+  const normalizedEmail = email.toLowerCase();
+  const userId = await getUserIdByEmail(normalizedEmail);
 
   if (userId) {
-    await auth.api.signInMagicLink({ body: { email }, headers: await headers() });
+    await auth.api.signInMagicLink({ body: { email: normalizedEmail }, headers: await headers() });
   }
 
   return { success: true };

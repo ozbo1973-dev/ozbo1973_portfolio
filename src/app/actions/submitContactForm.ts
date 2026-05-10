@@ -47,7 +47,11 @@ export async function submitContactForm(formData: ContactFormData): Promise<Acti
     return { success: false, error: guard.error };
   }
 
-  const prospectData: ProspectData = prospectSchema.parse(parsed.data);
+  const rawData = parsed.data;
+  const prospectData: ProspectData = prospectSchema.parse({
+    ...rawData,
+    email: rawData.email.toLowerCase(),
+  });
 
   try {
     const prospect = await createProspect(prospectData);
