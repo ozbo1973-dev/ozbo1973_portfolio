@@ -169,5 +169,11 @@ describe("PortalPage", () => {
 
       expect(screen.getByRole("button", { name: /delete account/i })).toBeInTheDocument();
     });
+
+    it("displays the signed-in user's email below the subtitle", async () => {
+      render(await PortalPage());
+
+      expect(screen.getByText(/signed in as:\s*alice@example\.com/i)).toBeInTheDocument();
+    });
   });
 });

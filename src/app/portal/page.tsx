@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PortalPage() {
-  await verifySession();
+  const { email } = await verifySession();
   const submissions = await getSubmissionsByUserId();
 
   return (
@@ -27,6 +27,9 @@ export default async function PortalPage() {
         </h1>
         <p className="text-muted-foreground font-['Mulish'] mb-10">
           Your submitted inquiries are shown below.
+        </p>
+        <p className="text-sm text-muted-foreground font-['Mulish'] mb-10">
+          Signed in as: {email}
         </p>
 
         <PortalContent initialSubmissions={submissions} />
