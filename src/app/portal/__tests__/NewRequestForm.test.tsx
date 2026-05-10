@@ -61,9 +61,7 @@ describe("NewRequestForm", () => {
   it("calls onSubmitted with the new submission after success", async () => {
     const submission = {
       id: "sub-new",
-      firstName: "Alice",
-      lastName: "Smith",
-      email: "alice@example.com",
+      userId: "user-abc",
       description: "Need a new website",
       createdAt: new Date(),
       updatedAt: new Date(),

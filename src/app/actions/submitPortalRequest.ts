@@ -19,20 +19,10 @@ export type SubmitPortalRequestResult =
   | { success: true; submission: ProspectRecord }
   | { success: false; error?: string; fieldErrors?: Record<string, string> };
 
-function splitName(name: string): { firstName: string; lastName: string } {
-  const trimmed = name.trim();
-  const spaceIndex = trimmed.indexOf(" ");
-  if (spaceIndex === -1) return { firstName: trimmed, lastName: "" };
-  return {
-    firstName: trimmed.slice(0, spaceIndex),
-    lastName: trimmed.slice(spaceIndex + 1),
-  };
-}
-
 export async function submitPortalRequest(
   input: SubmitPortalRequestInput
 ): Promise<SubmitPortalRequestResult> {
-  const { userId, email, name } = await verifySession();
+  const { userId } = await verifySession();
 
   const parsed = schema.safeParse(input);
   if (!parsed.success) {
@@ -44,15 +34,10 @@ export async function submitPortalRequest(
     return { success: false, fieldErrors };
   }
 
-  const { firstName, lastName } = splitName(name || email);
-
   try {
     const submission = await createProspect({
-      firstName,
-      lastName,
-      email,
-      description: parsed.data.description,
       userId,
+      description: parsed.data.description,
       ...(parsed.data.parentId ? { parentId: parsed.data.parentId } : {}),
     });
 

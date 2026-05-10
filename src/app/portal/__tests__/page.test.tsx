@@ -93,18 +93,14 @@ describe("PortalPage", () => {
       mockGetSubmissions.mockResolvedValue([
         {
           id: "sub-1",
-          firstName: "Alice",
-          lastName: "Smith",
-          email: "alice@example.com",
+          userId: "user-abc",
           description: "Build me a portfolio site",
           createdAt: new Date("2024-01-01"),
           updatedAt: new Date("2024-01-02"),
         },
         {
           id: "sub-2",
-          firstName: "Alice",
-          lastName: "Smith",
-          email: "alice@example.com",
+          userId: "user-abc",
           description: "E-commerce store",
           createdAt: new Date("2024-02-01"),
           updatedAt: new Date("2024-02-02"),
@@ -140,18 +136,14 @@ describe("PortalPage", () => {
       mockGetSubmissions.mockResolvedValue([
         {
           id: "sub-1",
-          firstName: "Alice",
-          lastName: "Smith",
-          email: "alice@example.com",
+          userId: "user-abc",
           description: "First project",
           createdAt: new Date("2024-01-01"),
           updatedAt: new Date("2024-01-02"),
         },
         {
           id: "sub-2",
-          firstName: "Alice",
-          lastName: "Smith",
-          email: "alice@example.com",
+          userId: "user-abc",
           description: "Second project",
           createdAt: new Date("2024-02-01"),
           updatedAt: new Date("2024-02-02"),

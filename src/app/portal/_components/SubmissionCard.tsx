@@ -44,42 +44,36 @@ export default function SubmissionCard({ submission }: SubmissionCardProps) {
     >
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-4 flex-wrap">
-          <span className="font-semibold text-foreground font-['Mulish']">
-            {submission.firstName} {submission.lastName}
-          </span>
-          <div className="flex items-center gap-2">
-            <time
-              dateTime={submission.createdAt.toISOString()}
-              className="text-xs text-muted-foreground font-['Mulish']"
-            >
-              {submission.createdAt.toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </time>
-            <AlertDialog open={open} onOpenChange={setOpen}>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm" aria-label="Delete submission">
-                  Delete
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent role="alertdialog">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete submission?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will permanently delete this submission. This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleConfirm}>Confirm</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
+          <time
+            dateTime={submission.createdAt.toISOString()}
+            className="text-xs text-muted-foreground font-['Mulish']"
+          >
+            {submission.createdAt.toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </time>
+          <AlertDialog open={open} onOpenChange={setOpen}>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm" aria-label="Delete submission">
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent role="alertdialog">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete submission?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete this submission. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleConfirm}>Confirm</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
-        <p className="text-sm text-muted-foreground font-['Mulish']">{submission.email}</p>
         <p className="text-sm text-foreground font-['Mulish'] leading-relaxed">
           {submission.description}
         </p>

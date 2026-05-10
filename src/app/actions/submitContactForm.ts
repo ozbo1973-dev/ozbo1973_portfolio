@@ -4,7 +4,7 @@ import { z } from "zod";
 import { headers } from "next/headers";
 import { getClientIP } from "@/lib/utils";
 import { runSecurityGuard, recordGuardRejection } from "@/lib/contact/guard";
-import { createProspect, updateProspectUserId } from "@/lib/dal/prospects";
+import { createProspect } from "@/lib/dal/prospects";
 import { sendNotifications } from "@/lib/contact/sendNotifications";
 import { auth, registerMagicLinkCapture } from "@/lib/auth/auth";
 import { getUserByEmail } from "@/lib/auth/getUserIdByEmail";
@@ -17,10 +17,7 @@ const submissionSchema = z.object({
   company: z.string().optional(),
 });
 
-const prospectSchema = submissionSchema.omit({ company: true });
-
 export type ContactFormData = z.infer<typeof submissionSchema>;
-type ProspectData = z.infer<typeof prospectSchema>;
 
 export interface ActionResult {
   success: boolean;
@@ -47,32 +44,26 @@ export async function submitContactForm(formData: ContactFormData): Promise<Acti
     return { success: false, error: guard.error };
   }
 
-  const rawData = parsed.data;
-  const prospectData: ProspectData = prospectSchema.parse({
-    ...rawData,
-    email: rawData.email.toLowerCase(),
-  });
+  const { firstName, lastName, description } = parsed.data;
+  const email = parsed.data.email.toLowerCase();
 
   try {
-    const prospect = await createProspect(prospectData);
-
-    // Register capture before triggering signInMagicLink so the sendMagicLink
-    // callback resolves the promise instead of sending a standalone email.
-    const urlCapture = registerMagicLinkCapture(prospectData.email);
+    const urlCapture = registerMagicLinkCapture(email);
 
     await auth.api.signInMagicLink({
-      body: { email: prospectData.email, callbackURL: "/portal" },
+      body: { email, callbackURL: "/portal" },
       headers: h,
     });
 
     const magicLinkUrl = await urlCapture;
 
-    await sendNotifications(prospect, magicLinkUrl);
+    const user = await getUserByEmail(email);
+    const prospect = await createProspect({
+      userId: user!.id,
+      description,
+    });
 
-    const user = await getUserByEmail(prospectData.email);
-    if (user) {
-      await updateProspectUserId(prospect.id, user.id);
-    }
+    await sendNotifications({ firstName, lastName, email, description }, magicLinkUrl);
 
     const redirect = user?.emailVerified ? "/sign-in?sent=true" : "/verify-email";
     return { success: true, redirect };

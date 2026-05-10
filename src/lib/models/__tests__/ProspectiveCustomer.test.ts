@@ -22,7 +22,6 @@ vi.mock("mongoose", () => {
 
 import mongoose from "mongoose";
 
-// Must import after vi.mock is hoisted
 const getSchemaDefinition = async () => {
   const mod = await import("@/lib/models/ProspectiveCustomer");
   return mod;
@@ -38,11 +37,11 @@ describe("ProspectiveCustomer model schema", () => {
     expect(definition).toHaveProperty("userId");
   });
 
-  it("userId field is optional (no required constraint)", async () => {
+  it("userId field is required", async () => {
     const modelFn = mongoose.model as ReturnType<typeof vi.fn>;
     const [, schemaInstance] = modelFn.mock.calls[0];
     const definition = (schemaInstance as { definition: Record<string, { required?: unknown }> })?.definition;
-    expect(definition?.userId?.required).toBeFalsy();
+    expect(definition?.userId?.required).toBeTruthy();
   });
 
   it("schema has a parentId field", async () => {
@@ -57,5 +56,14 @@ describe("ProspectiveCustomer model schema", () => {
     const [, schemaInstance] = modelFn.mock.calls[0];
     const definition = (schemaInstance as { definition: Record<string, { required?: unknown }> })?.definition;
     expect(definition?.parentId?.required).toBeFalsy();
+  });
+
+  it("schema does not have firstName, lastName, or email fields", async () => {
+    const modelFn = mongoose.model as ReturnType<typeof vi.fn>;
+    const [, schemaInstance] = modelFn.mock.calls[0];
+    const definition = (schemaInstance as { definition: Record<string, unknown> })?.definition;
+    expect(definition).not.toHaveProperty("firstName");
+    expect(definition).not.toHaveProperty("lastName");
+    expect(definition).not.toHaveProperty("email");
   });
 });
