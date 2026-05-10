@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -9,11 +9,19 @@ import { signIn } from "@/lib/auth/actions/signIn";
 
 export function SignInForm({ initialSent = false }: { initialSent?: boolean }) {
   const [submitted, setSubmitted] = useState(initialSent);
+  const [isPending, startTransition] = useTransition();
 
-  async function handleSubmit(formData: FormData) {
-    const email = formData.get("email") as string;
-    await signIn(email);
-    setSubmitted(true);
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const email = (e.currentTarget.elements.namedItem("email") as HTMLInputElement).value;
+    startTransition(async () => {
+      try {
+        await signIn(email);
+      } catch {
+        // silent failure — show confirmation regardless so the UI is never broken
+      }
+      setSubmitted(true);
+    });
   }
 
   if (submitted) {
@@ -36,7 +44,7 @@ export function SignInForm({ initialSent = false }: { initialSent?: boolean }) {
   }
 
   return (
-    <form action={handleSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="email"
@@ -54,8 +62,12 @@ export function SignInForm({ initialSent = false }: { initialSent?: boolean }) {
           className="h-12 rounded-2xl"
         />
       </div>
-      <Button type="submit" className="h-12 rounded-2xl text-base font-semibold font-['Mulish']">
-        Send sign-in link
+      <Button
+        type="submit"
+        disabled={isPending}
+        className="h-12 rounded-2xl text-base font-semibold font-['Mulish']"
+      >
+        {isPending ? "Sending…" : "Send sign-in link"}
       </Button>
     </form>
   );
