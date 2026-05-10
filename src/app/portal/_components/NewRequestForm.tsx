@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, startTransition } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,28 +25,31 @@ export default function NewRequestForm({ onSubmitted }: NewRequestFormProps) {
     return true;
   }
 
-  async function handleSubmit(e: React.SubmitEvent) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
-    try {
-      const result = await submitPortalRequest({ description });
+    startTransition(async () => {
+      try {
+        const result = await submitPortalRequest({ description });
 
-      if (!result.success) {
-        if (result.fieldErrors?.description) {
-          setDescriptionError(result.fieldErrors.description);
+        if (!result.success) {
+          if (result.fieldErrors?.description) {
+            setDescriptionError(result.fieldErrors.description);
+          }
+          toast.error("Something went wrong. Please try again.");
+          return;
         }
-        return;
-      }
 
-      toast.success("Request submitted successfully");
-      setDescription("");
-      setDescriptionError(null);
-      onSubmitted?.(result.submission);
-    } finally {
-      setIsSubmitting(false);
-    }
+        toast.success("Request submitted successfully");
+        setDescription("");
+        setDescriptionError(null);
+        onSubmitted?.(result.submission);
+      } finally {
+        setIsSubmitting(false);
+      }
+    });
   }
 
   return (
