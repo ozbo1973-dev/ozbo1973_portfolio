@@ -210,6 +210,20 @@ describe("submitContactForm", () => {
     expect(mockSignInMagicLink).not.toHaveBeenCalled();
   });
 
+  it("redirects to /verify-email and skips updateProspectUserId when user is not found in BetterAuth", async () => {
+    mockHeaders.mockResolvedValue(makeHeadersMap());
+    mockCreateProspect.mockResolvedValue(prospect);
+    mockRegisterMagicLinkCapture.mockResolvedValue(MAGIC_LINK_URL);
+    mockSignInMagicLink.mockResolvedValue({ status: true });
+    mockSendNotifications.mockResolvedValue(undefined);
+    mockGetUserByEmail.mockResolvedValue(null);
+
+    const result = await submitContactForm(validData);
+
+    expect(result).toEqual({ success: true, redirect: "/verify-email" });
+    expect(mockUpdateProspectUserId).not.toHaveBeenCalled();
+  });
+
   it("normalizes a mixed-case email to lowercase before creating prospect and sending magic link", async () => {
     mockHeaders.mockResolvedValue(makeHeadersMap());
     mockCreateProspect.mockResolvedValue({ ...prospect, email: "user@example.com" });
