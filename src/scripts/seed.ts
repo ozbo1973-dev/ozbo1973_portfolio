@@ -29,13 +29,13 @@ export function buildSeedUsers(): SeedUser[] {
     },
     {
       name: "John Doe",
-      email: "bbbove20.dev+Test1@gmail.com",
+      email: "bbbove20.dev+test1@gmail.com",
       role: "user",
       emailVerified: true,
     },
     {
       name: "Jane Doe",
-      email: "bbbove20.dev+Test2@gmail.com",
+      email: "bbbove20.dev+test2@gmail.com",
       role: "user",
       emailVerified: true,
     },
@@ -49,7 +49,7 @@ export function buildLinkedProspects(users: SeedUserWithId[]): SeedProspect[] {
     return {
       firstName,
       lastName,
-      email: user.email,
+      email: user.email.toLowerCase(),
       description: `Seed record for ${user.name}`,
       userId: user.id,
     };
