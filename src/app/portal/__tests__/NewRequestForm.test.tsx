@@ -35,11 +35,10 @@ describe("NewRequestForm", () => {
     expect(screen.getByRole("button", { name: /submit|send/i })).toBeInTheDocument();
   });
 
-  it("shows an inline error when submitting with empty description", async () => {
+  it("disables the submit button when description is empty", () => {
     render(<NewRequestForm {...defaultProps} />);
-    fireEvent.click(screen.getByRole("button", { name: /submit|send/i }));
 
-    expect(await screen.findByText(/description is required/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /submit|send/i })).toBeDisabled();
     expect(mockSubmitPortalRequest).not.toHaveBeenCalled();
   });
 

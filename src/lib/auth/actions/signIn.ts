@@ -10,13 +10,14 @@ export interface SignInResult {
 }
 
 export async function signIn(email: string): Promise<SignInResult> {
-  const userId = await getUserIdByEmail(email);
+  const normalizedEmail = email.toLowerCase();
+  const userId = await getUserIdByEmail(normalizedEmail);
 
   if (userId) {
-    const urlCapture = registerMagicLinkCapture(email);
-    await auth.api.signInMagicLink({ body: { email, callbackURL: "/portal" }, headers: await headers() });
+    const urlCapture = registerMagicLinkCapture(normalizedEmail);
+    await auth.api.signInMagicLink({ body: { email: normalizedEmail, callbackURL: "/portal" }, headers: await headers() });
     const magicLinkUrl = await urlCapture;
-    await sendMagicLinkEmail(email, magicLinkUrl);
+    await sendMagicLinkEmail(normalizedEmail, magicLinkUrl);
   }
 
   return { success: true };
