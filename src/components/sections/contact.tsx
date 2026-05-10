@@ -160,7 +160,7 @@ export default function ContactSection() {
                 onChange={handleChange}
                 placeholder="Question or brief description of project in mind"
                 className={cn(
-                  "min-h-[192px] md:min-h-[192px] lg:min-h-[320px]",
+                  "min-h-[120px]",
                   "bg-background",
                   "border-2 border-primary",
                   "text-base font-semibold font-['Mulish']",
@@ -169,6 +169,11 @@ export default function ContactSection() {
                 )}
                 required
               />
+
+              {/* Magic Link Notice */}
+              <p className="text-sm text-muted-foreground font-['Mulish'] text-center">
+                Submitting creates an account. You&apos;ll sign in via a magic link — no password needed.
+              </p>
 
               {/* Submit Button */}
               <div className="flex justify-end">
