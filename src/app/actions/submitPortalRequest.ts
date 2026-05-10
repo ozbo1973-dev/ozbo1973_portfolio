@@ -57,7 +57,8 @@ export async function submitPortalRequest(
     });
 
     return { success: true, submission };
-  } catch {
+  } catch (err) {
+    console.error("[submitPortalRequest]", err);
     return { success: false, error: "An error occurred while submitting. Please try again." };
   }
 }

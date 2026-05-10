@@ -38,7 +38,7 @@ export default function NewRequestForm({ onSubmitted }: NewRequestFormProps) {
           if (result.fieldErrors?.description) {
             setDescriptionError(result.fieldErrors.description);
           }
-          toast.error("Something went wrong. Please try again.");
+          toast.error(result.error ?? "Something went wrong. Please try again.");
           return;
         }
 
