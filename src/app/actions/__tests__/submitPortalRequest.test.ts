@@ -102,4 +102,24 @@ describe("submitPortalRequest", () => {
 
     expect(result).toEqual({ success: false, error: expect.any(String) });
   });
+
+  it("succeeds when session.user.name is empty string", async () => {
+    mockVerifySession.mockResolvedValue({ userId: "user-abc", email: "alice@example.com", name: "" });
+
+    const result = await submitPortalRequest({ description: "Need a new website" });
+
+    expect(result).toEqual({ success: true, submission: baseSubmission });
+    expect(mockCreateProspect).toHaveBeenCalledWith({ userId: "user-abc", description: "Need a new website" });
+    expect(mockCreateProspect).toHaveBeenCalledWith(expect.not.objectContaining({ name: expect.anything() }));
+  });
+
+  it("succeeds when session.user.name is null (resolved to empty)", async () => {
+    mockVerifySession.mockResolvedValue({ userId: "user-abc", email: "alice@example.com", name: null });
+
+    const result = await submitPortalRequest({ description: "Need a new website" });
+
+    expect(result).toEqual({ success: true, submission: baseSubmission });
+    expect(mockCreateProspect).toHaveBeenCalledWith({ userId: "user-abc", description: "Need a new website" });
+    expect(mockCreateProspect).toHaveBeenCalledWith(expect.not.objectContaining({ name: expect.anything() }));
+  });
 });
