@@ -58,4 +58,29 @@ describe("SignInForm", () => {
     expect(screen.getByRole("status")).toBeInTheDocument();
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   });
+
+  it("shows subtitle before submission", () => {
+    render(<SignInForm />);
+
+    expect(screen.getByText(/enter your email to receive a sign-in link/i)).toBeInTheDocument();
+  });
+
+  it("hides subtitle after submission", async () => {
+    render(<SignInForm />);
+
+    const input = screen.getByRole("textbox", { name: /email/i });
+    fireEvent.change(input, { target: { value: "user@example.com" } });
+
+    await act(async () => {
+      fireEvent.submit(input.closest("form")!);
+    });
+
+    expect(screen.queryByText(/enter your email to receive a sign-in link/i)).not.toBeInTheDocument();
+  });
+
+  it("hides subtitle when initialSent is true", () => {
+    render(<SignInForm initialSent />);
+
+    expect(screen.queryByText(/enter your email to receive a sign-in link/i)).not.toBeInTheDocument();
+  });
 });

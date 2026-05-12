@@ -45,6 +45,9 @@ export function SignInForm({ initialSent = false }: { initialSent?: boolean }) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <p className="text-muted-foreground text-sm font-['Mulish']">
+        Enter your email to receive a sign-in link.
+      </p>
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="email"
