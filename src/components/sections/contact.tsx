@@ -179,7 +179,13 @@ export default function ContactSection() {
               <div className="flex justify-end">
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={
+                    isSubmitting ||
+                    !formData.firstName.trim() ||
+                    !formData.lastName.trim() ||
+                    !formData.email.trim() ||
+                    !formData.description.trim()
+                  }
                   className={cn(
                     "w-full md:w-auto md:min-w-40",
                     "h-14",

@@ -68,6 +68,62 @@ describe("ContactSection — magic link notice", () => {
   });
 });
 
+describe("ContactSection — submit button disabled state", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("is disabled on initial render when all fields are empty", () => {
+    render(<ContactSection />);
+    const button = screen.getByRole("button", { name: /submit/i });
+    expect(button).toBeDisabled();
+  });
+
+  it("remains disabled when only some fields are filled", () => {
+    render(<ContactSection />);
+    fireEvent.change(screen.getByPlaceholderText("First Name"), { target: { value: "Jane" } });
+    fireEvent.change(screen.getByPlaceholderText("Last Name"), { target: { value: "Doe" } });
+    const button = screen.getByRole("button", { name: /submit/i });
+    expect(button).toBeDisabled();
+  });
+
+  it("remains disabled when a field contains only whitespace", () => {
+    render(<ContactSection />);
+    fireEvent.change(screen.getByPlaceholderText("First Name"), { target: { value: "   " } });
+    fireEvent.change(screen.getByPlaceholderText("Last Name"), { target: { value: "Doe" } });
+    fireEvent.change(screen.getByPlaceholderText("Email"), { target: { value: "jane@example.com" } });
+    fireEvent.change(screen.getByPlaceholderText("Question or brief description of project in mind"), {
+      target: { value: "Some project" },
+    });
+    const button = screen.getByRole("button", { name: /submit/i });
+    expect(button).toBeDisabled();
+  });
+
+  it("becomes enabled when all four required fields have non-whitespace content", () => {
+    render(<ContactSection />);
+    fireEvent.change(screen.getByPlaceholderText("First Name"), { target: { value: "Jane" } });
+    fireEvent.change(screen.getByPlaceholderText("Last Name"), { target: { value: "Doe" } });
+    fireEvent.change(screen.getByPlaceholderText("Email"), { target: { value: "jane@example.com" } });
+    fireEvent.change(screen.getByPlaceholderText("Question or brief description of project in mind"), {
+      target: { value: "Some project" },
+    });
+    const button = screen.getByRole("button", { name: /submit/i });
+    expect(button).not.toBeDisabled();
+  });
+
+  it("honeypot field does not affect enabled/disabled logic", () => {
+    render(<ContactSection />);
+    fireEvent.change(screen.getByPlaceholderText("First Name"), { target: { value: "Jane" } });
+    fireEvent.change(screen.getByPlaceholderText("Last Name"), { target: { value: "Doe" } });
+    fireEvent.change(screen.getByPlaceholderText("Email"), { target: { value: "jane@example.com" } });
+    fireEvent.change(screen.getByPlaceholderText("Question or brief description of project in mind"), {
+      target: { value: "Some project" },
+    });
+    const button = screen.getByRole("button", { name: /submit/i });
+    expect(button).not.toBeDisabled();
+  });
+});
+
 describe("ContactSection — form submission", () => {
   beforeEach(() => {
     vi.clearAllMocks();
