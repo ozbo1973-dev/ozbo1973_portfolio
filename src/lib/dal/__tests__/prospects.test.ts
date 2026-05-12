@@ -18,8 +18,9 @@ vi.mock("@/lib/auth/auth", () => ({
 
 vi.mock("@/lib/db/connect", () => ({ default: vi.fn() }));
 
-const { mockFind, mockUpdateMany } = vi.hoisted(() => ({
+const { mockFind, mockSort, mockUpdateMany } = vi.hoisted(() => ({
   mockFind: vi.fn(),
+  mockSort: vi.fn(),
   mockUpdateMany: vi.fn(),
 }));
 
@@ -91,7 +92,8 @@ describe("getSubmissionsByUserId", () => {
         updatedAt: new Date("2024-01-02"),
       },
     ];
-    mockFind.mockResolvedValue(mockDocs);
+    mockSort.mockResolvedValue(mockDocs);
+    mockFind.mockReturnValue({ sort: mockSort });
 
     const results = await getSubmissionsByUserId();
 
@@ -100,13 +102,47 @@ describe("getSubmissionsByUserId", () => {
     expect(results[0]).toMatchObject({ id: "doc-1", description: "Need a website" });
   });
 
+  it("sorts results by createdAt descending", async () => {
+    mockHeaders.mockResolvedValue({ get: () => null });
+    mockGetSession.mockResolvedValue({
+      session: { userId: "user-abc" },
+      user: { email: "alice@example.com" },
+    });
+
+    const mockDocs = [
+      {
+        _id: { toString: () => "doc-2" },
+        userId: "user-abc",
+        description: "Newer request",
+        createdAt: new Date("2024-02-01"),
+        updatedAt: new Date("2024-02-01"),
+      },
+      {
+        _id: { toString: () => "doc-1" },
+        userId: "user-abc",
+        description: "Older request",
+        createdAt: new Date("2024-01-01"),
+        updatedAt: new Date("2024-01-01"),
+      },
+    ];
+    mockSort.mockResolvedValue(mockDocs);
+    mockFind.mockReturnValue({ sort: mockSort });
+
+    const results = await getSubmissionsByUserId();
+
+    expect(mockSort).toHaveBeenCalledWith({ createdAt: -1 });
+    expect(results[0]).toMatchObject({ id: "doc-2", description: "Newer request" });
+    expect(results[1]).toMatchObject({ id: "doc-1", description: "Older request" });
+  });
+
   it("returns empty array when no submissions exist", async () => {
     mockHeaders.mockResolvedValue({ get: () => null });
     mockGetSession.mockResolvedValue({
       session: { userId: "user-none" },
       user: { email: "nobody@example.com" },
     });
-    mockFind.mockResolvedValue([]);
+    mockSort.mockResolvedValue([]);
+    mockFind.mockReturnValue({ sort: mockSort });
 
     const results = await getSubmissionsByUserId();
 

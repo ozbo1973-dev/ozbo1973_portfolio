@@ -42,7 +42,7 @@ export async function createProspect(data: ProspectData): Promise<ProspectRecord
 export async function getSubmissionsByUserId(): Promise<ProspectRecord[]> {
   const { userId } = await verifySession();
   await connectDB();
-  const docs = await ProspectiveCustomer.find({ userId });
+  const docs = await ProspectiveCustomer.find({ userId }).sort({ createdAt: -1 });
 
   return docs.map((doc) => ({
     id: doc._id.toString(),

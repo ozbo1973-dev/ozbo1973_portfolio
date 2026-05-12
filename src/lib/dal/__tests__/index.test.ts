@@ -18,8 +18,9 @@ vi.mock("@/lib/auth/auth", () => ({
 
 vi.mock("@/lib/db/connect", () => ({ default: vi.fn() }));
 
-const { mockFind, mockUpdateMany, mockFindOneAndDelete, mockDeleteMany } = vi.hoisted(() => ({
+const { mockFind, mockSort, mockUpdateMany, mockFindOneAndDelete, mockDeleteMany } = vi.hoisted(() => ({
   mockFind: vi.fn(),
+  mockSort: vi.fn(),
   mockUpdateMany: vi.fn(),
   mockFindOneAndDelete: vi.fn(),
   mockDeleteMany: vi.fn(),
@@ -71,7 +72,8 @@ describe("getSubmissionsByUserId", () => {
         updatedAt: new Date("2024-02-02"),
       },
     ];
-    mockFind.mockResolvedValue(mockDocs);
+    mockSort.mockResolvedValue(mockDocs);
+    mockFind.mockReturnValue({ sort: mockSort });
 
     const results = await getSubmissionsByUserId();
 
@@ -89,7 +91,8 @@ describe("getSubmissionsByUserId", () => {
       session: { userId: "user-no-submissions" },
       user: { email: "nobody@example.com" },
     });
-    mockFind.mockResolvedValue([]);
+    mockSort.mockResolvedValue([]);
+    mockFind.mockReturnValue({ sort: mockSort });
 
     const results = await getSubmissionsByUserId();
 
@@ -103,7 +106,7 @@ describe("getSubmissionsByUserId", () => {
       session: { userId: "user-xyz" },
       user: { email: "bob@example.com" },
     });
-    mockFind.mockResolvedValue([
+    mockSort.mockResolvedValue([
       {
         _id: { toString: () => "doc-3" },
         userId: "user-xyz",
@@ -112,6 +115,7 @@ describe("getSubmissionsByUserId", () => {
         updatedAt,
       },
     ]);
+    mockFind.mockReturnValue({ sort: mockSort });
 
     const [record] = await getSubmissionsByUserId();
 
