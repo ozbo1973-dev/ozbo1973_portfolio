@@ -54,6 +54,24 @@ describe("SignInPage", () => {
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   });
 
+  it("renders the page title 'Sign In' at all times", async () => {
+    render(await SignInPage({ searchParams: Promise.resolve({}) }));
+
+    expect(screen.getByRole("heading", { name: /sign in/i })).toBeInTheDocument();
+  });
+
+  it("shows subtitle on initial load", async () => {
+    render(await SignInPage({ searchParams: Promise.resolve({}) }));
+
+    expect(screen.getByText(/enter your email to receive a sign-in link/i)).toBeInTheDocument();
+  });
+
+  it("hides subtitle when loaded with ?sent=true", async () => {
+    render(await SignInPage({ searchParams: Promise.resolve({ sent: "true" }) }));
+
+    expect(screen.queryByText(/enter your email to receive a sign-in link/i)).not.toBeInTheDocument();
+  });
+
   it("shows a generic confirmation message after form submission regardless of email status", async () => {
     render(await SignInPage({ searchParams: Promise.resolve({}) }));
 

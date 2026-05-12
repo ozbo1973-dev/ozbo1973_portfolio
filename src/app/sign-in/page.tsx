@@ -31,20 +31,15 @@ export default async function SignInPage({
           "flex flex-col gap-6"
         )}
       >
-        <div className="space-y-2">
-          <h1
-            className={cn(
-              "text-3xl md:text-4xl font-bold",
-              "font-[family-name:var(--font-playfair)]",
-              "text-primary"
-            )}
-          >
-            Sign In
-          </h1>
-          <p className="text-muted-foreground text-sm font-['Mulish']">
-            Enter your email to receive a sign-in link.
-          </p>
-        </div>
+        <h1
+          className={cn(
+            "text-3xl md:text-4xl font-bold",
+            "font-[family-name:var(--font-playfair)]",
+            "text-primary"
+          )}
+        >
+          Sign In
+        </h1>
         <SignInForm initialSent={sent === "true"} />
       </div>
     </div>
