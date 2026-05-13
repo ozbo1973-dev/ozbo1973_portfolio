@@ -37,8 +37,8 @@ export function ContactButton({
             isScrolled
               ? "h-10 w-40 md:h-12 md:w-48"
               : "md:h-16 md:w-72 lg:h-20 lg:w-72",
-            "rounded-[24px] text-shadow-white"
-          )
+            "rounded-[24px] text-shadow-white",
+          ),
       )}
     >
       <Send className="w-4 h-4 text-primary" />

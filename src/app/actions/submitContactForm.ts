@@ -4,8 +4,10 @@ import { z } from "zod";
 import { headers } from "next/headers";
 import { getClientIP } from "@/lib/utils";
 import { runSecurityGuard, recordGuardRejection } from "@/lib/contact/guard";
-import { createProspect } from "@/lib/dal";
+import { createProspect } from "@/lib/dal/prospects";
 import { sendNotifications } from "@/lib/contact/sendNotifications";
+import { auth, registerMagicLinkCapture } from "@/lib/auth/auth";
+import { getUserByEmail } from "@/lib/auth/getUserIdByEmail";
 
 const submissionSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -15,13 +17,11 @@ const submissionSchema = z.object({
   company: z.string().optional(),
 });
 
-const prospectSchema = submissionSchema.omit({ company: true });
-
 export type ContactFormData = z.infer<typeof submissionSchema>;
-type ProspectData = z.infer<typeof prospectSchema>;
 
 export interface ActionResult {
   success: boolean;
+  redirect?: string;
   error?: string;
 }
 
@@ -44,12 +44,29 @@ export async function submitContactForm(formData: ContactFormData): Promise<Acti
     return { success: false, error: guard.error };
   }
 
-  const prospectData: ProspectData = prospectSchema.parse(parsed.data);
+  const { firstName, lastName, description } = parsed.data;
+  const email = parsed.data.email.toLowerCase();
 
   try {
-    const prospect = await createProspect(prospectData);
-    await sendNotifications(prospect);
-    return { success: true };
+    const urlCapture = registerMagicLinkCapture(email);
+
+    await auth.api.signInMagicLink({
+      body: { email, callbackURL: "/portal" },
+      headers: h,
+    });
+
+    const magicLinkUrl = await urlCapture;
+
+    const user = await getUserByEmail(email);
+    const prospect = await createProspect({
+      userId: user!.id,
+      description,
+    });
+
+    await sendNotifications({ firstName, lastName, email, description }, magicLinkUrl);
+
+    const redirect = user?.emailVerified ? "/sign-in?sent=true" : "/verify-email";
+    return { success: true, redirect };
   } catch (error) {
     console.error("Error submitting contact form:", error);
     return { success: false, error: "An error occurred while submitting. Please try again." };

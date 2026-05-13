@@ -3,11 +3,12 @@ import * as React from "react";
 interface CustomerConfirmationEmailProps {
   firstName: string;
   lastName: string;
+  magicLinkUrl?: string;
 }
 
 export const CustomerConfirmationEmail: React.FC<
   Readonly<CustomerConfirmationEmailProps>
-> = ({ firstName, lastName }) => (
+> = ({ firstName, lastName, magicLinkUrl }) => (
   <div
     style={{ fontFamily: "Arial, sans-serif", padding: "20px", color: "#333" }}
   >
@@ -28,6 +29,40 @@ export const CustomerConfirmationEmail: React.FC<
         expect to hear from me soon with a personalized response to your project
         requirements.
       </p>
+
+      {magicLinkUrl && (
+        <div
+          style={{
+            margin: "24px 0",
+            padding: "16px",
+            background: "#f0f4ff",
+            borderRadius: "8px",
+            border: "1px solid #c7d7ff",
+          }}
+        >
+          <p style={{ margin: "0 0 12px", fontWeight: "bold" }}>
+            Access Your Client Portal
+          </p>
+          <p style={{ margin: "0 0 12px", fontSize: "14px" }}>
+            Use the button below to access your personalized client portal. This
+            link is valid for 24 hours and can only be used once.
+          </p>
+          <a
+            href={magicLinkUrl}
+            style={{
+              display: "inline-block",
+              padding: "10px 20px",
+              background: "#2563eb",
+              color: "#fff",
+              borderRadius: "6px",
+              textDecoration: "none",
+              fontWeight: "bold",
+            }}
+          >
+            Sign In to Client Portal
+          </a>
+        </div>
+      )}
 
       <p>
         In the meantime, if you have any urgent matters, please feel free to

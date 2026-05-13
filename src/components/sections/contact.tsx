@@ -10,8 +10,10 @@ import { SECTION_IDS } from "@/lib/config";
 import { useState } from "react";
 import type { ContactFormData } from "@/app/actions/submitContactForm";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export default function ContactSection() {
+  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<ContactFormData>({
     firstName: "",
@@ -29,14 +31,7 @@ export default function ContactSection() {
       const result = await submitContactForm(formData);
 
       if (result.success) {
-        toast.success("Your message has been sent successfully.");
-        // Reset form
-        setFormData({
-          firstName: "",
-          lastName: "",
-          email: "",
-          description: "",
-        });
+        router.push(result.redirect ?? "/verify-email");
       } else {
         toast.error(result.error || "Something went wrong. Please try again.");
       }
@@ -165,7 +160,7 @@ export default function ContactSection() {
                 onChange={handleChange}
                 placeholder="Question or brief description of project in mind"
                 className={cn(
-                  "min-h-[192px] md:min-h-[192px] lg:min-h-[320px]",
+                  "min-h-[120px]",
                   "bg-background",
                   "border-2 border-primary",
                   "text-base font-semibold font-['Mulish']",
@@ -175,11 +170,22 @@ export default function ContactSection() {
                 required
               />
 
+              {/* Magic Link Notice */}
+              <p className="text-sm text-muted-foreground font-['Mulish'] text-center">
+                Submitting creates an account. You&apos;ll sign in via a magic link — no password needed.
+              </p>
+
               {/* Submit Button */}
               <div className="flex justify-end">
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={
+                    isSubmitting ||
+                    !formData.firstName.trim() ||
+                    !formData.lastName.trim() ||
+                    !formData.email.trim() ||
+                    !formData.description.trim()
+                  }
                   className={cn(
                     "w-full md:w-auto md:min-w-40",
                     "h-14",
