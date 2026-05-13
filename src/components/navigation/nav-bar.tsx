@@ -88,8 +88,15 @@ function Navbar() {
         <div className="hidden sm:flex items-center gap-4">
           {session && (
             <>
+              <NavButton
+                className={cn(
+                  path === "/portal" ? "text-primary" : "text-white",
+                )}
+                href="/portal"
+              >
+                My Portal
+              </NavButton>
               <SignOutButton />
-              <NavButton href="/portal">My Portal</NavButton>
             </>
           )}
 
