@@ -24,7 +24,10 @@ vi.mock("mongoose", () => ({
       deleteMany: vi.fn(),
       create: vi.fn(),
     })),
-    Schema: vi.fn(function (this: Record<string, unknown>, definition: unknown) {
+    Schema: vi.fn(function (
+      this: Record<string, unknown>,
+      definition: unknown,
+    ) {
       this.definition = definition;
     }),
   },
@@ -53,7 +56,7 @@ describe("seed data builders", () => {
   it("second seed user is John Doe with user role", () => {
     const [, john] = buildSeedUsers();
     expect(john.name).toBe("John Doe");
-    expect(john.email).toBe("bbbove20.dev+Test1@gmail.com");
+    expect(john.email).toBe("bbbove20.dev+test1@gmail.com");
     expect(john.role).toBe("user");
     expect(john.emailVerified).toBe(true);
   });
@@ -61,7 +64,7 @@ describe("seed data builders", () => {
   it("third seed user is Jane Doe with user role", () => {
     const [, , jane] = buildSeedUsers();
     expect(jane.name).toBe("Jane Doe");
-    expect(jane.email).toBe("bbbove20.dev+Test2@gmail.com");
+    expect(jane.email).toBe("bbbove20.dev+test2@gmail.com");
     expect(jane.role).toBe("user");
     expect(jane.emailVerified).toBe(true);
   });
