@@ -45,7 +45,6 @@ pnpm lint             # Run Next.js linter
 
 **Security Layers**:
 
-- Middleware protection (src/middleware.ts) for rate limiting and suspicious request detection
 - Honeypot field ("company") in contact form to catch bots
 - User-agent filtering against common automation tools (curl, wget, postman, etc.)
 - IP-based rate limiting with in-memory storage (Maps)
@@ -57,34 +56,6 @@ pnpm lint             # Run Next.js linter
 - MongoDB via Mongoose with connection caching (src/lib/db/connect.ts)
 - Global caching prevents connection exhaustion during hot reloads
 - Connection string in DATABASE_URI environment variable
-
-### Directory Structure
-
-```
-src/
-├── app/                    # Next.js app router
-│   ├── layout.tsx          # Root layout with fonts, metadata, providers
-│   ├── page.tsx            # Home page (renders all sections)
-│   └── globals.css         # Tailwind v4 CSS with theme variables
-├── components/
-│   ├── navigation/         # Navbar, mobile menu, navigation buttons
-│   ├── sections/           # Main sections (hero, about, skills, projects, contact)
-│   ├── ui/                 # shadcn/ui components (button, input, textarea, etc.)
-│   ├── email-template.tsx  # Owner notification email
-│   └── customer-confirmation-email.tsx  # Customer confirmation email
-├── context/
-│   └── navigation-context.tsx  # Global navigation state and scroll handling
-├── lib/
-│   ├── actions/            # Server actions (submitProspectiveCustomer)
-│   ├── db/                 # MongoDB connection
-│   ├── models/             # Mongoose schemas (ProspectiveCustomer, SuspiciousID)
-│   ├── security/           # Rate limiting, suspicious request detection
-│   ├── config.ts           # Navigation links, rate limits, blocked user agents
-│   └── utils.ts            # cn() utility for className merging
-├── hooks/
-│   └── use-mobile.ts       # Mobile breakpoint detection
-└── middleware.ts           # Request protection and security headers
-```
 
 ### Technology Stack
 
@@ -99,14 +70,6 @@ src/
 - **Notifications**: sonner toast library
 
 ### Important Implementation Details
-
-**Styling Approach**:
-
-- Tailwind CSS v4 uses CSS-first configuration via @import in globals.css
-- Theme defined using CSS custom properties with oklch color space
-- Dark mode support via .dark class variant
-- Responsive breakpoints include custom xs breakpoint (25rem/400px)
-- cn() utility combines clsx and tailwind-merge for conditional classes
 
 **Path Aliases**:
 
@@ -132,14 +95,6 @@ src/
 - Contact form action: 3 submissions per 5 minutes
 - Blacklist after 10 failed attempts
 
-### Component Conventions
-
-- UI components use shadcn/ui patterns with cn() for className composition
-- Section components wrapped in SectionWrapper for consistent layout
-- Navigation uses custom NavButton and ContactButton components
-- Mobile menu uses sheet component from shadcn/ui
-- All section wrappers accept bgImage prop for background images
-
 ## Agent skills
 
 ### Issue tracker
@@ -153,3 +108,7 @@ Uses default label vocabulary. See `docs/agents/triage-labels.md`.
 ### Domain docs
 
 Single-context layout — one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
+### Code standards
+
+TypeScript, naming, imports, component, form, styling, and comment conventions. See `docs/agents/code-standards.md`.
