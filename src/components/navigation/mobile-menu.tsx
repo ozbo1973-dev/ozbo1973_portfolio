@@ -16,10 +16,14 @@ import { navLinks } from "@/lib/config";
 import { Menu } from "lucide-react";
 import { ContactButton } from "./contact-button";
 import { NavButton } from "./nav-button";
+import { authClient } from "@/lib/auth/auth-client";
+import { usePathname } from "next/navigation";
 
 export function MobileMenu({ isScrolled }: { isScrolled: boolean }) {
   const { activeSection } = useNavigation();
   const [open, setOpen] = React.useState(false);
+  const { data: session } = authClient.useSession();
+  const path = usePathname();
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -69,6 +73,16 @@ export function MobileMenu({ isScrolled }: { isScrolled: boolean }) {
               {link.label}
             </NavButton>
           ))}{" "}
+          {!session && path !== "/sign-in" && (
+            <NavButton
+              href="/sign-in"
+              setOpen={setOpen}
+              isMobile={true}
+              className="w-full justify-start text-lg gap-3 hover:bg-primary/10"
+            >
+              Sign In
+            </NavButton>
+          )}
           <ContactButton
             isScrolled={isScrolled}
             isMobile={true}

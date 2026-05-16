@@ -73,7 +73,7 @@ function SkillCard({ name, level, progress, icon, index }: SkillCardProps) {
       <div className="w-full h-20 max-w-32 flex items-center justify-center">
         {icon}
       </div>
-      <div className="w-56 text-center text-foreground text-base font-extrabold font-['Mulish'] uppercase tracking-wider">
+      <div className="w-full text-center text-foreground text-base font-extrabold font-['Mulish'] uppercase tracking-wider">
         {name}
       </div>
       <div className="self-stretch text-center text-foreground/80 text-xs font-light font-['Mulish'] uppercase tracking-wide">

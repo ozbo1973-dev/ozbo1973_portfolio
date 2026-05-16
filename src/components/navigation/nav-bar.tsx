@@ -84,8 +84,8 @@ function Navbar() {
               );
           })}
         </div>
-        {/* Right side: Sign Out (when session active) + Contact Button if not on /portal page - Tablet & Desktop */}
-        <div className="hidden sm:flex items-center gap-4">
+        {/* Right side: Sign Out (when session active) + Contact Button if not on /portal page - Desktop only */}
+        <div className="hidden lg:flex items-center gap-4">
           {session && (
             <>
               <NavButton

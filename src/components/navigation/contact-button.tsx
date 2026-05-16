@@ -31,7 +31,7 @@ export function ContactButton({
         "border-2 border-primary hover:bg-primary/10 gap-2",
         "transition-all duration-300 bg-transparent",
         isMobile &&
-          "mx-auto w-[60%] bg-slate-800 hover:bg-slate-600 rounded-[8px] mt-4",
+          "mx-auto w-[60%] bg-card hover:bg-card/80 rounded-[8px] mt-4",
         !isMobile &&
           cn(
             isScrolled
