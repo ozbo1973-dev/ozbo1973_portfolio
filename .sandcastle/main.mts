@@ -73,7 +73,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     const implement = await sandbox.run({
       name: "implementer",
       maxIterations: 100,
-      agent: sandcastle.claudeCode("sonnet-4-6", { effort: "medium" }),
+      agent: sandcastle.claudeCode("claude-sonnet-4-6", { effort: "medium" }),
       promptFile: "./.sandcastle/implement-prompt.md",
     });
 
