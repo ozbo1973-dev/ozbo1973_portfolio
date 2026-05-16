@@ -7,8 +7,6 @@ import {
   SiNextdotjs,
   SiTypescript,
   SiNodedotjs,
-  SiPython,
-  SiAmazonwebservices,
 } from "@icons-pack/react-simple-icons";
 
 type SkillProps = {

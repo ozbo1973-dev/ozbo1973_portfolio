@@ -13,11 +13,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNavigation } from "@/context/navigation-context";
 import { navLinks } from "@/lib/config";
+import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
+import { authClient } from "@/lib/auth/auth-client";
 import { ContactButton } from "./contact-button";
 import { NavButton } from "./nav-button";
-import { authClient } from "@/lib/auth/auth-client";
-import { usePathname } from "next/navigation";
 
 export function MobileMenu({ isScrolled }: { isScrolled: boolean }) {
   const { activeSection } = useNavigation();
@@ -72,7 +72,7 @@ export function MobileMenu({ isScrolled }: { isScrolled: boolean }) {
               )}
               {link.label}
             </NavButton>
-          ))}{" "}
+          ))}
           {!session && path !== "/sign-in" && (
             <NavButton
               href="/sign-in"
