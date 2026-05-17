@@ -50,7 +50,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
 
   // Generate a unique branch name for this iteration.
   // const branch = `sandcastle/sequential-reviewer/${Date.now()}`;
-  const branch = BRANCH_STRATEGY;
+  const branch = BRANCH_STRATEGY + `_${iteration}`;
 
   // Create a single sandbox that both the implementer and reviewer share.
   // This gives both agents a real, named branch that persists across phases.
