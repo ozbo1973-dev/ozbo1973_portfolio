@@ -64,28 +64,27 @@ function Navbar() {
         </Link>
         {/* Navigation Links - Desktop Only */}
         <div className="hidden lg:flex items-center gap-12">
-          {navLinks.map((link) => {
-            if (link.href !== "/")
-              return (
-                <NavButton
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "font-bold font-['Mulish']",
-                    isScrolled ? "text-sm" : "text-base",
-                    activeSection === link.href
-                      ? "text-primary"
-                      : "text-white hover:text-primary",
-                    "transition-colors duration-200",
-                  )}
-                >
-                  {link.label}
-                </NavButton>
-              );
-          })}
+          {navLinks
+            .filter((link) => link.href !== "/")
+            .map((link) => (
+              <NavButton
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "font-bold font-['Mulish']",
+                  isScrolled ? "text-sm" : "text-base",
+                  activeSection === link.href
+                    ? "text-primary"
+                    : "text-white hover:text-primary",
+                  "transition-colors duration-200",
+                )}
+              >
+                {link.label}
+              </NavButton>
+            ))}
         </div>
-        {/* Right side: Sign Out (when session active) + Contact Button if not on /portal page - Tablet & Desktop */}
-        <div className="hidden sm:flex items-center gap-4">
+        {/* Right side: Sign Out (when session active) + Contact Button if not on /portal page - Desktop only */}
+        <div className="hidden lg:flex items-center gap-4">
           {session && (
             <>
               <NavButton

@@ -13,13 +13,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNavigation } from "@/context/navigation-context";
 import { navLinks } from "@/lib/config";
+import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
+import { authClient } from "@/lib/auth/auth-client";
 import { ContactButton } from "./contact-button";
 import { NavButton } from "./nav-button";
+import { LogIn } from "lucide-react";
+import { SignOutButton } from "./sign-out-button";
 
 export function MobileMenu({ isScrolled }: { isScrolled: boolean }) {
   const { activeSection } = useNavigation();
   const [open, setOpen] = React.useState(false);
+  const { data: session } = authClient.useSession();
+  const path = usePathname();
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -31,7 +37,7 @@ export function MobileMenu({ isScrolled }: { isScrolled: boolean }) {
           <Menu
             className={cn(
               "transition-all duration-300",
-              isScrolled ? "h-5 w-5" : "h-6 w-6"
+              isScrolled ? "h-5 w-5" : "h-6 w-6",
             )}
           />
           <span className="sr-only">Menu</span>
@@ -50,10 +56,10 @@ export function MobileMenu({ isScrolled }: { isScrolled: boolean }) {
               isMobile={true}
               href={link.href}
               className={cn(
-                "w-full justify-start text-lg gap-3",
+                "w-full ml-5 justify-start text-lg gap-3",
                 activeSection === link.href
                   ? "bg-primary/10 text-primary"
-                  : "hover:bg-primary/10"
+                  : "hover:bg-primary/10",
               )}
             >
               {link.icon && (
@@ -62,13 +68,27 @@ export function MobileMenu({ isScrolled }: { isScrolled: boolean }) {
                     "w-5 h-5",
                     activeSection === link.href
                       ? "text-primary"
-                      : "text-primary/70"
+                      : "text-primary/70",
                   )}
                 />
               )}
               {link.label}
             </NavButton>
-          ))}{" "}
+          ))}
+          {!session && path !== "/sign-in" && (
+            <NavButton
+              href="/sign-in"
+              setOpen={setOpen}
+              isMobile={true}
+              className="w-full ml-5 justify-start text-lg gap-3 hover:bg-primary/10"
+            >
+              <LogIn className="w-5 h-5 text-primary" />
+              Sign In
+            </NavButton>
+          )}
+
+          {session && <SignOutButton />}
+
           <ContactButton
             isScrolled={isScrolled}
             isMobile={true}
