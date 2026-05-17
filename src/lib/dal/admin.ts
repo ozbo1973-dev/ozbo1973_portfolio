@@ -2,8 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth/auth";
-import { db } from "@/lib/auth/auth";
+import { auth, db } from "@/lib/auth/auth";
 import connectDB from "@/lib/db/connect";
 import ProspectiveCustomer from "@/lib/models/ProspectiveCustomer";
 

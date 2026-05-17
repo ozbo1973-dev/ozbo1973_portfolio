@@ -1,7 +1,6 @@
 "use server";
 
-import { verifyAdminSession } from "@/lib/dal/admin";
-import { archiveSubmission } from "@/lib/dal/admin";
+import { verifyAdminSession, archiveSubmission } from "@/lib/dal/admin";
 
 export interface ArchiveSubmissionResult {
   success: boolean;
