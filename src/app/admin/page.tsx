@@ -1,4 +1,4 @@
-import { verifyAdminSession, getInbox } from "@/lib/dal/admin";
+import { verifyAdminSession, getInbox, getArchived } from "@/lib/dal/admin";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import AdminContent from "./_components/AdminContent";
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default async function AdminPage() {
   await verifyAdminSession();
-  const submissions = await getInbox();
+  const [inbox, archived] = await Promise.all([getInbox(), getArchived()]);
 
   return (
     <div className="min-h-screen bg-background px-4 py-16">
@@ -28,7 +28,7 @@ export default async function AdminPage() {
           Manage incoming submissions.
         </p>
 
-        <AdminContent submissions={submissions} />
+        <AdminContent initialInbox={inbox} initialArchived={archived} />
       </div>
     </div>
   );

@@ -41,9 +41,9 @@ export const verifyAdminSession = cache(async (): Promise<AdminSession> => {
   };
 });
 
-export async function getInbox(): Promise<AdminSubmissionRecord[]> {
+async function fetchWithSenders(filter: object, sortField: string): Promise<AdminSubmissionRecord[]> {
   await connectDB();
-  const docs = await ProspectiveCustomer.find({ archivedAt: null }).sort({ createdAt: -1 });
+  const docs = await ProspectiveCustomer.find(filter).sort({ [sortField]: -1 });
 
   const userIds = [...new Set(docs.map((d) => d.userId))];
   const userDocs = await db.collection("user").find({ id: { $in: userIds } }).toArray();
@@ -61,4 +61,17 @@ export async function getInbox(): Promise<AdminSubmissionRecord[]> {
       sender,
     };
   });
+}
+
+export async function getInbox(): Promise<AdminSubmissionRecord[]> {
+  return fetchWithSenders({ archivedAt: null }, "createdAt");
+}
+
+export async function getArchived(): Promise<AdminSubmissionRecord[]> {
+  return fetchWithSenders({ archivedAt: { $ne: null } }, "archivedAt");
+}
+
+export async function archiveSubmission(id: string): Promise<void> {
+  await connectDB();
+  await ProspectiveCustomer.findByIdAndUpdate(id, { archivedAt: new Date() });
 }

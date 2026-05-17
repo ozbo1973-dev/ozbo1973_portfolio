@@ -5,13 +5,15 @@ import type { AdminSubmissionRecord } from "@/lib/dal/admin";
 
 interface MessageListProps {
   submissions: AdminSubmissionRecord[];
+  emptyMessage: string;
+  onArchive?: (submission: AdminSubmissionRecord) => void;
 }
 
-export default function MessageList({ submissions }: MessageListProps) {
+export default function MessageList({ submissions, emptyMessage, onArchive }: MessageListProps) {
   if (submissions.length === 0) {
     return (
       <p className="text-muted-foreground font-['Mulish'] text-sm">
-        No submissions in your inbox.
+        {emptyMessage}
       </p>
     );
   }
@@ -19,7 +21,7 @@ export default function MessageList({ submissions }: MessageListProps) {
   return (
     <ul className="space-y-6">
       {submissions.map((sub) => (
-        <MessageCard key={sub.id} submission={sub} />
+        <MessageCard key={sub.id} submission={sub} onArchive={onArchive} />
       ))}
     </ul>
   );

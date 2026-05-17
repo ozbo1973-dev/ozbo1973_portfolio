@@ -1,13 +1,15 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import type { AdminSubmissionRecord } from "@/lib/dal/admin";
 
 interface MessageCardProps {
   submission: AdminSubmissionRecord;
+  onArchive?: (submission: AdminSubmissionRecord) => void;
 }
 
-export default function MessageCard({ submission }: MessageCardProps) {
+export default function MessageCard({ submission, onArchive }: MessageCardProps) {
   return (
     <li
       className={cn(
@@ -25,16 +27,28 @@ export default function MessageCard({ submission }: MessageCardProps) {
               {submission.sender.email}
             </span>
           </div>
-          <time
-            dateTime={submission.createdAt.toISOString()}
-            className="text-xs text-muted-foreground font-['Mulish']"
-          >
-            {submission.createdAt.toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </time>
+          <div className="flex items-center gap-3">
+            <time
+              dateTime={submission.createdAt.toISOString()}
+              className="text-xs text-muted-foreground font-['Mulish']"
+            >
+              {submission.createdAt.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </time>
+            {onArchive && (
+              <Button
+                variant="outline"
+                size="sm"
+                aria-label="Archive submission"
+                onClick={() => onArchive(submission)}
+              >
+                Archive
+              </Button>
+            )}
+          </div>
         </div>
         <p className="text-sm text-foreground font-['Mulish'] leading-relaxed">
           {submission.description}

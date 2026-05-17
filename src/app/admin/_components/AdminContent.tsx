@@ -1,25 +1,81 @@
 "use client";
 
+import { useState } from "react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import MessageList from "./MessageList";
 import type { AdminSubmissionRecord } from "@/lib/dal/admin";
+import { archiveSubmissionAction } from "@/app/actions/admin/archiveSubmission";
+
+type Tab = "inbox" | "archive";
 
 interface AdminContentProps {
-  submissions: AdminSubmissionRecord[];
+  initialInbox: AdminSubmissionRecord[];
+  initialArchived: AdminSubmissionRecord[];
 }
 
-export default function AdminContent({ submissions }: AdminContentProps) {
+export default function AdminContent({ initialInbox, initialArchived }: AdminContentProps) {
+  const [tab, setTab] = useState<Tab>("inbox");
+  const [inbox, setInbox] = useState<AdminSubmissionRecord[]>(initialInbox);
+  const [archived, setArchived] = useState<AdminSubmissionRecord[]>(initialArchived);
+
+  async function handleArchive(submission: AdminSubmissionRecord) {
+    const optimisticArchivedAt = new Date();
+    setInbox((prev) => prev.filter((s) => s.id !== submission.id));
+    setArchived((prev) => [{ ...submission, archivedAt: optimisticArchivedAt }, ...prev]);
+
+    const result = await archiveSubmissionAction(submission.id);
+    if (result.success) {
+      toast.success("Submission archived.");
+    } else {
+      setInbox((prev) => [submission, ...prev]);
+      setArchived((prev) => prev.filter((s) => s.id !== submission.id));
+      toast.error("Failed to archive submission.");
+    }
+  }
+
   return (
-    <section aria-label="Inbox">
-      <h2
-        className={cn(
-          "text-xl font-semibold mb-6 font-['Mulish']",
-          "text-foreground"
-        )}
-      >
-        Inbox
-      </h2>
-      <MessageList submissions={submissions} />
-    </section>
+    <div>
+      <div className="flex gap-2 mb-8" role="tablist" aria-label="Admin tabs">
+        <Button
+          role="tab"
+          aria-selected={tab === "inbox"}
+          variant={tab === "inbox" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setTab("inbox")}
+        >
+          Inbox
+        </Button>
+        <Button
+          role="tab"
+          aria-selected={tab === "archive"}
+          variant={tab === "archive" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setTab("archive")}
+        >
+          Archive
+        </Button>
+      </div>
+
+      {tab === "inbox" && (
+        <section aria-label="Inbox">
+          <MessageList
+            submissions={inbox}
+            emptyMessage="No submissions in your inbox."
+            onArchive={handleArchive}
+          />
+        </section>
+      )}
+
+      {tab === "archive" && (
+        <section aria-label="Archive">
+          <MessageList
+            submissions={archived}
+            emptyMessage="No archived submissions."
+          />
+        </section>
+      )}
+    </div>
   );
 }
