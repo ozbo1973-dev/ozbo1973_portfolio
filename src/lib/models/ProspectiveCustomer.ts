@@ -4,6 +4,7 @@ export interface IProspectiveCustomer {
   userId: string;
   description: string;
   parentId?: mongoose.Types.ObjectId | null;
+  archivedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -22,6 +23,10 @@ const ProspectiveCustomerSchema = new Schema<IProspectiveCustomer>(
     },
     parentId: {
       type: mongoose.Schema.Types.ObjectId,
+      default: null,
+    },
+    archivedAt: {
+      type: Date,
       default: null,
     },
   },

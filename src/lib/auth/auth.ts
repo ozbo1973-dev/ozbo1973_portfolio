@@ -4,7 +4,7 @@ import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { MongoClient } from "mongodb";
 
 const client = new MongoClient(process.env.DATABASE_URI!);
-const db = client.db();
+export const db = client.db();
 
 // Per-request URL capture: keyed by email, resolved by the sendMagicLink callback.
 const pendingCaptures = new Map<string, (url: string) => void>();

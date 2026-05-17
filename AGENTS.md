@@ -95,6 +95,10 @@ pnpm lint             # Run Next.js linter
 - Contact form action: 3 submissions per 5 minutes
 - Blacklist after 10 failed attempts
 
+## Admin Console
+
+The Admin is provisioned by running `pnpm tsx src/scripts/seed.ts` (which sets `role: "admin"` on the first user document), or by manually setting `role: "admin"` on the `user` document in MongoDB. The Admin Console is accessible at `/admin` — there is no navbar link.
+
 ## Agent skills
 
 ### Issue tracker
