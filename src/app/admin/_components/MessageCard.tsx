@@ -1,15 +1,37 @@
 "use client";
 
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import type { AdminSubmissionRecord } from "@/lib/dal/admin";
 
 interface MessageCardProps {
   submission: AdminSubmissionRecord;
   onArchive?: (submission: AdminSubmissionRecord) => void;
+  onDelete?: (submission: AdminSubmissionRecord) => void;
 }
 
-export default function MessageCard({ submission, onArchive }: MessageCardProps) {
+export default function MessageCard({ submission, onArchive, onDelete }: MessageCardProps) {
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  async function handleConfirmDelete() {
+    if (onDelete) {
+      onDelete(submission);
+      setDeleteOpen(false);
+    }
+  }
+
   return (
     <li
       className={cn(
@@ -47,6 +69,27 @@ export default function MessageCard({ submission, onArchive }: MessageCardProps)
               >
                 Archive
               </Button>
+            )}
+            {onDelete && (
+              <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm" aria-label="Delete submission">
+                    Delete
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent role="alertdialog">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Delete submission?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete this submission. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleConfirmDelete}>Confirm</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
           </div>
         </div>

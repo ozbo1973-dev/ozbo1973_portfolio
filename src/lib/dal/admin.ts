@@ -75,3 +75,8 @@ export async function archiveSubmission(id: string): Promise<void> {
   await connectDB();
   await ProspectiveCustomer.findByIdAndUpdate(id, { archivedAt: new Date() });
 }
+
+export async function adminDeleteSubmission(id: string): Promise<void> {
+  await connectDB();
+  await ProspectiveCustomer.findByIdAndDelete(id);
+}

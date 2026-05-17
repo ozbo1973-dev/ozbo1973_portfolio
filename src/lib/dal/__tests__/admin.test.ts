@@ -10,13 +10,14 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/lib/db/connect", () => ({ default: vi.fn() }));
 
-const { mockFind, mockSort, mockFindOne, mockFindMongo, mockToArray, mockFindByIdAndUpdate } = vi.hoisted(() => ({
+const { mockFind, mockSort, mockFindOne, mockFindMongo, mockToArray, mockFindByIdAndUpdate, mockFindByIdAndDelete } = vi.hoisted(() => ({
   mockFind: vi.fn(),
   mockSort: vi.fn(),
   mockFindOne: vi.fn(),
   mockFindMongo: vi.fn(),
   mockToArray: vi.fn(),
   mockFindByIdAndUpdate: vi.fn(),
+  mockFindByIdAndDelete: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/auth", () => ({
@@ -42,13 +43,14 @@ vi.mock("@/lib/models/ProspectiveCustomer", () => ({
   default: {
     find: mockFind,
     findByIdAndUpdate: mockFindByIdAndUpdate,
+    findByIdAndDelete: mockFindByIdAndDelete,
   },
 }));
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
-import { verifyAdminSession, getInbox, getArchived, archiveSubmission } from "@/lib/dal/admin";
+import { verifyAdminSession, getInbox, getArchived, archiveSubmission, adminDeleteSubmission } from "@/lib/dal/admin";
 
 const mockHeaders = headers as ReturnType<typeof vi.fn>;
 const mockGetSession = auth.api.getSession as ReturnType<typeof vi.fn>;
@@ -274,5 +276,25 @@ describe("archiveSubmission", () => {
       "sub-already-archived",
       expect.objectContaining({ archivedAt: expect.any(Date) })
     );
+  });
+});
+
+describe("adminDeleteSubmission", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFindByIdAndDelete.mockResolvedValue(null);
+  });
+
+  it("calls findByIdAndDelete with the supplied id", async () => {
+    await adminDeleteSubmission("sub-to-delete");
+
+    expect(mockFindByIdAndDelete).toHaveBeenCalledWith("sub-to-delete");
+  });
+
+  it("calls findByIdAndDelete regardless of archivedAt value (both inbox and archived)", async () => {
+    await adminDeleteSubmission("sub-archived");
+
+    expect(mockFindByIdAndDelete).toHaveBeenCalledTimes(1);
+    expect(mockFindByIdAndDelete).toHaveBeenCalledWith("sub-archived");
   });
 });

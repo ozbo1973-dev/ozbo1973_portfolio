@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import MessageList from "./MessageList";
 import type { AdminSubmissionRecord } from "@/lib/dal/admin";
 import { archiveSubmissionAction } from "@/app/actions/admin/archiveSubmission";
+import { adminDeleteSubmissionAction } from "@/app/actions/admin/deleteSubmission";
 
 type Tab = "inbox" | "archive";
 
@@ -19,6 +19,23 @@ export default function AdminContent({ initialInbox, initialArchived }: AdminCon
   const [tab, setTab] = useState<Tab>("inbox");
   const [inbox, setInbox] = useState<AdminSubmissionRecord[]>(initialInbox);
   const [archived, setArchived] = useState<AdminSubmissionRecord[]>(initialArchived);
+
+  async function handleDelete(submission: AdminSubmissionRecord) {
+    setInbox((prev) => prev.filter((s) => s.id !== submission.id));
+    setArchived((prev) => prev.filter((s) => s.id !== submission.id));
+
+    const result = await adminDeleteSubmissionAction(submission.id);
+    if (result.success) {
+      toast.success("Submission deleted.");
+    } else {
+      if (submission.archivedAt) {
+        setArchived((prev) => [submission, ...prev]);
+      } else {
+        setInbox((prev) => [submission, ...prev]);
+      }
+      toast.error("Failed to delete submission.");
+    }
+  }
 
   async function handleArchive(submission: AdminSubmissionRecord) {
     const optimisticArchivedAt = new Date();
@@ -64,6 +81,7 @@ export default function AdminContent({ initialInbox, initialArchived }: AdminCon
             submissions={inbox}
             emptyMessage="No submissions in your inbox."
             onArchive={handleArchive}
+            onDelete={handleDelete}
           />
         </section>
       )}
@@ -73,6 +91,7 @@ export default function AdminContent({ initialInbox, initialArchived }: AdminCon
           <MessageList
             submissions={archived}
             emptyMessage="No archived submissions."
+            onDelete={handleDelete}
           />
         </section>
       )}
