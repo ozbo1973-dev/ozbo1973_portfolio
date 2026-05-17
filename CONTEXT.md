@@ -36,6 +36,22 @@ _Avoid_: Login page, auth page
 An optional reference (`parentId`) on a Submission pointing to another Submission. Reserved for future admin threading — unused in the current UI.
 _Avoid_: Thread, parent message, reply
 
+**Admin**:
+A User with `role: "admin"` (managed by BetterAuth). The single authorized identity allowed to access the Admin Console. Distinct from a regular User.
+_Avoid_: Owner, moderator, superuser
+
+**Admin Console**:
+The authenticated view at `/admin` where the Admin reviews the Inbox and manages Archived Submissions. Parallel to the Portal but reserved for the Admin.
+_Avoid_: Dashboard, admin panel, backoffice
+
+**Inbox**:
+The live set of Submissions the Admin has not yet acted on. Implemented as all `ProspectiveCustomer` records not yet archived.
+_Avoid_: Unread, pending, queue
+
+**Archived Submission**:
+A Submission the Admin has explicitly chosen to archive — a deliberate act marking the Admin's review as done. Distinct from the Submission's own lifecycle (which may still receive future replies via threading). Represented by a non-null `archivedAt` field on the existing `ProspectiveCustomer` record (see ADR-0004).
+_Avoid_: Read submission, dismissed submission, closed submission
+
 ## Relationships
 
 - A **Prospect** has one or more **Submissions**
