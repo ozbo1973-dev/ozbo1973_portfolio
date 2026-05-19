@@ -15,6 +15,7 @@ function Navbar() {
   const { activeSection, isScrolled } = useNavigation();
   const { data: session } = authClient.useSession();
   const path = usePathname();
+  const portalHref = session?.user.role === "admin" ? "/admin" : "/portal";
 
   return (
     <nav
@@ -89,9 +90,9 @@ function Navbar() {
             <>
               <NavButton
                 className={cn(
-                  path === "/portal" ? "text-primary" : "text-white",
+                  path === portalHref ? "text-primary" : "text-white",
                 )}
-                href="/portal"
+                href={portalHref}
               >
                 My Portal
               </NavButton>

@@ -25,7 +25,7 @@ import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
 // ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
-const BRANCH_STRATEGY = "feature/admin-page";
+const BRANCH_STRATEGY = "feature/admin-page-implement";
 // Maximum number of implement→review cycles to run before stopping.
 // Each cycle works on one issue. Raise this to process more issues per run.
 const MAX_ITERATIONS = 5;
@@ -50,7 +50,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
 
   // Generate a unique branch name for this iteration.
   // const branch = `sandcastle/sequential-reviewer/${Date.now()}`;
-  const branch = BRANCH_STRATEGY;
+  const branch = BRANCH_STRATEGY + `_${iteration}`;
 
   // Create a single sandbox that both the implementer and reviewer share.
   // This gives both agents a real, named branch that persists across phases.

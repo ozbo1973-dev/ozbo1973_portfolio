@@ -5,7 +5,7 @@ vi.mock("next/headers", () => ({
 }));
 
 vi.mock("@/lib/auth/getUserIdByEmail", () => ({
-  getUserIdByEmail: vi.fn(),
+  getUserIdAndRoleByEmail: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/auth", () => ({
@@ -22,13 +22,13 @@ vi.mock("@/lib/contact/sendNotifications", () => ({
 }));
 
 import { headers } from "next/headers";
-import { getUserIdByEmail } from "@/lib/auth/getUserIdByEmail";
+import { getUserIdAndRoleByEmail } from "@/lib/auth/getUserIdByEmail";
 import { auth, registerMagicLinkCapture } from "@/lib/auth/auth";
 import { sendMagicLinkEmail } from "@/lib/contact/sendNotifications";
 import { signIn } from "@/lib/auth/actions/signIn";
 
 const mockHeaders = headers as ReturnType<typeof vi.fn>;
-const mockGetUserIdByEmail = getUserIdByEmail as ReturnType<typeof vi.fn>;
+const mockGetUserIdByEmail = getUserIdAndRoleByEmail as ReturnType<typeof vi.fn>;
 const mockSignInMagicLink = auth.api.signInMagicLink as ReturnType<typeof vi.fn>;
 const mockRegisterMagicLinkCapture = registerMagicLinkCapture as ReturnType<typeof vi.fn>;
 const mockSendMagicLinkEmail = sendMagicLinkEmail as ReturnType<typeof vi.fn>;
@@ -47,7 +47,7 @@ describe("signIn", () => {
   });
 
   it("returns { success: true } for a registered email", async () => {
-    mockGetUserIdByEmail.mockResolvedValue("user-id-123");
+    mockGetUserIdByEmail.mockResolvedValue({ id: "user-id-123", role: null });
     mockSignInMagicLink.mockResolvedValue({ status: true });
 
     const result = await signIn("registered@example.com");
@@ -56,7 +56,7 @@ describe("signIn", () => {
   });
 
   it("calls signInMagicLink with the registered email", async () => {
-    mockGetUserIdByEmail.mockResolvedValue("user-id-123");
+    mockGetUserIdByEmail.mockResolvedValue({ id: "user-id-123", role: null });
     mockSignInMagicLink.mockResolvedValue({ status: true });
 
     await signIn("registered@example.com");
@@ -84,7 +84,7 @@ describe("signIn", () => {
   });
 
   it("normalizes a mixed-case email to lowercase before looking up the user", async () => {
-    mockGetUserIdByEmail.mockResolvedValue("user-id-123");
+    mockGetUserIdByEmail.mockResolvedValue({ id: "user-id-123", role: null });
     mockSignInMagicLink.mockResolvedValue({ status: true });
 
     await signIn("User@Example.com");
@@ -92,6 +92,28 @@ describe("signIn", () => {
     expect(mockGetUserIdByEmail).toHaveBeenCalledWith("user@example.com");
     expect(mockSignInMagicLink).toHaveBeenCalledWith(
       expect.objectContaining({ body: expect.objectContaining({ email: "user@example.com" }) })
+    );
+  });
+
+  it("uses /admin callbackURL for admin users", async () => {
+    mockGetUserIdByEmail.mockResolvedValue({ id: "admin-id", role: "admin" });
+    mockSignInMagicLink.mockResolvedValue({ status: true });
+
+    await signIn("admin@example.com");
+
+    expect(mockSignInMagicLink).toHaveBeenCalledWith(
+      expect.objectContaining({ body: expect.objectContaining({ callbackURL: "/admin" }) })
+    );
+  });
+
+  it("uses /portal callbackURL for non-admin users", async () => {
+    mockGetUserIdByEmail.mockResolvedValue({ id: "user-id", role: null });
+    mockSignInMagicLink.mockResolvedValue({ status: true });
+
+    await signIn("user@example.com");
+
+    expect(mockSignInMagicLink).toHaveBeenCalledWith(
+      expect.objectContaining({ body: expect.objectContaining({ callbackURL: "/portal" }) })
     );
   });
 });

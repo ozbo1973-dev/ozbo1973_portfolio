@@ -26,6 +26,7 @@ export function MobileMenu({ isScrolled }: { isScrolled: boolean }) {
   const [open, setOpen] = React.useState(false);
   const { data: session } = authClient.useSession();
   const path = usePathname();
+  const portalHref = session?.user.role === "admin" ? "/admin" : "/portal";
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -87,7 +88,19 @@ export function MobileMenu({ isScrolled }: { isScrolled: boolean }) {
             </NavButton>
           )}
 
-          {session && <SignOutButton />}
+          {session && (
+            <>
+              <NavButton
+                href={portalHref}
+                setOpen={setOpen}
+                isMobile={true}
+                className="w-full ml-5 justify-start text-lg gap-3 hover:bg-primary/10"
+              >
+                My Portal
+              </NavButton>
+              <SignOutButton />
+            </>
+          )}
 
           <ContactButton
             isScrolled={isScrolled}
