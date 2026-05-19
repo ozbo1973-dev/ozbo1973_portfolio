@@ -25,6 +25,15 @@ export const auth = betterAuth({
   },
   secret: process.env.BETTER_AUTH_SECRET,
   database: mongodbAdapter(db),
+  user: {
+    additionalFields: {
+      role: {
+        type: "string",
+        defaultValue: "user",
+        required: false,
+      },
+    },
+  },
   plugins: [
     magicLink({
       expiresIn: 60 * 60 * 24, // 24 hours

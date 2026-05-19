@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { ObjectId } from "mongodb";
 import { auth, db } from "@/lib/auth/auth";
 import connectDB from "@/lib/db/connect";
 import ProspectiveCustomer from "@/lib/models/ProspectiveCustomer";
@@ -30,7 +31,10 @@ export const verifyAdminSession = cache(async (): Promise<AdminSession> => {
   const session = await auth.api.getSession({ headers: h });
   if (!session) redirect("/");
 
-  const userDoc = await db.collection("user").findOne({ id: session.session.userId });
+  const userDoc = await db
+    .collection("user")
+    .findOne({ _id: new ObjectId(session.session.userId) });
+
   if (!userDoc || userDoc.role !== "admin") redirect("/");
 
   return {
@@ -40,16 +44,31 @@ export const verifyAdminSession = cache(async (): Promise<AdminSession> => {
   };
 });
 
-async function fetchWithSenders(filter: object, sortField: string): Promise<AdminSubmissionRecord[]> {
+async function fetchWithSenders(
+  filter: object,
+  sortField: string,
+): Promise<AdminSubmissionRecord[]> {
   await connectDB();
   const docs = await ProspectiveCustomer.find(filter).sort({ [sortField]: -1 });
 
   const userIds = [...new Set(docs.map((d) => d.userId))];
-  const userDocs = await db.collection("user").find({ id: { $in: userIds } }).toArray();
-  const userMap = new Map(userDocs.map((u) => [u.id as string, { name: u.name as string, email: u.email as string }]));
+  const objectIds = userIds.map((id) => new ObjectId(id));
+  const userDocs = await db
+    .collection("user")
+    .find({ _id: { $in: objectIds } })
+    .toArray();
+  const userMap = new Map(
+    userDocs.map((u) => [
+      u._id.toString(),
+      { name: u.name as string, email: u.email as string },
+    ]),
+  );
 
   return docs.map((doc) => {
-    const sender = userMap.get(doc.userId) ?? { name: "Unknown", email: "unknown" };
+    const sender = userMap.get(doc.userId) ?? {
+      name: "Unknown",
+      email: "unknown",
+    };
     return {
       id: doc._id.toString(),
       userId: doc.userId,
