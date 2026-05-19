@@ -72,6 +72,7 @@ _Avoid_: Read submission, dismissed submission, closed submission
 - **Email is always stored lowercase.** Normalization happens at the action entry point (`submitContactForm`, `signIn`) before any DB write or query. Never normalize only at query time.
 - **A returning email on the contact form creates a new Submission but not a new User.** BetterAuth reuses the existing User record and sends a fresh Magic Link.
 - **Client-side forms use `onSubmit` + `startTransition`.** Never use `form action={asyncFn}` without `startTransition`.
+- **Role has two enforcement layers with distinct purposes.** The session `role` field (via BetterAuth `additionalFields`) is for UI routing only — e.g., navbar "My Portal" destination. The DB-level role check (`verifyAdminSession` in `admin.ts`) is the security gate and performs a live lookup on every protected request. Never rely solely on the session role for access control.
 
 ## Flagged ambiguities
 
