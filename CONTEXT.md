@@ -32,9 +32,17 @@ _Avoid_: Token, JWT, auth state
 The dedicated page at `/sign-in` where an existing User can request a new Magic Link by entering their email. Only Users who already have an account (created via form submission) can authenticate here.
 _Avoid_: Login page, auth page
 
-**Parent Submission**:
-An optional reference (`parentId`) on a Submission pointing to another Submission. Reserved for future admin threading — unused in the current UI.
-_Avoid_: Thread, parent message, reply
+**Root Submission**:
+A Submission with `parentId: null`. The conversation starter in a Thread. What the Inbox and Archived views display at the top level.
+_Avoid_: Parent submission, parent message, original submission
+
+**Reply**:
+A Submission with a non-null `parentId` referencing a Root Submission. Created by either the Admin or a User as part of a Thread.
+_Avoid_: Thread message, child submission, response
+
+**Thread**:
+A Root Submission together with all its Replies, ordered by `createdAt` ascending.
+_Avoid_: Conversation, message thread, chat
 
 **Admin**:
 A User with `role: "admin"` (managed by BetterAuth). The single authorized identity allowed to access the Admin Console. Distinct from a regular User.
@@ -59,7 +67,8 @@ _Avoid_: Read submission, dismissed submission, closed submission
 - A **User** can view all their **Submissions** in the **Portal**
 - A **Session** belongs to exactly one **User**
 - A **Submission** is linked to a **User** via `userId` foreign key (see ADR-0002)
-- A **Submission** may optionally reference a **Parent Submission** via `parentId` (future threading)
+- A **Root Submission** may have zero or more **Replies**, forming a **Thread**
+- A **Reply** references its **Root Submission** via `parentId`
 - Deleting a **User** cascade-deletes all their **Submissions**
 
 ## Example dialogue
