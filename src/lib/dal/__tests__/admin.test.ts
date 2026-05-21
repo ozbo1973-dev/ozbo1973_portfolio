@@ -10,7 +10,7 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/lib/db/connect", () => ({ default: vi.fn() }));
 
-const { mockFind, mockSort, mockFindOne, mockFindMongo, mockToArray, mockFindByIdAndUpdate, mockFindByIdAndDelete } = vi.hoisted(() => ({
+const { mockFind, mockSort, mockFindOne, mockFindMongo, mockToArray, mockFindByIdAndUpdate, mockFindByIdAndDelete, mockFindById } = vi.hoisted(() => ({
   mockFind: vi.fn(),
   mockSort: vi.fn(),
   mockFindOne: vi.fn(),
@@ -18,6 +18,7 @@ const { mockFind, mockSort, mockFindOne, mockFindMongo, mockToArray, mockFindByI
   mockToArray: vi.fn(),
   mockFindByIdAndUpdate: vi.fn(),
   mockFindByIdAndDelete: vi.fn(),
+  mockFindById: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/auth", () => ({
@@ -42,6 +43,7 @@ vi.mock("@/lib/auth/auth", () => ({
 vi.mock("@/lib/models/ProspectiveCustomer", () => ({
   default: {
     find: mockFind,
+    findById: mockFindById,
     findByIdAndUpdate: mockFindByIdAndUpdate,
     findByIdAndDelete: mockFindByIdAndDelete,
   },
@@ -50,7 +52,7 @@ vi.mock("@/lib/models/ProspectiveCustomer", () => ({
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
-import { verifyAdminSession, getInbox, getArchived, archiveSubmission, adminDeleteSubmission } from "@/lib/dal/admin";
+import { verifyAdminSession, getInbox, getArchived, archiveSubmission, adminDeleteSubmission, getThread } from "@/lib/dal/admin";
 
 const mockHeaders = headers as ReturnType<typeof vi.fn>;
 const mockGetSession = auth.api.getSession as ReturnType<typeof vi.fn>;
@@ -116,14 +118,23 @@ describe("verifyAdminSession", () => {
   });
 });
 
+function setupFindMockWithReplies(rootDocs: object[], replyDocs: object[] = []) {
+  mockFind.mockImplementation((filter: Record<string, unknown>) => {
+    if (filter && "parentId" in filter) {
+      return replyDocs;
+    }
+    return { sort: mockSort };
+  });
+  mockSort.mockResolvedValue(rootDocs);
+}
+
 describe("getInbox", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it("filters submissions where archivedAt is null", async () => {
-    mockSort.mockResolvedValue([]);
-    mockFind.mockReturnValue({ sort: mockSort });
+    setupFindMockWithReplies([]);
     mockFindMongo.mockReturnValue({ toArray: mockToArray });
     mockToArray.mockResolvedValue([]);
 
@@ -133,8 +144,7 @@ describe("getInbox", () => {
   });
 
   it("sorts by createdAt descending", async () => {
-    mockSort.mockResolvedValue([]);
-    mockFind.mockReturnValue({ sort: mockSort });
+    setupFindMockWithReplies([]);
     mockFindMongo.mockReturnValue({ toArray: mockToArray });
     mockToArray.mockResolvedValue([]);
 
@@ -152,10 +162,9 @@ describe("getInbox", () => {
       updatedAt: new Date("2024-01-02"),
       archivedAt: null,
     };
-    mockSort.mockResolvedValue([doc]);
-    mockFind.mockReturnValue({ sort: mockSort });
+    setupFindMockWithReplies([doc]);
     mockFindMongo.mockReturnValue({ toArray: mockToArray });
-    mockToArray.mockResolvedValue([{ id: "user-abc", name: "Alice Smith", email: "alice@example.com" }]);
+    mockToArray.mockResolvedValue([{ _id: { toString: () => "user-abc" }, name: "Alice Smith", email: "alice@example.com" }]);
 
     const results = await getInbox();
 
@@ -171,8 +180,7 @@ describe("getInbox", () => {
       updatedAt: new Date("2024-01-02"),
       archivedAt: null,
     };
-    mockSort.mockResolvedValue([doc]);
-    mockFind.mockReturnValue({ sort: mockSort });
+    setupFindMockWithReplies([doc]);
     mockFindMongo.mockReturnValue({ toArray: mockToArray });
     mockToArray.mockResolvedValue([]);
 
@@ -182,14 +190,55 @@ describe("getInbox", () => {
   });
 
   it("returns empty array when no inbox submissions exist", async () => {
-    mockSort.mockResolvedValue([]);
-    mockFind.mockReturnValue({ sort: mockSort });
+    setupFindMockWithReplies([]);
     mockFindMongo.mockReturnValue({ toArray: mockToArray });
     mockToArray.mockResolvedValue([]);
 
     const results = await getInbox();
 
     expect(results).toEqual([]);
+  });
+
+  it("includes replyCount of 0 when no replies exist", async () => {
+    const validUserId = "aaaaaaaaaaaaaaaaaaaaaaaa";
+    const doc = {
+      _id: { toString: () => "sub-000000000001" },
+      userId: validUserId,
+      description: "Need a website",
+      createdAt: new Date("2024-01-01"),
+      updatedAt: new Date("2024-01-02"),
+      archivedAt: null,
+    };
+    setupFindMockWithReplies([doc], []);
+    mockFindMongo.mockReturnValue({ toArray: mockToArray });
+    mockToArray.mockResolvedValue([{ _id: { toString: () => validUserId }, name: "Alice", email: "alice@example.com" }]);
+
+    const results = await getInbox();
+
+    expect(results[0].replyCount).toBe(0);
+  });
+
+  it("includes correct replyCount when replies exist", async () => {
+    const validUserId = "aaaaaaaaaaaaaaaaaaaaaaaa";
+    const doc = {
+      _id: { toString: () => "sub-000000000001" },
+      userId: validUserId,
+      description: "Need a website",
+      createdAt: new Date("2024-01-01"),
+      updatedAt: new Date("2024-01-02"),
+      archivedAt: null,
+    };
+    const replyDocs = [
+      { parentId: { toString: () => "sub-000000000001" } },
+      { parentId: { toString: () => "sub-000000000001" } },
+    ];
+    setupFindMockWithReplies([doc], replyDocs);
+    mockFindMongo.mockReturnValue({ toArray: mockToArray });
+    mockToArray.mockResolvedValue([{ _id: { toString: () => validUserId }, name: "Alice", email: "alice@example.com" }]);
+
+    const results = await getInbox();
+
+    expect(results[0].replyCount).toBe(2);
   });
 });
 
@@ -199,8 +248,7 @@ describe("getArchived", () => {
   });
 
   it("filters submissions where archivedAt is not null", async () => {
-    mockSort.mockResolvedValue([]);
-    mockFind.mockReturnValue({ sort: mockSort });
+    setupFindMockWithReplies([]);
     mockFindMongo.mockReturnValue({ toArray: mockToArray });
     mockToArray.mockResolvedValue([]);
 
@@ -210,8 +258,7 @@ describe("getArchived", () => {
   });
 
   it("sorts by archivedAt descending", async () => {
-    mockSort.mockResolvedValue([]);
-    mockFind.mockReturnValue({ sort: mockSort });
+    setupFindMockWithReplies([]);
     mockFindMongo.mockReturnValue({ toArray: mockToArray });
     mockToArray.mockResolvedValue([]);
 
@@ -230,10 +277,9 @@ describe("getArchived", () => {
       updatedAt: new Date("2024-03-01"),
       archivedAt,
     };
-    mockSort.mockResolvedValue([doc]);
-    mockFind.mockReturnValue({ sort: mockSort });
+    setupFindMockWithReplies([doc]);
     mockFindMongo.mockReturnValue({ toArray: mockToArray });
-    mockToArray.mockResolvedValue([{ id: "user-xyz", name: "Bob Jones", email: "bob@example.com" }]);
+    mockToArray.mockResolvedValue([{ _id: { toString: () => "user-xyz" }, name: "Bob Jones", email: "bob@example.com" }]);
 
     const results = await getArchived();
 
@@ -242,8 +288,7 @@ describe("getArchived", () => {
   });
 
   it("returns empty array when no archived submissions exist", async () => {
-    mockSort.mockResolvedValue([]);
-    mockFind.mockReturnValue({ sort: mockSort });
+    setupFindMockWithReplies([]);
     mockFindMongo.mockReturnValue({ toArray: mockToArray });
     mockToArray.mockResolvedValue([]);
 
@@ -296,5 +341,115 @@ describe("adminDeleteSubmission", () => {
 
     expect(mockFindByIdAndDelete).toHaveBeenCalledTimes(1);
     expect(mockFindByIdAndDelete).toHaveBeenCalledWith("sub-archived");
+  });
+});
+
+describe("getThread", () => {
+  const USER_ID = "aaaaaaaaaaaaaaaaaaaaaaaa";
+  const ADMIN_ID = "bbbbbbbbbbbbbbbbbbbbbbbb";
+
+  const rootDoc = {
+    _id: { toString: () => "root-1" },
+    userId: USER_ID,
+    description: "Root submission",
+    parentId: null,
+    createdAt: new Date("2024-01-01"),
+    updatedAt: new Date("2024-01-01"),
+    archivedAt: null,
+  };
+
+  const replyDoc1 = {
+    _id: { toString: () => "reply-1" },
+    userId: ADMIN_ID,
+    description: "Admin reply",
+    parentId: { toString: () => "root-1" },
+    createdAt: new Date("2024-01-02"),
+    updatedAt: new Date("2024-01-02"),
+    archivedAt: null,
+  };
+
+  const replyDoc2 = {
+    _id: { toString: () => "reply-2" },
+    userId: USER_ID,
+    description: "User reply",
+    parentId: { toString: () => "root-1" },
+    createdAt: new Date("2024-01-03"),
+    updatedAt: new Date("2024-01-03"),
+    archivedAt: null,
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns root submission and replies ordered by createdAt ascending", async () => {
+    mockFindById.mockResolvedValue(rootDoc);
+    mockSort.mockResolvedValue([replyDoc1, replyDoc2]);
+    mockFind.mockReturnValue({ sort: mockSort });
+    mockFindMongo.mockReturnValue({ toArray: mockToArray });
+    mockToArray.mockResolvedValue([
+      { _id: { toString: () => USER_ID }, name: "Alice", email: "alice@example.com" },
+      { _id: { toString: () => ADMIN_ID }, name: "Admin User", email: "admin@example.com" },
+    ]);
+
+    const result = await getThread("root-1");
+
+    expect(result).not.toBeNull();
+    expect(result!.root.id).toBe("root-1");
+    expect(result!.root.replyCount).toBe(2);
+    expect(result!.replies).toHaveLength(2);
+    expect(result!.replies[0].id).toBe("reply-1");
+    expect(result!.replies[1].id).toBe("reply-2");
+  });
+
+  it("queries replies with parentId matching the rootId", async () => {
+    mockFindById.mockResolvedValue(rootDoc);
+    mockSort.mockResolvedValue([]);
+    mockFind.mockReturnValue({ sort: mockSort });
+    mockFindMongo.mockReturnValue({ toArray: mockToArray });
+    mockToArray.mockResolvedValue([]);
+
+    await getThread("root-1");
+
+    expect(mockFind).toHaveBeenCalledWith({ parentId: "root-1" });
+    expect(mockSort).toHaveBeenCalledWith({ createdAt: 1 });
+  });
+
+  it("returns null when root submission does not exist", async () => {
+    mockFindById.mockResolvedValue(null);
+
+    const result = await getThread("nonexistent-root");
+
+    expect(result).toBeNull();
+  });
+
+  it("returns empty replies array when no replies exist", async () => {
+    mockFindById.mockResolvedValue(rootDoc);
+    mockSort.mockResolvedValue([]);
+    mockFind.mockReturnValue({ sort: mockSort });
+    mockFindMongo.mockReturnValue({ toArray: mockToArray });
+    mockToArray.mockResolvedValue([
+      { _id: { toString: () => USER_ID }, name: "Alice", email: "alice@example.com" },
+    ]);
+
+    const result = await getThread("root-1");
+
+    expect(result!.replies).toEqual([]);
+  });
+
+  it("joins sender info for both root and reply documents", async () => {
+    mockFindById.mockResolvedValue(rootDoc);
+    mockSort.mockResolvedValue([replyDoc1]);
+    mockFind.mockReturnValue({ sort: mockSort });
+    mockFindMongo.mockReturnValue({ toArray: mockToArray });
+    mockToArray.mockResolvedValue([
+      { _id: { toString: () => USER_ID }, name: "Alice", email: "alice@example.com" },
+      { _id: { toString: () => ADMIN_ID }, name: "Admin User", email: "admin@example.com" },
+    ]);
+
+    const result = await getThread("root-1");
+
+    expect(result!.root.sender).toEqual({ name: "Alice", email: "alice@example.com" });
+    expect(result!.replies[0].sender).toEqual({ name: "Admin User", email: "admin@example.com" });
   });
 });

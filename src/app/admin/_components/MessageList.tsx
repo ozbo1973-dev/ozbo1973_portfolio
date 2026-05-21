@@ -8,9 +8,10 @@ interface MessageListProps {
   emptyMessage: string;
   onArchive?: (submission: AdminSubmissionRecord) => void;
   onDelete?: (submission: AdminSubmissionRecord) => void;
+  onViewThread?: (submission: AdminSubmissionRecord) => void;
 }
 
-export default function MessageList({ submissions, emptyMessage, onArchive, onDelete }: MessageListProps) {
+export default function MessageList({ submissions, emptyMessage, onArchive, onDelete, onViewThread }: MessageListProps) {
   if (submissions.length === 0) {
     return (
       <p className="text-muted-foreground font-['Mulish'] text-sm">
@@ -22,7 +23,7 @@ export default function MessageList({ submissions, emptyMessage, onArchive, onDe
   return (
     <ul className="space-y-6">
       {submissions.map((sub) => (
-        <MessageCard key={sub.id} submission={sub} onArchive={onArchive} onDelete={onDelete} />
+        <MessageCard key={sub.id} submission={sub} onArchive={onArchive} onDelete={onDelete} onViewThread={onViewThread} />
       ))}
     </ul>
   );

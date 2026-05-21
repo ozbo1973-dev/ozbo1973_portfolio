@@ -4,21 +4,26 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import MessageList from "./MessageList";
+import ThreadPanel from "./ThreadPanel";
 import type { AdminSubmissionRecord } from "@/lib/dal/admin";
+import type { AdminThread } from "@/lib/dal/admin";
 import { archiveSubmissionAction } from "@/app/actions/admin/archiveSubmission";
 import { adminDeleteSubmissionAction } from "@/app/actions/admin/deleteSubmission";
+import { getThreadAction } from "@/app/actions/admin/getThread";
 
 type Tab = "inbox" | "archive";
 
 interface AdminContentProps {
   initialInbox: AdminSubmissionRecord[];
   initialArchived: AdminSubmissionRecord[];
+  adminUserId: string;
 }
 
-export default function AdminContent({ initialInbox, initialArchived }: AdminContentProps) {
+export default function AdminContent({ initialInbox, initialArchived, adminUserId }: AdminContentProps) {
   const [tab, setTab] = useState<Tab>("inbox");
   const [inbox, setInbox] = useState<AdminSubmissionRecord[]>(initialInbox);
   const [archived, setArchived] = useState<AdminSubmissionRecord[]>(initialArchived);
+  const [activeThread, setActiveThread] = useState<AdminThread | null>(null);
 
   async function handleDelete(submission: AdminSubmissionRecord) {
     setInbox((prev) => prev.filter((s) => s.id !== submission.id));
@@ -34,6 +39,15 @@ export default function AdminContent({ initialInbox, initialArchived }: AdminCon
         setInbox((prev) => [submission, ...prev]);
       }
       toast.error("Failed to delete submission.");
+    }
+  }
+
+  async function handleViewThread(submission: AdminSubmissionRecord) {
+    const result = await getThreadAction(submission.id);
+    if (result.success) {
+      setActiveThread(result.thread);
+    } else {
+      toast.error("Failed to load thread.");
     }
   }
 
@@ -82,6 +96,7 @@ export default function AdminContent({ initialInbox, initialArchived }: AdminCon
             emptyMessage="No submissions in your inbox."
             onArchive={handleArchive}
             onDelete={handleDelete}
+            onViewThread={handleViewThread}
           />
         </section>
       )}
@@ -92,8 +107,17 @@ export default function AdminContent({ initialInbox, initialArchived }: AdminCon
             submissions={archived}
             emptyMessage="No archived submissions."
             onDelete={handleDelete}
+            onViewThread={handleViewThread}
           />
         </section>
+      )}
+
+      {activeThread && (
+        <ThreadPanel
+          thread={activeThread}
+          adminUserId={adminUserId}
+          onClose={() => setActiveThread(null)}
+        />
       )}
     </div>
   );
