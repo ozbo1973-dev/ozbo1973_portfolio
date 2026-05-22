@@ -3,6 +3,7 @@
 import { useState, useTransition, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import type { AdminThread, AdminSubmissionRecord } from "@/lib/dal/admin";
 import { createAdminReplyAction } from "@/app/actions/admin/createAdminReply";
 
@@ -23,11 +24,10 @@ function MessageBubble({
 }) {
   return (
     <li
-      className={`p-4 border rounded-sm ${
-        isAdmin
-          ? "bg-primary/5 border-primary/30 ml-4"
-          : "bg-card border-border"
-      }`}
+      className={cn(
+        "p-4 border rounded-sm",
+        isAdmin ? "bg-primary/5 border-primary/30 ml-4" : "bg-card border-border",
+      )}
     >
       <div className="flex items-center justify-between gap-4 mb-2 flex-wrap">
         <div className="flex items-center gap-2">

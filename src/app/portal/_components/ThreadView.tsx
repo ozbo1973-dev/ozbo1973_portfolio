@@ -3,6 +3,7 @@
 import { useState, useTransition, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 import type { UserThread, UserThreadRecord } from "@/lib/dal/prospects";
 import { createUserReplyAction } from "@/app/actions/createUserReply";
 
@@ -20,11 +21,10 @@ function MessageBubble({
 }) {
   return (
     <li
-      className={`p-4 border rounded-sm ${
-        isCurrentUser
-          ? "bg-card border-border"
-          : "bg-primary/5 border-primary/30 ml-4"
-      }`}
+      className={cn(
+        "p-4 border rounded-sm",
+        isCurrentUser ? "bg-card border-border" : "bg-primary/5 border-primary/30 ml-4",
+      )}
     >
       <div className="flex items-center justify-between gap-4 mb-2 flex-wrap">
         <span className="text-xs font-semibold font-['Mulish'] text-muted-foreground">
