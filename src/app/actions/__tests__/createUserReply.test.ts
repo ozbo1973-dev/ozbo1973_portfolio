@@ -1,13 +1,18 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
 
-const { mockVerifySession, mockCreateUserReply } = vi.hoisted(() => ({
+const { mockVerifySession, mockCreateUserReply, mockSendReplyNotification } = vi.hoisted(() => ({
   mockVerifySession: vi.fn(),
   mockCreateUserReply: vi.fn(),
+  mockSendReplyNotification: vi.fn(),
 }));
 
 vi.mock("@/lib/dal/prospects", () => ({
   verifySession: mockVerifySession,
   createUserReply: mockCreateUserReply,
+}));
+
+vi.mock("@/lib/contact/sendNotifications", () => ({
+  sendReplyNotification: mockSendReplyNotification,
 }));
 
 import { createUserReplyAction } from "../createUserReply";
@@ -24,8 +29,10 @@ const replyRecord = {
 describe("createUserReplyAction", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.NOTIFICATION_EMAIL = "admin@example.com";
     mockVerifySession.mockResolvedValue(userSession);
     mockCreateUserReply.mockResolvedValue(replyRecord);
+    mockSendReplyNotification.mockResolvedValue(undefined);
   });
 
   it("returns success with reply when input is valid", async () => {
@@ -75,5 +82,25 @@ describe("createUserReplyAction", () => {
     const result = await createUserReplyAction("root-1", "Valid reply");
 
     expect(result).toEqual({ success: false, error: expect.any(String) });
+  });
+
+  it("fires sendReplyNotification after a successful reply", async () => {
+    mockSendReplyNotification.mockResolvedValue(undefined);
+
+    await createUserReplyAction("root-1", "Thanks for the update!");
+
+    expect(mockSendReplyNotification).toHaveBeenCalledWith({
+      to: "admin@example.com",
+      senderName: userSession.name,
+      replyBody: "Thanks for the update!",
+    });
+  });
+
+  it("still returns success when sendReplyNotification throws", async () => {
+    mockSendReplyNotification.mockRejectedValue(new Error("Resend is down"));
+
+    const result = await createUserReplyAction("root-1", "Thanks for the update!");
+
+    expect(result).toEqual({ success: true, reply: replyRecord });
   });
 });
