@@ -40,23 +40,34 @@ vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn() }),
 }));
 
-const { mockVerifySession, mockGetSubmissions } = vi.hoisted(() => ({
+const { mockVerifySession, mockGetThreadsByUserId } = vi.hoisted(() => ({
   mockVerifySession: vi.fn(),
-  mockGetSubmissions: vi.fn(),
+  mockGetThreadsByUserId: vi.fn(),
 }));
 
 vi.mock("@/lib/dal/prospects", () => ({
   verifySession: mockVerifySession,
-  getSubmissionsByUserId: mockGetSubmissions,
+  getThreadsByUserId: mockGetThreadsByUserId,
 }));
 
 import PortalPage from "../page";
+
+const makeThread = (id: string, description: string, date: Date) => ({
+  root: {
+    id,
+    userId: "user-abc",
+    description,
+    createdAt: date,
+  },
+  replies: [],
+  latestActivity: date,
+});
 
 describe("PortalPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockVerifySession.mockResolvedValue({ userId: "user-abc", email: "alice@example.com", name: "Alice Smith" });
-    mockGetSubmissions.mockResolvedValue([]);
+    mockGetThreadsByUserId.mockResolvedValue([]);
   });
 
   describe("auth guard", () => {
@@ -76,11 +87,11 @@ describe("PortalPage", () => {
       expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
     });
 
-    it("calls getSubmissionsByUserId with zero arguments", async () => {
+    it("calls getThreadsByUserId with the current user id", async () => {
       render(await PortalPage());
 
-      expect(mockGetSubmissions).toHaveBeenCalledWith();
-      expect(mockGetSubmissions).toHaveBeenCalledTimes(1);
+      expect(mockGetThreadsByUserId).toHaveBeenCalledWith("user-abc");
+      expect(mockGetThreadsByUserId).toHaveBeenCalledTimes(1);
     });
 
     it("displays a message when the user has no submissions", async () => {
@@ -89,22 +100,10 @@ describe("PortalPage", () => {
       expect(document.body.textContent?.toLowerCase()).toMatch(/no submissions|no inquiries/);
     });
 
-    it("displays each submission's description", async () => {
-      mockGetSubmissions.mockResolvedValue([
-        {
-          id: "sub-1",
-          userId: "user-abc",
-          description: "Build me a portfolio site",
-          createdAt: new Date("2024-01-01"),
-          updatedAt: new Date("2024-01-02"),
-        },
-        {
-          id: "sub-2",
-          userId: "user-abc",
-          description: "E-commerce store",
-          createdAt: new Date("2024-02-01"),
-          updatedAt: new Date("2024-02-02"),
-        },
+    it("displays each thread root description", async () => {
+      mockGetThreadsByUserId.mockResolvedValue([
+        makeThread("sub-1", "Build me a portfolio site", new Date("2024-01-01")),
+        makeThread("sub-2", "E-commerce store", new Date("2024-02-01")),
       ]);
 
       render(await PortalPage());
@@ -132,22 +131,10 @@ describe("PortalPage", () => {
       expect(heading.className).toMatch(/font-playfair|--font-playfair/);
     });
 
-    it("renders a delete button for each submission", async () => {
-      mockGetSubmissions.mockResolvedValue([
-        {
-          id: "sub-1",
-          userId: "user-abc",
-          description: "First project",
-          createdAt: new Date("2024-01-01"),
-          updatedAt: new Date("2024-01-02"),
-        },
-        {
-          id: "sub-2",
-          userId: "user-abc",
-          description: "Second project",
-          createdAt: new Date("2024-02-01"),
-          updatedAt: new Date("2024-02-02"),
-        },
+    it("renders a delete button for each thread", async () => {
+      mockGetThreadsByUserId.mockResolvedValue([
+        makeThread("sub-1", "First project", new Date("2024-01-01")),
+        makeThread("sub-2", "Second project", new Date("2024-02-01")),
       ]);
 
       render(await PortalPage());

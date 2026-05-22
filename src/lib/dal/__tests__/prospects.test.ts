@@ -69,7 +69,7 @@ describe("verifySession", () => {
   });
 });
 
-import { getSubmissionsByUserId } from "@/lib/dal/prospects";
+import { getSubmissionsByUserId, getThreadsByUserId } from "@/lib/dal/prospects";
 
 describe("getSubmissionsByUserId", () => {
   beforeEach(() => {
@@ -155,5 +155,161 @@ describe("getSubmissionsByUserId", () => {
     mockRedirect.mockImplementation(() => { throw new Error("NEXT_REDIRECT"); });
 
     await expect(getSubmissionsByUserId()).rejects.toThrow("NEXT_REDIRECT");
+  });
+});
+
+describe("getThreadsByUserId", () => {
+  const mockSortReplies = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockHeaders.mockResolvedValue({ get: () => null });
+    mockGetSession.mockResolvedValue({
+      session: { userId: "user-abc" },
+      user: { email: "alice@example.com", name: "Alice" },
+    });
+  });
+
+  function setupFindMock(rootDocs: object[], replyDocs: object[] = []) {
+    mockFind.mockImplementation((filter: Record<string, unknown>) => {
+      if (filter && filter.parentId !== null && typeof filter.parentId === "object" && "$in" in (filter.parentId as object)) {
+        return { sort: mockSortReplies };
+      }
+      return { sort: mockSort };
+    });
+    mockSort.mockResolvedValue(rootDocs);
+    mockSortReplies.mockResolvedValue(replyDocs);
+  }
+
+  it("queries only active (archivedAt: null) root submissions for the user", async () => {
+    setupFindMock([]);
+
+    await getThreadsByUserId("user-abc");
+
+    expect(mockFind).toHaveBeenCalledWith({ userId: "user-abc", archivedAt: null, parentId: null });
+  });
+
+  it("returns threads sorted by most recent activity (latest reply createdAt)", async () => {
+    const older = new Date("2024-01-01");
+    const newer = new Date("2024-02-01");
+    const rootDoc1 = {
+      _id: { toString: () => "root-1" },
+      userId: "user-abc",
+      description: "First submission",
+      parentId: null,
+      createdAt: older,
+      updatedAt: older,
+      archivedAt: null,
+    };
+    const rootDoc2 = {
+      _id: { toString: () => "root-2" },
+      userId: "user-abc",
+      description: "Second submission",
+      parentId: null,
+      createdAt: older,
+      updatedAt: older,
+      archivedAt: null,
+    };
+    const replyForRoot1 = {
+      _id: { toString: () => "reply-1" },
+      userId: "admin-id",
+      description: "Admin reply to root-1",
+      parentId: { toString: () => "root-1" },
+      createdAt: newer,
+      updatedAt: newer,
+      archivedAt: null,
+    };
+    setupFindMock([rootDoc1, rootDoc2], [replyForRoot1]);
+
+    const results = await getThreadsByUserId("user-abc");
+
+    expect(results).toHaveLength(2);
+    expect(results[0].root.id).toBe("root-1");
+    expect(results[1].root.id).toBe("root-2");
+  });
+
+  it("falls back to root createdAt when no replies exist", async () => {
+    const date1 = new Date("2024-02-01");
+    const date2 = new Date("2024-01-01");
+    const rootDoc1 = {
+      _id: { toString: () => "root-1" },
+      userId: "user-abc",
+      description: "Newer root",
+      parentId: null,
+      createdAt: date1,
+      updatedAt: date1,
+      archivedAt: null,
+    };
+    const rootDoc2 = {
+      _id: { toString: () => "root-2" },
+      userId: "user-abc",
+      description: "Older root",
+      parentId: null,
+      createdAt: date2,
+      updatedAt: date2,
+      archivedAt: null,
+    };
+    setupFindMock([rootDoc1, rootDoc2], []);
+
+    const results = await getThreadsByUserId("user-abc");
+
+    expect(results[0].root.id).toBe("root-1");
+    expect(results[1].root.id).toBe("root-2");
+  });
+
+  it("orders replies within each thread by createdAt ascending", async () => {
+    const rootDoc = {
+      _id: { toString: () => "root-1" },
+      userId: "user-abc",
+      description: "Root",
+      parentId: null,
+      createdAt: new Date("2024-01-01"),
+      updatedAt: new Date("2024-01-01"),
+      archivedAt: null,
+    };
+    const reply1 = {
+      _id: { toString: () => "reply-1" },
+      userId: "admin-id",
+      description: "First reply",
+      parentId: { toString: () => "root-1" },
+      createdAt: new Date("2024-01-02"),
+      updatedAt: new Date("2024-01-02"),
+      archivedAt: null,
+    };
+    const reply2 = {
+      _id: { toString: () => "reply-2" },
+      userId: "user-abc",
+      description: "Second reply",
+      parentId: { toString: () => "root-1" },
+      createdAt: new Date("2024-01-03"),
+      updatedAt: new Date("2024-01-03"),
+      archivedAt: null,
+    };
+    setupFindMock([rootDoc], [reply1, reply2]);
+
+    const results = await getThreadsByUserId("user-abc");
+
+    expect(results[0].replies).toHaveLength(2);
+    expect(results[0].replies[0].id).toBe("reply-1");
+    expect(results[0].replies[1].id).toBe("reply-2");
+  });
+
+  it("excludes archived threads (archivedAt not null)", async () => {
+    setupFindMock([]);
+
+    const results = await getThreadsByUserId("user-abc");
+
+    expect(results).toEqual([]);
+    expect(mockFind).toHaveBeenCalledWith(
+      expect.objectContaining({ archivedAt: null })
+    );
+  });
+
+  it("returns empty array when no active submissions exist", async () => {
+    setupFindMock([]);
+
+    const results = await getThreadsByUserId("user-abc");
+
+    expect(results).toEqual([]);
   });
 });

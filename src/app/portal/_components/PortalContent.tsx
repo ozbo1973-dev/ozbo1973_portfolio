@@ -2,19 +2,35 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import SubmissionCard from "./SubmissionCard";
+import ThreadCard from "./ThreadCard";
 import NewRequestForm from "./NewRequestForm";
 import type { ProspectRecord } from "@/lib/dal/index";
+import type { UserThread } from "@/lib/dal/prospects";
 
 interface PortalContentProps {
-  initialSubmissions: ProspectRecord[];
+  initialThreads: UserThread[];
+  currentUserId: string;
 }
 
-export default function PortalContent({ initialSubmissions }: PortalContentProps) {
-  const [submissions, setSubmissions] = useState<ProspectRecord[]>(initialSubmissions);
+export default function PortalContent({ initialThreads, currentUserId }: PortalContentProps) {
+  const [threads, setThreads] = useState<UserThread[]>(initialThreads);
 
   function handleNewSubmission(submission: ProspectRecord) {
-    setSubmissions((prev) => [submission, ...prev]);
+    const newThread: UserThread = {
+      root: {
+        id: submission.id,
+        userId: submission.userId,
+        description: submission.description,
+        createdAt: submission.createdAt,
+      },
+      replies: [],
+      latestActivity: submission.createdAt,
+    };
+    setThreads((prev) => [newThread, ...prev]);
+  }
+
+  function handleThreadDeleted(rootId: string) {
+    setThreads((prev) => prev.filter((t) => t.root.id !== rootId));
   }
 
   return (
@@ -32,14 +48,19 @@ export default function PortalContent({ initialSubmissions }: PortalContentProps
       </section>
 
       <section aria-label="Your submissions">
-        {submissions.length === 0 ? (
+        {threads.length === 0 ? (
           <p className="text-muted-foreground font-['Mulish'] text-sm">
             No submissions found. Your inquiries will appear here once you submit the contact form.
           </p>
         ) : (
           <ul className="space-y-6">
-            {submissions.map((sub) => (
-              <SubmissionCard key={sub.id} submission={sub} />
+            {threads.map((thread) => (
+              <ThreadCard
+                key={thread.root.id}
+                thread={thread}
+                currentUserId={currentUserId}
+                onDeleted={handleThreadDeleted}
+              />
             ))}
           </ul>
         )}

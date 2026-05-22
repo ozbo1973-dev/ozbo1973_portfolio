@@ -1,7 +1,7 @@
 import connectDB from "@/lib/db/connect";
 import ProspectiveCustomer from "@/lib/models/ProspectiveCustomer";
 
-export type { ProspectData, ProspectRecord } from "@/lib/dal/prospects";
+export type { ProspectData, ProspectRecord, UserThread, UserThreadRecord } from "@/lib/dal/prospects";
 export { createProspect } from "@/lib/dal/prospects";
 
 export async function getSubmissionsByUserId(userId: string): Promise<import("@/lib/dal/prospects").ProspectRecord[]> {

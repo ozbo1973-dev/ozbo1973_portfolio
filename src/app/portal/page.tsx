@@ -1,4 +1,4 @@
-import { verifySession, getSubmissionsByUserId } from "@/lib/dal/prospects";
+import { verifySession, getThreadsByUserId } from "@/lib/dal/prospects";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import DeleteAccountButton from "./_components/DeleteAccountButton";
@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 };
 
 export default async function PortalPage() {
-  const { email } = await verifySession();
-  const submissions = await getSubmissionsByUserId();
+  const { userId, email } = await verifySession();
+  const threads = await getThreadsByUserId(userId);
 
   return (
     <div className="min-h-screen bg-background px-4 py-16">
@@ -32,7 +32,7 @@ export default async function PortalPage() {
           Signed in as: {email}
         </p>
 
-        <PortalContent initialSubmissions={submissions} />
+        <PortalContent initialThreads={threads} currentUserId={userId} />
 
         <div className="mt-16 border-t border-border pt-8">
           <h2 className="text-lg font-semibold text-destructive font-['Mulish'] mb-2">
