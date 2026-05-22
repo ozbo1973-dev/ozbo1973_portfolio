@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { verifySession, createUserReply } from "@/lib/dal/prospects";
 import type { UserThreadRecord } from "@/lib/dal/prospects";
+import { sendReplyNotification } from "@/lib/contact/sendNotifications";
 
 const replySchema = z.object({
   body: z.string().trim().min(1, "Reply cannot be empty").max(5000, "Reply is too long"),
@@ -25,6 +26,11 @@ export async function createUserReplyAction(
 
   try {
     const reply = await createUserReply(rootId, session.userId, parsed.data.body);
+    sendReplyNotification({
+      to: process.env.NOTIFICATION_EMAIL!,
+      senderName: session.name,
+      replyBody: parsed.data.body,
+    }).catch(() => {});
     return { success: true, reply };
   } catch {
     return { success: false, error: "Failed to send reply." };

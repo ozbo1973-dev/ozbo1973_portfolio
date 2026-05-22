@@ -28,4 +28,10 @@ describe("ReplyNotificationEmail", () => {
 
     expect(screen.queryByRole("link", { name: /sign in/i })).toBeNull();
   });
+
+  it("renders an Admin Console note when magicLinkUrl is absent", () => {
+    render(<ReplyNotificationEmail senderName="Brady" replyBody="No magic link here." />);
+
+    expect(screen.getByText(/admin console/i)).toBeInTheDocument();
+  });
 });

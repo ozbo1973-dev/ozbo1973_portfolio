@@ -17,6 +17,12 @@ export const ReplyNotificationEmail: React.FC<Readonly<ReplyNotificationEmailPro
     <div style={{ margin: "20px 0", lineHeight: "1.5" }}>
       <p>{replyBody}</p>
 
+      {!magicLinkUrl && (
+        <p style={{ marginTop: "16px", color: "#555" }}>
+          Check the Admin Console to view and respond to this reply.
+        </p>
+      )}
+
       {magicLinkUrl && (
         <div
           style={{
