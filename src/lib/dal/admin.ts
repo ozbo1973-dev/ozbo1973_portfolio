@@ -124,6 +124,29 @@ export interface AdminThread {
   replies: AdminSubmissionRecord[];
 }
 
+export async function createAdminReply(
+  rootId: string,
+  body: string,
+  adminSession: AdminSession,
+): Promise<AdminSubmissionRecord> {
+  await connectDB();
+  const doc = await ProspectiveCustomer.create({
+    userId: adminSession.userId,
+    description: body,
+    parentId: rootId,
+  });
+  return {
+    id: doc._id.toString(),
+    userId: doc.userId,
+    description: doc.description,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+    archivedAt: doc.archivedAt ?? null,
+    replyCount: 0,
+    sender: { name: adminSession.name, email: adminSession.email },
+  };
+}
+
 export async function getThread(rootId: string): Promise<AdminThread | null> {
   await connectDB();
 

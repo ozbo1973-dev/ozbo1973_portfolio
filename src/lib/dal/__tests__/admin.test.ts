@@ -10,7 +10,7 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/lib/db/connect", () => ({ default: vi.fn() }));
 
-const { mockFind, mockSort, mockFindOne, mockFindMongo, mockToArray, mockFindByIdAndUpdate, mockFindByIdAndDelete, mockFindById, mockUpdateMany, mockDeleteMany } = vi.hoisted(() => ({
+const { mockFind, mockSort, mockFindOne, mockFindMongo, mockToArray, mockFindByIdAndUpdate, mockFindByIdAndDelete, mockFindById, mockUpdateMany, mockDeleteMany, mockCreate } = vi.hoisted(() => ({
   mockFind: vi.fn(),
   mockSort: vi.fn(),
   mockFindOne: vi.fn(),
@@ -21,6 +21,7 @@ const { mockFind, mockSort, mockFindOne, mockFindMongo, mockToArray, mockFindByI
   mockFindById: vi.fn(),
   mockUpdateMany: vi.fn(),
   mockDeleteMany: vi.fn(),
+  mockCreate: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/auth", () => ({
@@ -50,13 +51,14 @@ vi.mock("@/lib/models/ProspectiveCustomer", () => ({
     findByIdAndDelete: mockFindByIdAndDelete,
     updateMany: mockUpdateMany,
     deleteMany: mockDeleteMany,
+    create: mockCreate,
   },
 }));
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
-import { verifyAdminSession, getInbox, getArchived, archiveSubmission, adminDeleteSubmission, getThread } from "@/lib/dal/admin";
+import { verifyAdminSession, getInbox, getArchived, archiveSubmission, adminDeleteSubmission, getThread, createAdminReply } from "@/lib/dal/admin";
 
 const mockHeaders = headers as ReturnType<typeof vi.fn>;
 const mockGetSession = auth.api.getSession as ReturnType<typeof vi.fn>;
@@ -477,5 +479,46 @@ describe("getThread", () => {
 
     expect(result!.root.sender).toEqual({ name: "Alice", email: "alice@example.com" });
     expect(result!.replies[0].sender).toEqual({ name: "Admin User", email: "admin@example.com" });
+  });
+});
+
+describe("createAdminReply", () => {
+  const adminSession = { userId: "admin-user-id", email: "admin@example.com", name: "Admin" };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockCreate.mockResolvedValue({
+      _id: { toString: () => "reply-new" },
+      userId: "admin-user-id",
+      description: "Admin reply body",
+      parentId: { toString: () => "root-1" },
+      createdAt: new Date("2024-01-02"),
+      updatedAt: new Date("2024-01-02"),
+      archivedAt: null,
+    });
+  });
+
+  it("creates a reply with parentId set to rootId and userId set to admin's userId", async () => {
+    await createAdminReply("root-1", "Admin reply body", adminSession);
+
+    expect(mockCreate).toHaveBeenCalledWith({
+      userId: "admin-user-id",
+      description: "Admin reply body",
+      parentId: "root-1",
+    });
+  });
+
+  it("returns the created reply record", async () => {
+    const result = await createAdminReply("root-1", "Admin reply body", adminSession);
+
+    expect(result.id).toBe("reply-new");
+    expect(result.userId).toBe("admin-user-id");
+    expect(result.description).toBe("Admin reply body");
+  });
+
+  it("includes sender info from the admin session", async () => {
+    const result = await createAdminReply("root-1", "Admin reply body", adminSession);
+
+    expect(result.sender).toEqual({ name: "Admin", email: "admin@example.com" });
   });
 });

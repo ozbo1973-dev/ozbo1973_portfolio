@@ -17,9 +17,11 @@ interface AdminContentProps {
   initialInbox: AdminSubmissionRecord[];
   initialArchived: AdminSubmissionRecord[];
   adminUserId: string;
+  adminName: string;
+  adminEmail: string;
 }
 
-export default function AdminContent({ initialInbox, initialArchived, adminUserId }: AdminContentProps) {
+export default function AdminContent({ initialInbox, initialArchived, adminUserId, adminName, adminEmail }: AdminContentProps) {
   const [tab, setTab] = useState<Tab>("inbox");
   const [inbox, setInbox] = useState<AdminSubmissionRecord[]>(initialInbox);
   const [archived, setArchived] = useState<AdminSubmissionRecord[]>(initialArchived);
@@ -116,6 +118,8 @@ export default function AdminContent({ initialInbox, initialArchived, adminUserI
         <ThreadPanel
           thread={activeThread}
           adminUserId={adminUserId}
+          adminName={adminName}
+          adminEmail={adminEmail}
           onClose={() => setActiveThread(null)}
         />
       )}

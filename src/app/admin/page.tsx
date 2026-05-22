@@ -28,7 +28,13 @@ export default async function AdminPage() {
           Manage incoming submissions.
         </p>
 
-        <AdminContent initialInbox={inbox} initialArchived={archived} adminUserId={adminSession.userId} />
+        <AdminContent
+          initialInbox={inbox}
+          initialArchived={archived}
+          adminUserId={adminSession.userId}
+          adminName={adminSession.name}
+          adminEmail={adminSession.email}
+        />
       </div>
     </div>
   );
