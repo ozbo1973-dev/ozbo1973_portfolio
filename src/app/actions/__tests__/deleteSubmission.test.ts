@@ -22,7 +22,7 @@ describe("deleteSubmissionAction", () => {
   });
 
   it("returns success true when submission is deleted", async () => {
-    mockDeleteSubmission.mockResolvedValue(true);
+    mockDeleteSubmission.mockResolvedValue({ deleted: true });
 
     const result = await deleteSubmissionAction("sub-1");
 
@@ -31,11 +31,19 @@ describe("deleteSubmissionAction", () => {
   });
 
   it("returns success false when submission does not belong to user", async () => {
-    mockDeleteSubmission.mockResolvedValue(false);
+    mockDeleteSubmission.mockResolvedValue({ deleted: false });
 
     const result = await deleteSubmissionAction("sub-other");
 
     expect(result).toEqual({ success: false, error: "Submission not found" });
+  });
+
+  it("returns success false with blocked flag when admin replies exist", async () => {
+    mockDeleteSubmission.mockResolvedValue({ deleted: false, blocked: true });
+
+    const result = await deleteSubmissionAction("sub-1");
+
+    expect(result).toEqual({ success: false, blocked: true, error: expect.any(String) });
   });
 
   it("redirects when session is invalid", async () => {

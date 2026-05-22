@@ -15,22 +15,35 @@ import {
 } from "@/components/ui/alert-dialog";
 import ThreadView from "./ThreadView";
 import { deleteSubmissionAction } from "@/app/actions/deleteSubmission";
+import { archiveSubmissionAction } from "@/app/actions/archiveSubmission";
 import type { UserThread } from "@/lib/dal/prospects";
 
 interface ThreadCardProps {
   thread: UserThread;
   currentUserId: string;
   onDeleted: (rootId: string) => void;
+  onArchived?: (rootId: string) => void;
 }
 
-export default function ThreadCard({ thread, currentUserId, onDeleted }: ThreadCardProps) {
+export default function ThreadCard({ thread, currentUserId, onDeleted, onArchived }: ThreadCardProps) {
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
+
+  const hasAdminReplies = thread.replies.some((r) => r.userId !== currentUserId);
 
   async function handleConfirmDelete() {
     const result = await deleteSubmissionAction(thread.root.id);
     if (result.success) {
       onDeleted(thread.root.id);
       setDeleteOpen(false);
+    }
+  }
+
+  async function handleConfirmArchive() {
+    const result = await archiveSubmissionAction(thread.root.id);
+    if (result.success) {
+      onArchived?.(thread.root.id);
+      setArchiveOpen(false);
     }
   }
 
@@ -54,25 +67,48 @@ export default function ThreadCard({ thread, currentUserId, onDeleted }: ThreadC
             </span>
           )}
         </div>
-        <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm" aria-label="Delete submission">
-              Delete
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent role="alertdialog">
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete submission?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will permanently delete this submission. This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleConfirmDelete}>Confirm</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+
+        {hasAdminReplies ? (
+          <AlertDialog open={archiveOpen} onOpenChange={setArchiveOpen}>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="sm" aria-label="Archive submission">
+                Archive
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent role="alertdialog">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Archive submission?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will move this submission and its replies to your archive.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleConfirmArchive}>Confirm</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        ) : (
+          <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm" aria-label="Delete submission">
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent role="alertdialog">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete submission?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete this submission. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleConfirmDelete}>Confirm</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
       <ThreadView thread={thread} currentUserId={currentUserId} />
     </li>

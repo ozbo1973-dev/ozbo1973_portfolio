@@ -9,6 +9,14 @@ vi.mock("@/app/actions/deleteSubmission", () => ({
   deleteSubmissionAction: mockDeleteSubmissionAction,
 }));
 
+vi.mock("@/app/actions/archiveSubmission", () => ({
+  archiveSubmissionAction: vi.fn(),
+}));
+
+vi.mock("@/app/actions/createUserReply", () => ({
+  createUserReplyAction: vi.fn(),
+}));
+
 const { mockDeleteAccountAction } = vi.hoisted(() => ({
   mockDeleteAccountAction: vi.fn(),
 }));
@@ -50,6 +58,14 @@ vi.mock("@/lib/dal/prospects", () => ({
   getThreadsByUserId: mockGetThreadsByUserId,
 }));
 
+const { mockGetArchivedThreadsByUserId } = vi.hoisted(() => ({
+  mockGetArchivedThreadsByUserId: vi.fn(),
+}));
+
+vi.mock("@/lib/dal/index", () => ({
+  getArchivedThreadsByUserId: mockGetArchivedThreadsByUserId,
+}));
+
 import PortalPage from "../page";
 
 const makeThread = (id: string, description: string, date: Date) => ({
@@ -68,6 +84,7 @@ describe("PortalPage", () => {
     vi.clearAllMocks();
     mockVerifySession.mockResolvedValue({ userId: "user-abc", email: "alice@example.com", name: "Alice Smith" });
     mockGetThreadsByUserId.mockResolvedValue([]);
+    mockGetArchivedThreadsByUserId.mockResolvedValue([]);
   });
 
   describe("auth guard", () => {
