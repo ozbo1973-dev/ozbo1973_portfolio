@@ -104,12 +104,19 @@ export async function getArchived(): Promise<AdminSubmissionRecord[]> {
 
 export async function archiveSubmission(id: string): Promise<void> {
   await connectDB();
-  await ProspectiveCustomer.findByIdAndUpdate(id, { archivedAt: new Date() });
+  const archivedAt = new Date();
+  await Promise.all([
+    ProspectiveCustomer.findByIdAndUpdate(id, { archivedAt }),
+    ProspectiveCustomer.updateMany({ parentId: id }, { archivedAt }),
+  ]);
 }
 
 export async function adminDeleteSubmission(id: string): Promise<void> {
   await connectDB();
-  await ProspectiveCustomer.findByIdAndDelete(id);
+  await Promise.all([
+    ProspectiveCustomer.findByIdAndDelete(id),
+    ProspectiveCustomer.deleteMany({ parentId: id }),
+  ]);
 }
 
 export interface AdminThread {

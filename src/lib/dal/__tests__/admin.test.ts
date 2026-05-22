@@ -10,7 +10,7 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/lib/db/connect", () => ({ default: vi.fn() }));
 
-const { mockFind, mockSort, mockFindOne, mockFindMongo, mockToArray, mockFindByIdAndUpdate, mockFindByIdAndDelete, mockFindById } = vi.hoisted(() => ({
+const { mockFind, mockSort, mockFindOne, mockFindMongo, mockToArray, mockFindByIdAndUpdate, mockFindByIdAndDelete, mockFindById, mockUpdateMany, mockDeleteMany } = vi.hoisted(() => ({
   mockFind: vi.fn(),
   mockSort: vi.fn(),
   mockFindOne: vi.fn(),
@@ -19,6 +19,8 @@ const { mockFind, mockSort, mockFindOne, mockFindMongo, mockToArray, mockFindByI
   mockFindByIdAndUpdate: vi.fn(),
   mockFindByIdAndDelete: vi.fn(),
   mockFindById: vi.fn(),
+  mockUpdateMany: vi.fn(),
+  mockDeleteMany: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/auth", () => ({
@@ -46,6 +48,8 @@ vi.mock("@/lib/models/ProspectiveCustomer", () => ({
     findById: mockFindById,
     findByIdAndUpdate: mockFindByIdAndUpdate,
     findByIdAndDelete: mockFindByIdAndDelete,
+    updateMany: mockUpdateMany,
+    deleteMany: mockDeleteMany,
   },
 }));
 
@@ -302,9 +306,10 @@ describe("archiveSubmission", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockFindByIdAndUpdate.mockResolvedValue(null);
+    mockUpdateMany.mockResolvedValue({ modifiedCount: 0 });
   });
 
-  it("sets archivedAt to a Date on the submission", async () => {
+  it("sets archivedAt to a Date on the root submission", async () => {
     await archiveSubmission("sub-1");
 
     expect(mockFindByIdAndUpdate).toHaveBeenCalledWith(
@@ -313,14 +318,28 @@ describe("archiveSubmission", () => {
     );
   });
 
-  it("calls findByIdAndUpdate regardless of current archivedAt value", async () => {
+  it("cascades archivedAt to all replies where parentId matches", async () => {
+    await archiveSubmission("sub-1");
+
+    expect(mockUpdateMany).toHaveBeenCalledWith(
+      { parentId: "sub-1" },
+      expect.objectContaining({ archivedAt: expect.any(Date) })
+    );
+  });
+
+  it("uses the same archivedAt timestamp for root and replies", async () => {
+    await archiveSubmission("sub-1");
+
+    const rootCall = mockFindByIdAndUpdate.mock.calls[0];
+    const repliesCall = mockUpdateMany.mock.calls[0];
+    expect(rootCall[1].archivedAt).toEqual(repliesCall[1].archivedAt);
+  });
+
+  it("archives root and all replies in a single operation (parallel)", async () => {
     await archiveSubmission("sub-already-archived");
 
     expect(mockFindByIdAndUpdate).toHaveBeenCalledTimes(1);
-    expect(mockFindByIdAndUpdate).toHaveBeenCalledWith(
-      "sub-already-archived",
-      expect.objectContaining({ archivedAt: expect.any(Date) })
-    );
+    expect(mockUpdateMany).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -328,19 +347,26 @@ describe("adminDeleteSubmission", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockFindByIdAndDelete.mockResolvedValue(null);
+    mockDeleteMany.mockResolvedValue({ deletedCount: 0 });
   });
 
-  it("calls findByIdAndDelete with the supplied id", async () => {
+  it("deletes the root submission", async () => {
     await adminDeleteSubmission("sub-to-delete");
 
     expect(mockFindByIdAndDelete).toHaveBeenCalledWith("sub-to-delete");
   });
 
-  it("calls findByIdAndDelete regardless of archivedAt value (both inbox and archived)", async () => {
+  it("cascades delete to all replies where parentId matches", async () => {
+    await adminDeleteSubmission("sub-to-delete");
+
+    expect(mockDeleteMany).toHaveBeenCalledWith({ parentId: "sub-to-delete" });
+  });
+
+  it("deletes root and all replies for both inbox and archived submissions", async () => {
     await adminDeleteSubmission("sub-archived");
 
     expect(mockFindByIdAndDelete).toHaveBeenCalledTimes(1);
-    expect(mockFindByIdAndDelete).toHaveBeenCalledWith("sub-archived");
+    expect(mockDeleteMany).toHaveBeenCalledTimes(1);
   });
 });
 
