@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { EmailTemplate } from "@/components/email-template";
 import { CustomerConfirmationEmail } from "@/components/customer-confirmation-email";
 import { MagicLinkEmail } from "@/components/magic-link-email";
+import { ReplyNotificationEmail } from "@/components/reply-notification-email";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -23,6 +24,28 @@ export async function sendMagicLinkEmail(email: string, magicLinkUrl: string): P
     });
   } catch (emailError) {
     console.error("Failed to send magic link email:", emailError);
+  }
+}
+
+export interface ReplyNotificationData {
+  to: string;
+  senderName: string;
+  replyBody: string;
+  magicLinkUrl?: string;
+}
+
+export async function sendReplyNotification(data: ReplyNotificationData): Promise<void> {
+  const from = process.env.NOTIFICATION_EMAIL!;
+  const { to, senderName, replyBody, magicLinkUrl } = data;
+  try {
+    await resend.emails.send({
+      from: `Brady Bovero <${from}>`,
+      to,
+      subject: `New reply from ${senderName}`,
+      react: ReplyNotificationEmail({ senderName, replyBody, magicLinkUrl }),
+    });
+  } catch (emailError) {
+    console.error("Failed to send reply notification:", emailError);
   }
 }
 

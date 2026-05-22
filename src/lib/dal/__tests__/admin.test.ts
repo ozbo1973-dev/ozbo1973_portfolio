@@ -58,7 +58,7 @@ vi.mock("@/lib/models/ProspectiveCustomer", () => ({
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
-import { verifyAdminSession, getInbox, getArchived, archiveSubmission, adminDeleteSubmission, getThread, createAdminReply } from "@/lib/dal/admin";
+import { verifyAdminSession, getInbox, getArchived, archiveSubmission, adminDeleteSubmission, getThread, createAdminReply, getRootSubmissionOwner } from "@/lib/dal/admin";
 
 const mockHeaders = headers as ReturnType<typeof vi.fn>;
 const mockGetSession = auth.api.getSession as ReturnType<typeof vi.fn>;
@@ -520,5 +520,39 @@ describe("createAdminReply", () => {
     const result = await createAdminReply("root-1", "Admin reply body", adminSession);
 
     expect(result.sender).toEqual({ name: "Admin", email: "admin@example.com" });
+  });
+});
+
+describe("getRootSubmissionOwner", () => {
+  const VALID_USER_ID = "aaaaaaaaaaaaaaaaaaaaaaaa";
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns email and name when root submission and user both exist", async () => {
+    mockFindById.mockResolvedValue({ _id: { toString: () => "root-1" }, userId: VALID_USER_ID });
+    mockFindOne.mockResolvedValue({ email: "alice@example.com", name: "Alice" });
+
+    const result = await getRootSubmissionOwner("root-1");
+
+    expect(result).toEqual({ email: "alice@example.com", name: "Alice" });
+  });
+
+  it("returns null when the root submission does not exist", async () => {
+    mockFindById.mockResolvedValue(null);
+
+    const result = await getRootSubmissionOwner("nonexistent");
+
+    expect(result).toBeNull();
+  });
+
+  it("returns null when the user document does not exist", async () => {
+    mockFindById.mockResolvedValue({ _id: { toString: () => "root-1" }, userId: VALID_USER_ID });
+    mockFindOne.mockResolvedValue(null);
+
+    const result = await getRootSubmissionOwner("root-1");
+
+    expect(result).toBeNull();
   });
 });

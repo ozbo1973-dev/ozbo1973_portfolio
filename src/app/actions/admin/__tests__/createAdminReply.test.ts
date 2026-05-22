@@ -1,13 +1,42 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
 
-const { mockVerifyAdminSession, mockCreateAdminReply } = vi.hoisted(() => ({
+const {
+  mockVerifyAdminSession,
+  mockCreateAdminReply,
+  mockGetRootSubmissionOwner,
+  mockSendReplyNotification,
+  mockRegisterMagicLinkCapture,
+  mockSignInMagicLink,
+} = vi.hoisted(() => ({
   mockVerifyAdminSession: vi.fn(),
   mockCreateAdminReply: vi.fn(),
+  mockGetRootSubmissionOwner: vi.fn(),
+  mockSendReplyNotification: vi.fn(),
+  mockRegisterMagicLinkCapture: vi.fn(),
+  mockSignInMagicLink: vi.fn(),
 }));
 
 vi.mock("@/lib/dal/admin", () => ({
   verifyAdminSession: mockVerifyAdminSession,
   createAdminReply: mockCreateAdminReply,
+  getRootSubmissionOwner: mockGetRootSubmissionOwner,
+}));
+
+vi.mock("@/lib/contact/sendNotifications", () => ({
+  sendReplyNotification: mockSendReplyNotification,
+}));
+
+vi.mock("next/headers", () => ({
+  headers: vi.fn().mockResolvedValue({}),
+}));
+
+vi.mock("@/lib/auth/auth", () => ({
+  registerMagicLinkCapture: mockRegisterMagicLinkCapture,
+  auth: {
+    api: {
+      signInMagicLink: mockSignInMagicLink,
+    },
+  },
 }));
 
 import { createAdminReplyAction } from "../createAdminReply";
@@ -79,5 +108,37 @@ describe("createAdminReplyAction", () => {
     const result = await createAdminReplyAction("root-1", "Valid reply");
 
     expect(result).toEqual({ success: false, error: expect.any(String) });
+  });
+
+  it("sends a notification to the thread owner after a successful reply", async () => {
+    mockGetRootSubmissionOwner.mockResolvedValue({ email: "alice@example.com", name: "Alice" });
+    mockRegisterMagicLinkCapture.mockReturnValue(Promise.resolve("https://example.com/magic"));
+    mockSignInMagicLink.mockResolvedValue(undefined);
+
+    await createAdminReplyAction("root-1", "Great question!");
+
+    expect(mockSendReplyNotification).toHaveBeenCalledWith(
+      expect.objectContaining({ to: "alice@example.com", senderName: "Admin" })
+    );
+  });
+
+  it("skips notification without error when getRootSubmissionOwner returns null", async () => {
+    mockGetRootSubmissionOwner.mockResolvedValue(null);
+
+    const result = await createAdminReplyAction("root-1", "Great question!");
+
+    expect(mockSendReplyNotification).not.toHaveBeenCalled();
+    expect(result).toEqual({ success: true, reply: replyRecord });
+  });
+
+  it("still returns success when the notification fails", async () => {
+    mockGetRootSubmissionOwner.mockResolvedValue({ email: "alice@example.com", name: "Alice" });
+    mockRegisterMagicLinkCapture.mockReturnValue(Promise.resolve("https://example.com/magic"));
+    mockSignInMagicLink.mockResolvedValue(undefined);
+    mockSendReplyNotification.mockRejectedValue(new Error("Email down"));
+
+    const result = await createAdminReplyAction("root-1", "Great question!");
+
+    expect(result).toEqual({ success: true, reply: replyRecord });
   });
 });

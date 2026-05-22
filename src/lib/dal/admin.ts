@@ -147,6 +147,17 @@ export async function createAdminReply(
   };
 }
 
+export async function getRootSubmissionOwner(rootId: string): Promise<{ email: string; name: string } | null> {
+  await connectDB();
+  const submission = await ProspectiveCustomer.findById(rootId);
+  if (!submission) return null;
+
+  const userDoc = await db.collection("user").findOne({ _id: new ObjectId(submission.userId) });
+  if (!userDoc) return null;
+
+  return { email: userDoc.email as string, name: userDoc.name as string };
+}
+
 export async function getThread(rootId: string): Promise<AdminThread | null> {
   await connectDB();
 
