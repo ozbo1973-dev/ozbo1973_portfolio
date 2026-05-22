@@ -118,3 +118,26 @@ export async function getThreadsByUserId(userId: string): Promise<UserThread[]> 
 
   return threads.sort((a, b) => b.latestActivity.getTime() - a.latestActivity.getTime());
 }
+
+export async function createUserReply(
+  rootId: string,
+  userId: string,
+  body: string,
+): Promise<UserThreadRecord> {
+  await connectDB();
+  const rootDoc = await ProspectiveCustomer.findById(rootId);
+  if (!rootDoc || rootDoc.userId !== userId) {
+    throw new Error("Submission not found or does not belong to user.");
+  }
+  const doc = await ProspectiveCustomer.create({
+    userId,
+    description: body,
+    parentId: rootId,
+  });
+  return {
+    id: doc._id.toString(),
+    userId: doc.userId,
+    description: doc.description,
+    createdAt: doc.createdAt,
+  };
+}

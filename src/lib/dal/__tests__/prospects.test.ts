@@ -18,18 +18,21 @@ vi.mock("@/lib/auth/auth", () => ({
 
 vi.mock("@/lib/db/connect", () => ({ default: vi.fn() }));
 
-const { mockFind, mockSort, mockUpdateMany } = vi.hoisted(() => ({
+const { mockFind, mockSort, mockUpdateMany, mockFindById, mockCreate } = vi.hoisted(() => ({
   mockFind: vi.fn(),
   mockSort: vi.fn(),
   mockUpdateMany: vi.fn(),
+  mockFindById: vi.fn(),
+  mockCreate: vi.fn(),
 }));
 
 vi.mock("@/lib/models/ProspectiveCustomer", () => ({
   default: {
-    create: vi.fn(),
+    create: mockCreate,
     findByIdAndUpdate: vi.fn(),
     find: mockFind,
     updateMany: mockUpdateMany,
+    findById: mockFindById,
   },
 }));
 
@@ -69,7 +72,7 @@ describe("verifySession", () => {
   });
 });
 
-import { getSubmissionsByUserId, getThreadsByUserId } from "@/lib/dal/prospects";
+import { getSubmissionsByUserId, getThreadsByUserId, createUserReply } from "@/lib/dal/prospects";
 
 describe("getSubmissionsByUserId", () => {
   beforeEach(() => {
@@ -311,5 +314,78 @@ describe("getThreadsByUserId", () => {
     const results = await getThreadsByUserId("user-abc");
 
     expect(results).toEqual([]);
+  });
+});
+
+describe("createUserReply", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const rootDoc = {
+    _id: { toString: () => "root-1" },
+    userId: "user-abc",
+    description: "Root submission",
+    parentId: null,
+    createdAt: new Date("2024-01-01"),
+    updatedAt: new Date("2024-01-01"),
+    archivedAt: null,
+  };
+
+  it("creates reply with correct parentId and userId", async () => {
+    mockFindById.mockResolvedValue(rootDoc);
+    const replyDoc = {
+      _id: { toString: () => "reply-new" },
+      userId: "user-abc",
+      description: "Great, thanks!",
+      parentId: { toString: () => "root-1" },
+      createdAt: new Date("2024-01-02"),
+      updatedAt: new Date("2024-01-02"),
+    };
+    mockCreate.mockResolvedValue(replyDoc);
+
+    await createUserReply("root-1", "user-abc", "Great, thanks!");
+
+    expect(mockCreate).toHaveBeenCalledWith({
+      userId: "user-abc",
+      description: "Great, thanks!",
+      parentId: "root-1",
+    });
+  });
+
+  it("returns a UserThreadRecord with correct fields", async () => {
+    mockFindById.mockResolvedValue(rootDoc);
+    const replyDoc = {
+      _id: { toString: () => "reply-new" },
+      userId: "user-abc",
+      description: "Great, thanks!",
+      parentId: { toString: () => "root-1" },
+      createdAt: new Date("2024-01-02"),
+      updatedAt: new Date("2024-01-02"),
+    };
+    mockCreate.mockResolvedValue(replyDoc);
+
+    const result = await createUserReply("root-1", "user-abc", "Great, thanks!");
+
+    expect(result).toMatchObject({
+      id: "reply-new",
+      userId: "user-abc",
+      description: "Great, thanks!",
+    });
+    expect(result.createdAt).toBeInstanceOf(Date);
+  });
+
+  it("throws when root submission does not belong to requesting user", async () => {
+    mockFindById.mockResolvedValue({ ...rootDoc, userId: "other-user" });
+
+    await expect(createUserReply("root-1", "user-abc", "Trying to reply")).rejects.toThrow();
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it("throws when root submission does not exist", async () => {
+    mockFindById.mockResolvedValue(null);
+
+    await expect(createUserReply("root-1", "user-abc", "Hello")).rejects.toThrow();
+    expect(mockCreate).not.toHaveBeenCalled();
   });
 });
