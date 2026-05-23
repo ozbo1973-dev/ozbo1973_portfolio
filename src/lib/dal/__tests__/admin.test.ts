@@ -80,10 +80,10 @@ describe("verifyAdminSession", () => {
 
   it("redirects to / when user has no role", async () => {
     mockGetSession.mockResolvedValue({
-      session: { userId: "user-123" },
+      session: { userId: "aaaaaaaaaaaaaaaaaaaaaaaa" },
       user: { email: "alice@example.com", name: "Alice" },
     });
-    mockFindOne.mockResolvedValue({ id: "user-123", email: "alice@example.com", name: "Alice" });
+    mockFindOne.mockResolvedValue({ id: "aaaaaaaaaaaaaaaaaaaaaaaa", email: "alice@example.com", name: "Alice" });
 
     await expect(verifyAdminSession()).rejects.toThrow("NEXT_REDIRECT");
     expect(mockRedirect).toHaveBeenCalledWith("/");
@@ -91,10 +91,10 @@ describe("verifyAdminSession", () => {
 
   it("redirects to / when user role is not admin", async () => {
     mockGetSession.mockResolvedValue({
-      session: { userId: "user-123" },
+      session: { userId: "aaaaaaaaaaaaaaaaaaaaaaaa" },
       user: { email: "alice@example.com", name: "Alice" },
     });
-    mockFindOne.mockResolvedValue({ id: "user-123", email: "alice@example.com", name: "Alice", role: "user" });
+    mockFindOne.mockResolvedValue({ id: "aaaaaaaaaaaaaaaaaaaaaaaa", email: "alice@example.com", name: "Alice", role: "user" });
 
     await expect(verifyAdminSession()).rejects.toThrow("NEXT_REDIRECT");
     expect(mockRedirect).toHaveBeenCalledWith("/");
@@ -102,19 +102,19 @@ describe("verifyAdminSession", () => {
 
   it("returns session data when user is admin", async () => {
     mockGetSession.mockResolvedValue({
-      session: { userId: "admin-1" },
+      session: { userId: "bbbbbbbbbbbbbbbbbbbbbbbb" },
       user: { email: "admin@example.com", name: "Admin User" },
     });
-    mockFindOne.mockResolvedValue({ id: "admin-1", email: "admin@example.com", name: "Admin User", role: "admin" });
+    mockFindOne.mockResolvedValue({ id: "bbbbbbbbbbbbbbbbbbbbbbbb", email: "admin@example.com", name: "Admin User", role: "admin" });
 
     const result = await verifyAdminSession();
 
-    expect(result).toEqual({ userId: "admin-1", email: "admin@example.com", name: "Admin User" });
+    expect(result).toEqual({ userId: "bbbbbbbbbbbbbbbbbbbbbbbb", email: "admin@example.com", name: "Admin User" });
   });
 
   it("redirects when user doc not found in DB", async () => {
     mockGetSession.mockResolvedValue({
-      session: { userId: "ghost-user" },
+      session: { userId: "cccccccccccccccccccccccc" },
       user: { email: "ghost@example.com", name: "Ghost" },
     });
     mockFindOne.mockResolvedValue(null);
@@ -162,7 +162,7 @@ describe("getInbox", () => {
   it("joins sender info from BetterAuth user collection", async () => {
     const doc = {
       _id: { toString: () => "sub-1" },
-      userId: "user-abc",
+      userId: "aaaaaaaaaaaaaaaaaaaaaaaa",
       description: "Need a website",
       createdAt: new Date("2024-01-01"),
       updatedAt: new Date("2024-01-02"),
@@ -170,7 +170,7 @@ describe("getInbox", () => {
     };
     setupFindMockWithReplies([doc]);
     mockFindMongo.mockReturnValue({ toArray: mockToArray });
-    mockToArray.mockResolvedValue([{ _id: { toString: () => "user-abc" }, name: "Alice Smith", email: "alice@example.com" }]);
+    mockToArray.mockResolvedValue([{ _id: { toString: () => "aaaaaaaaaaaaaaaaaaaaaaaa" }, name: "Alice Smith", email: "alice@example.com" }]);
 
     const results = await getInbox();
 
@@ -180,7 +180,7 @@ describe("getInbox", () => {
   it("handles orphan submissions with fallback sender label", async () => {
     const doc = {
       _id: { toString: () => "sub-orphan" },
-      userId: "deleted-user",
+      userId: "dddddddddddddddddddddddd",
       description: "Orphan submission",
       createdAt: new Date("2024-01-01"),
       updatedAt: new Date("2024-01-02"),
@@ -277,7 +277,7 @@ describe("getArchived", () => {
     const archivedAt = new Date("2024-03-01");
     const doc = {
       _id: { toString: () => "sub-arch-1" },
-      userId: "user-xyz",
+      userId: "eeeeeeeeeeeeeeeeeeeeeeee",
       description: "Archived request",
       createdAt: new Date("2024-01-01"),
       updatedAt: new Date("2024-03-01"),
@@ -285,7 +285,7 @@ describe("getArchived", () => {
     };
     setupFindMockWithReplies([doc]);
     mockFindMongo.mockReturnValue({ toArray: mockToArray });
-    mockToArray.mockResolvedValue([{ _id: { toString: () => "user-xyz" }, name: "Bob Jones", email: "bob@example.com" }]);
+    mockToArray.mockResolvedValue([{ _id: { toString: () => "eeeeeeeeeeeeeeeeeeeeeeee" }, name: "Bob Jones", email: "bob@example.com" }]);
 
     const results = await getArchived();
 
