@@ -1,10 +1,12 @@
 import connectDB from "@/lib/db/connect";
 import ProspectiveCustomer from "@/lib/models/ProspectiveCustomer";
+import { buildUserThreads } from "@/lib/dal/prospects";
+import type { ProspectRecord, UserThread } from "@/lib/dal/prospects";
 
 export type { ProspectData, ProspectRecord, UserThread, UserThreadRecord } from "@/lib/dal/prospects";
 export { createProspect, getThreadsByUserId } from "@/lib/dal/prospects";
 
-export async function getSubmissionsByUserId(userId: string): Promise<import("@/lib/dal/prospects").ProspectRecord[]> {
+export async function getSubmissionsByUserId(userId: string): Promise<ProspectRecord[]> {
   await connectDB();
   const docs = await ProspectiveCustomer.find({ userId });
 
@@ -48,7 +50,7 @@ export async function userArchiveSubmission(id: string, _userId: string): Promis
   ]);
 }
 
-export async function getArchivedThreadsByUserId(userId: string): Promise<import("@/lib/dal/prospects").UserThread[]> {
+export async function getArchivedThreadsByUserId(userId: string): Promise<UserThread[]> {
   await connectDB();
 
   const rootDocs = await ProspectiveCustomer.find({
@@ -57,41 +59,7 @@ export async function getArchivedThreadsByUserId(userId: string): Promise<import
     parentId: null,
   }).sort({ archivedAt: -1 });
 
-  if (rootDocs.length === 0) return [];
-
-  const rootIds = rootDocs.map((d) => d._id);
-  const replyDocs = await ProspectiveCustomer.find({
-    parentId: { $in: rootIds },
-  }).sort({ createdAt: 1 });
-
-  const replyMap = new Map<string, import("@/lib/dal/prospects").UserThreadRecord[]>();
-  for (const reply of replyDocs) {
-    const pid = reply.parentId?.toString();
-    if (!pid) continue;
-    if (!replyMap.has(pid)) replyMap.set(pid, []);
-    replyMap.get(pid)!.push({
-      id: reply._id.toString(),
-      userId: reply.userId,
-      description: reply.description,
-      createdAt: reply.createdAt,
-    });
-  }
-
-  return rootDocs.map((doc) => {
-    const id = doc._id.toString();
-    const replies = replyMap.get(id) ?? [];
-    const latestReply = replies[replies.length - 1];
-    return {
-      root: {
-        id,
-        userId: doc.userId,
-        description: doc.description,
-        createdAt: doc.createdAt,
-      },
-      replies,
-      latestActivity: latestReply ? latestReply.createdAt : doc.createdAt,
-    };
-  });
+  return buildUserThreads(rootDocs);
 }
 
 export async function deleteAllSubmissionsByUser(userId: string): Promise<number> {

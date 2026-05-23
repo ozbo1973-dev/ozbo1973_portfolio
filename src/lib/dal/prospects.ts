@@ -71,15 +71,26 @@ export async function updateProspectUserId(id: string, userId: string): Promise<
   await ProspectiveCustomer.findByIdAndUpdate(id, { userId });
 }
 
-export async function getThreadsByUserId(userId: string): Promise<UserThread[]> {
-  await connectDB();
+function toUserThreadRecord(doc: {
+  _id: { toString(): string };
+  userId: string;
+  description: string;
+  createdAt: Date;
+}): UserThreadRecord {
+  return {
+    id: doc._id.toString(),
+    userId: doc.userId,
+    description: doc.description,
+    createdAt: doc.createdAt,
+  };
+}
 
-  const rootDocs = await ProspectiveCustomer.find({
-    userId,
-    archivedAt: null,
-    parentId: null,
-  }).sort({ createdAt: -1 });
-
+export async function buildUserThreads(rootDocs: Array<{
+  _id: { toString(): string };
+  userId: string;
+  description: string;
+  createdAt: Date;
+}>): Promise<UserThread[]> {
   if (rootDocs.length === 0) return [];
 
   const rootIds = rootDocs.map((d) => d._id);
@@ -92,30 +103,31 @@ export async function getThreadsByUserId(userId: string): Promise<UserThread[]> 
     const pid = reply.parentId?.toString();
     if (!pid) continue;
     if (!replyMap.has(pid)) replyMap.set(pid, []);
-    replyMap.get(pid)!.push({
-      id: reply._id.toString(),
-      userId: reply.userId,
-      description: reply.description,
-      createdAt: reply.createdAt,
-    });
+    replyMap.get(pid)!.push(toUserThreadRecord(reply));
   }
 
-  const threads: UserThread[] = rootDocs.map((doc) => {
-    const id = doc._id.toString();
-    const replies = replyMap.get(id) ?? [];
+  return rootDocs.map((doc) => {
+    const root = toUserThreadRecord(doc);
+    const replies = replyMap.get(root.id) ?? [];
     const latestReply = replies[replies.length - 1];
     return {
-      root: {
-        id,
-        userId: doc.userId,
-        description: doc.description,
-        createdAt: doc.createdAt,
-      },
+      root,
       replies,
       latestActivity: latestReply ? latestReply.createdAt : doc.createdAt,
     };
   });
+}
 
+export async function getThreadsByUserId(userId: string): Promise<UserThread[]> {
+  await connectDB();
+
+  const rootDocs = await ProspectiveCustomer.find({
+    userId,
+    archivedAt: null,
+    parentId: null,
+  }).sort({ createdAt: -1 });
+
+  const threads = await buildUserThreads(rootDocs);
   return threads.sort((a, b) => b.latestActivity.getTime() - a.latestActivity.getTime());
 }
 
