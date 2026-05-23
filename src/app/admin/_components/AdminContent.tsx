@@ -3,6 +3,12 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import MessageList from "./MessageList";
 import ThreadPanel from "./ThreadPanel";
 import type { AdminSubmissionRecord, AdminThread } from "@/lib/dal/admin";
@@ -113,15 +119,23 @@ export default function AdminContent({ initialInbox, initialArchived, adminUserI
         </section>
       )}
 
-      {activeThread && (
-        <ThreadPanel
-          thread={activeThread}
-          adminUserId={adminUserId}
-          adminName={adminName}
-          adminEmail={adminEmail}
-          onClose={() => setActiveThread(null)}
-        />
-      )}
+      <Sheet open={!!activeThread} onOpenChange={(open) => { if (!open) setActiveThread(null); }}>
+        <SheetContent side="right" className="flex flex-col">
+          <SheetHeader>
+            <SheetTitle className="font-[family-name:var(--font-playfair)] text-primary">
+              {activeThread ? `Thread - ${activeThread.root.sender.name}` : "Thread"}
+            </SheetTitle>
+          </SheetHeader>
+          {activeThread && (
+            <ThreadPanel
+              thread={activeThread}
+              adminUserId={adminUserId}
+              adminName={adminName}
+              adminEmail={adminEmail}
+            />
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

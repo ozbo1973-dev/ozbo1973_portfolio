@@ -13,6 +13,12 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import ThreadView from "./ThreadView";
 import { deleteSubmissionAction } from "@/app/actions/deleteSubmission";
 import { archiveSubmissionAction } from "@/app/actions/archiveSubmission";
@@ -28,8 +34,10 @@ interface ThreadCardProps {
 export default function ThreadCard({ thread, currentUserId, onDeleted, onArchived }: ThreadCardProps) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const hasAdminReplies = thread.replies.some((r) => r.userId !== currentUserId);
+  const isArchived = !onArchived;
 
   async function handleConfirmDelete() {
     const result = await deleteSubmissionAction(thread.root.id);
@@ -61,56 +69,84 @@ export default function ThreadCard({ thread, currentUserId, onDeleted, onArchive
               day: "numeric",
             })}
           </time>
-          {thread.replies.length > 0 && (
-            <span className="text-xs text-muted-foreground font-['Mulish']">
-              {thread.replies.length} {thread.replies.length === 1 ? "reply" : "replies"}
-            </span>
-          )}
         </div>
 
-        {hasAdminReplies ? (
-          <AlertDialog open={archiveOpen} onOpenChange={setArchiveOpen}>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" aria-label="Archive submission">
-                Archive
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent role="alertdialog">
-              <AlertDialogHeader>
-                <AlertDialogTitle>Archive submission?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will move this submission and its replies to your archive.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleConfirmArchive}>Confirm</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        ) : (
-          <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" size="sm" aria-label="Delete submission">
-                Delete
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent role="alertdialog">
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete submission?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently delete this submission. This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleConfirmDelete}>Confirm</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            aria-label="View thread"
+            onClick={() => setSheetOpen(true)}
+            className="gap-2"
+          >
+            View Thread
+            {thread.replies.length > 0 && (
+              <span className="bg-primary text-primary-foreground text-xs rounded-full px-1.5 py-0.5 font-['Mulish'] leading-none">
+                {thread.replies.length}
+              </span>
+            )}
+          </Button>
+
+          {!isArchived && hasAdminReplies && (
+            <AlertDialog open={archiveOpen} onOpenChange={setArchiveOpen}>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" aria-label="Archive submission">
+                  Archive
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent role="alertdialog">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Archive submission?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will move this submission and its replies to your archive.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleConfirmArchive}>Confirm</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+
+          {!hasAdminReplies && (
+            <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" aria-label="Delete submission">
+                  Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent role="alertdialog">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete submission?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete this submission. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleConfirmDelete}>Confirm</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
       </div>
-      <ThreadView thread={thread} currentUserId={currentUserId} />
+
+      <p className="text-sm text-foreground font-['Mulish'] leading-relaxed truncate">
+        {thread.root.description}
+      </p>
+
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        <SheetContent side="right" className="flex flex-col">
+          <SheetHeader>
+            <SheetTitle className="font-[family-name:var(--font-playfair)] text-primary">
+              Thread
+            </SheetTitle>
+          </SheetHeader>
+          <ThreadView thread={thread} currentUserId={currentUserId} isArchived={isArchived} />
+        </SheetContent>
+      </Sheet>
     </li>
   );
 }

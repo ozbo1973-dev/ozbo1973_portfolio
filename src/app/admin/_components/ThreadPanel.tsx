@@ -12,7 +12,6 @@ interface ThreadPanelProps {
   adminUserId: string;
   adminName: string;
   adminEmail: string;
-  onClose: () => void;
 }
 
 function MessageBubble({
@@ -63,7 +62,6 @@ export default function ThreadPanel({
   adminUserId,
   adminName,
   adminEmail,
-  onClose,
 }: ThreadPanelProps) {
   const [optimisticReplies, setOptimisticReplies] = useState<AdminSubmissionRecord[]>([]);
   const [body, setBody] = useState("");
@@ -105,16 +103,8 @@ export default function ThreadPanel({
   }
 
   return (
-    <div className="mt-8 border border-primary/20 border-t-[3px] border-t-primary p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold font-[family-name:var(--font-playfair)] text-primary">
-          Thread
-        </h2>
-        <Button variant="outline" size="sm" onClick={onClose}>
-          Close
-        </Button>
-      </div>
-      <ul className="space-y-3" aria-label="Thread messages">
+    <div className="flex flex-col h-full p-6">
+      <ul className="flex-1 overflow-y-auto space-y-3" aria-label="Thread messages">
         {allMessages.map((record) => (
           <MessageBubble
             key={record.id}
@@ -123,7 +113,7 @@ export default function ThreadPanel({
           />
         ))}
       </ul>
-      <form onSubmit={handleSubmit} className="mt-6 space-y-3">
+      <form onSubmit={handleSubmit} className="mt-6 space-y-3 shrink-0">
         <Textarea
           ref={textareaRef}
           value={body}

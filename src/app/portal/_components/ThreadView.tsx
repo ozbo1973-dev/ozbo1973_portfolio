@@ -10,6 +10,7 @@ import { createUserReplyAction } from "@/app/actions/createUserReply";
 interface ThreadViewProps {
   thread: UserThread;
   currentUserId: string;
+  isArchived?: boolean;
 }
 
 function MessageBubble({
@@ -48,7 +49,7 @@ function MessageBubble({
   );
 }
 
-export default function ThreadView({ thread, currentUserId }: ThreadViewProps) {
+export default function ThreadView({ thread, currentUserId, isArchived = false }: ThreadViewProps) {
   const [optimisticReplies, setOptimisticReplies] = useState<UserThreadRecord[]>([]);
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -85,8 +86,8 @@ export default function ThreadView({ thread, currentUserId }: ThreadViewProps) {
   }
 
   return (
-    <div className="mt-4">
-      <ul className="space-y-3" aria-label="Thread messages">
+    <div className="flex flex-col h-full p-6">
+      <ul className="flex-1 overflow-y-auto space-y-3" aria-label="Thread messages">
         {allMessages.map((record) => (
           <MessageBubble
             key={record.id}
@@ -95,28 +96,30 @@ export default function ThreadView({ thread, currentUserId }: ThreadViewProps) {
           />
         ))}
       </ul>
-      <form onSubmit={handleSubmit} className="mt-4 space-y-3">
-        <Textarea
-          ref={textareaRef}
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          placeholder="Write a reply…"
-          rows={3}
-          disabled={isPending}
-          aria-label="Reply body"
-          className="font-['Mulish']"
-        />
-        {error && (
-          <p role="alert" className="text-sm text-destructive font-['Mulish']">
-            {error}
-          </p>
-        )}
-        <div className="flex justify-end">
-          <Button type="submit" size="sm" disabled={isPending || !body.trim()}>
-            {isPending ? "Sending…" : "Send Reply"}
-          </Button>
-        </div>
-      </form>
+      {!isArchived && (
+        <form onSubmit={handleSubmit} className="mt-4 space-y-3 shrink-0">
+          <Textarea
+            ref={textareaRef}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder="Write a reply…"
+            rows={3}
+            disabled={isPending}
+            aria-label="Reply body"
+            className="font-['Mulish']"
+          />
+          {error && (
+            <p role="alert" className="text-sm text-destructive font-['Mulish']">
+              {error}
+            </p>
+          )}
+          <div className="flex justify-end">
+            <Button type="submit" size="sm" disabled={isPending || !body.trim()}>
+              {isPending ? "Sending…" : "Send Reply"}
+            </Button>
+          </div>
+        </form>
+      )}
     </div>
   );
 }

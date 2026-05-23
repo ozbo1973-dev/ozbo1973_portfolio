@@ -44,11 +44,6 @@ export default function MessageCard({ submission, onArchive, onDelete, onViewThr
             </span>
           </div>
           <div className="flex items-center gap-3">
-            {submission.replyCount > 0 && (
-              <span className="text-xs text-muted-foreground font-['Mulish']">
-                {submission.replyCount} {submission.replyCount === 1 ? "reply" : "replies"}
-              </span>
-            )}
             <time
               dateTime={submission.createdAt.toISOString()}
               className="text-xs text-muted-foreground font-['Mulish']"
@@ -65,8 +60,14 @@ export default function MessageCard({ submission, onArchive, onDelete, onViewThr
                 size="sm"
                 aria-label="View thread"
                 onClick={() => onViewThread(submission)}
+                className="gap-2"
               >
                 View Thread
+                {submission.replyCount > 0 && (
+                  <span className="bg-primary text-primary-foreground text-xs rounded-full px-1.5 py-0.5 font-['Mulish'] leading-none">
+                    {submission.replyCount}
+                  </span>
+                )}
               </Button>
             )}
             {onArchive && (
