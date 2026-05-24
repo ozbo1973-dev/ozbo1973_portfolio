@@ -126,7 +126,7 @@ describe("verifyAdminSession", () => {
 
 function setupFindMockWithReplies(rootDocs: object[], replyDocs: object[] = []) {
   mockFind.mockImplementation((filter: Record<string, unknown>) => {
-    if (filter && "parentId" in filter) {
+    if (filter && "parentId" in filter && filter.parentId !== null) {
       return replyDocs;
     }
     return { sort: mockSort };
@@ -146,7 +146,7 @@ describe("getInbox", () => {
 
     await getInbox();
 
-    expect(mockFind).toHaveBeenCalledWith({ archivedAt: null });
+    expect(mockFind).toHaveBeenCalledWith({ archivedAt: null, parentId: null });
   });
 
   it("sorts by createdAt descending", async () => {
@@ -260,7 +260,7 @@ describe("getArchived", () => {
 
     await getArchived();
 
-    expect(mockFind).toHaveBeenCalledWith({ archivedAt: { $ne: null } });
+    expect(mockFind).toHaveBeenCalledWith({ archivedAt: { $ne: null }, parentId: null });
   });
 
   it("sorts by archivedAt descending", async () => {

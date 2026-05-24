@@ -95,11 +95,11 @@ async function fetchWithSenders(
 }
 
 export async function getInbox(): Promise<AdminSubmissionRecord[]> {
-  return fetchWithSenders({ archivedAt: null }, "createdAt");
+  return fetchWithSenders({ archivedAt: null, parentId: null }, "createdAt");
 }
 
 export async function getArchived(): Promise<AdminSubmissionRecord[]> {
-  return fetchWithSenders({ archivedAt: { $ne: null } }, "archivedAt");
+  return fetchWithSenders({ archivedAt: { $ne: null }, parentId: null }, "archivedAt");
 }
 
 export async function archiveSubmission(id: string): Promise<void> {
