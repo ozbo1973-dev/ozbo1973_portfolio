@@ -2,6 +2,7 @@ import { Resend } from "resend";
 import { EmailTemplate } from "@/components/email-template";
 import { CustomerConfirmationEmail } from "@/components/customer-confirmation-email";
 import { MagicLinkEmail } from "@/components/magic-link-email";
+import { ReplyNotificationEmail } from "@/components/reply-notification-email";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -12,7 +13,10 @@ export interface ContactNotificationData {
   description: string;
 }
 
-export async function sendMagicLinkEmail(email: string, magicLinkUrl: string): Promise<void> {
+export async function sendMagicLinkEmail(
+  email: string,
+  magicLinkUrl: string,
+): Promise<void> {
   const from = process.env.NOTIFICATION_EMAIL!;
   try {
     await resend.emails.send({
@@ -26,7 +30,38 @@ export async function sendMagicLinkEmail(email: string, magicLinkUrl: string): P
   }
 }
 
-export async function sendNotifications(data: ContactNotificationData, magicLinkUrl?: string): Promise<void> {
+export interface ReplyNotificationData {
+  to: string;
+  senderName: string;
+  replyBody: string;
+  magicLinkUrl?: string;
+}
+
+export async function sendReplyNotification(
+  data: ReplyNotificationData,
+): Promise<void> {
+  const from = process.env.NOTIFICATION_EMAIL!;
+  const { to, senderName, replyBody, magicLinkUrl } = data;
+  try {
+    await resend.emails.send({
+      from: `Brady Bovero <${from}>`,
+      to,
+      subject: `New reply from ${senderName}`,
+      react: await ReplyNotificationEmail({
+        senderName,
+        replyBody,
+        magicLinkUrl,
+      }),
+    });
+  } catch (emailError) {
+    console.error("Failed to send reply notification:", emailError);
+  }
+}
+
+export async function sendNotifications(
+  data: ContactNotificationData,
+  magicLinkUrl?: string,
+): Promise<void> {
   const { firstName, lastName, email, description } = data;
   const from = process.env.NOTIFICATION_EMAIL!;
 
@@ -42,7 +77,11 @@ export async function sendNotifications(data: ContactNotificationData, magicLink
       from: `Brady Bovero <${from}>`,
       to: email,
       subject: "Thank You for Contacting Brady Bovero",
-      react: await CustomerConfirmationEmail({ firstName, lastName, magicLinkUrl }),
+      react: await CustomerConfirmationEmail({
+        firstName,
+        lastName,
+        magicLinkUrl,
+      }),
     });
   } catch (emailError) {
     console.error("Failed to send email notification:", emailError);

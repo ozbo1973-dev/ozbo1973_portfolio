@@ -87,18 +87,16 @@ describe("seed data builders", () => {
     const users = buildSeedUsers().map((u, i) => ({ ...u, id: `user-${i}` }));
     const prospects = buildLinkedProspects(users);
     prospects.forEach((prospect) => {
-      expect(prospect).toHaveProperty("firstName");
-      expect(prospect).toHaveProperty("lastName");
-      expect(prospect).toHaveProperty("email");
+      expect(prospect).toHaveProperty("userId");
       expect(prospect).toHaveProperty("description");
     });
   });
 
-  it("prospect email matches user email", () => {
+  it("prospect description references the user's name", () => {
     const users = buildSeedUsers().map((u, i) => ({ ...u, id: `user-${i}` }));
     const prospects = buildLinkedProspects(users);
     prospects.forEach((prospect, i) => {
-      expect(prospect.email).toBe(users[i].email);
+      expect(prospect.description).toContain(users[i].name);
     });
   });
 });

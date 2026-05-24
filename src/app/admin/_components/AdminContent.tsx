@@ -3,22 +3,34 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import MessageList from "./MessageList";
-import type { AdminSubmissionRecord } from "@/lib/dal/admin";
+import ThreadPanel from "./ThreadPanel";
+import type { AdminSubmissionRecord, AdminThread } from "@/lib/dal/admin";
 import { archiveSubmissionAction } from "@/app/actions/admin/archiveSubmission";
 import { adminDeleteSubmissionAction } from "@/app/actions/admin/deleteSubmission";
+import { getThreadAction } from "@/app/actions/admin/getThread";
 
 type Tab = "inbox" | "archive";
 
 interface AdminContentProps {
   initialInbox: AdminSubmissionRecord[];
   initialArchived: AdminSubmissionRecord[];
+  adminUserId: string;
+  adminName: string;
+  adminEmail: string;
 }
 
-export default function AdminContent({ initialInbox, initialArchived }: AdminContentProps) {
+export default function AdminContent({ initialInbox, initialArchived, adminUserId, adminName, adminEmail }: AdminContentProps) {
   const [tab, setTab] = useState<Tab>("inbox");
   const [inbox, setInbox] = useState<AdminSubmissionRecord[]>(initialInbox);
   const [archived, setArchived] = useState<AdminSubmissionRecord[]>(initialArchived);
+  const [activeThread, setActiveThread] = useState<AdminThread | null>(null);
 
   async function handleDelete(submission: AdminSubmissionRecord) {
     setInbox((prev) => prev.filter((s) => s.id !== submission.id));
@@ -34,6 +46,15 @@ export default function AdminContent({ initialInbox, initialArchived }: AdminCon
         setInbox((prev) => [submission, ...prev]);
       }
       toast.error("Failed to delete submission.");
+    }
+  }
+
+  async function handleViewThread(submission: AdminSubmissionRecord) {
+    const result = await getThreadAction(submission.id);
+    if (result.success) {
+      setActiveThread(result.thread);
+    } else {
+      toast.error("Failed to load thread.");
     }
   }
 
@@ -82,6 +103,7 @@ export default function AdminContent({ initialInbox, initialArchived }: AdminCon
             emptyMessage="No submissions in your inbox."
             onArchive={handleArchive}
             onDelete={handleDelete}
+            onViewThread={handleViewThread}
           />
         </section>
       )}
@@ -92,9 +114,28 @@ export default function AdminContent({ initialInbox, initialArchived }: AdminCon
             submissions={archived}
             emptyMessage="No archived submissions."
             onDelete={handleDelete}
+            onViewThread={handleViewThread}
           />
         </section>
       )}
+
+      <Sheet open={!!activeThread} onOpenChange={(open) => { if (!open) setActiveThread(null); }}>
+        <SheetContent side="right" className="flex flex-col">
+          <SheetHeader>
+            <SheetTitle className="font-[family-name:var(--font-playfair)] text-primary">
+              {activeThread ? `Thread - ${activeThread.root.sender.name}` : "Thread"}
+            </SheetTitle>
+          </SheetHeader>
+          {activeThread && (
+            <ThreadPanel
+              thread={activeThread}
+              adminUserId={adminUserId}
+              adminName={adminName}
+              adminEmail={adminEmail}
+            />
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

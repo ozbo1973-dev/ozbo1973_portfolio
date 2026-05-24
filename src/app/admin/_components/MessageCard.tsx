@@ -19,9 +19,10 @@ interface MessageCardProps {
   submission: AdminSubmissionRecord;
   onArchive?: (submission: AdminSubmissionRecord) => void;
   onDelete?: (submission: AdminSubmissionRecord) => void;
+  onViewThread?: (submission: AdminSubmissionRecord) => void;
 }
 
-export default function MessageCard({ submission, onArchive, onDelete }: MessageCardProps) {
+export default function MessageCard({ submission, onArchive, onDelete, onViewThread }: MessageCardProps) {
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   function handleConfirmDelete() {
@@ -53,6 +54,22 @@ export default function MessageCard({ submission, onArchive, onDelete }: Message
                 day: "numeric",
               })}
             </time>
+            {onViewThread && (
+              <Button
+                variant="outline"
+                size="sm"
+                aria-label="View thread"
+                onClick={() => onViewThread(submission)}
+                className="gap-2"
+              >
+                View Thread
+                {submission.replyCount > 0 && (
+                  <span className="bg-primary text-primary-foreground text-xs rounded-full px-1.5 py-0.5 font-['Mulish'] leading-none">
+                    {submission.replyCount}
+                  </span>
+                )}
+              </Button>
+            )}
             {onArchive && (
               <Button
                 variant="outline"

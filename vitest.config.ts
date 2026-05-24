@@ -13,6 +13,7 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
+    exclude: ["node_modules", ".sandcastle"],
     env: {
       DATABASE_URI: "mongodb://localhost/test",
       BETTER_AUTH_SECRET: "test-secret-do-not-use-in-production",

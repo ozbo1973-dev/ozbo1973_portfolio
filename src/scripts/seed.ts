@@ -12,9 +12,6 @@ export interface SeedUserWithId extends SeedUser {
 }
 
 export interface SeedProspect {
-  firstName: string;
-  lastName: string;
-  email: string;
   description: string;
   userId: string;
 }
@@ -43,17 +40,10 @@ export function buildSeedUsers(): SeedUser[] {
 }
 
 export function buildLinkedProspects(users: SeedUserWithId[]): SeedProspect[] {
-  return users.map((user) => {
-    const [firstName, ...rest] = user.name.split(" ");
-    const lastName = rest.join(" ");
-    return {
-      firstName,
-      lastName,
-      email: user.email.toLowerCase(),
-      description: `Seed record for ${user.name}`,
-      userId: user.id,
-    };
-  });
+  return users.map((user) => ({
+    description: `Seed record for ${user.name}`,
+    userId: user.id,
+  }));
 }
 
 async function seed() {

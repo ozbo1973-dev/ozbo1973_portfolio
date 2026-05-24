@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminPage() {
-  await verifyAdminSession();
+  const adminSession = await verifyAdminSession();
   const [inbox, archived] = await Promise.all([getInbox(), getArchived()]);
 
   return (
@@ -28,7 +28,13 @@ export default async function AdminPage() {
           Manage incoming submissions.
         </p>
 
-        <AdminContent initialInbox={inbox} initialArchived={archived} />
+        <AdminContent
+          initialInbox={inbox}
+          initialArchived={archived}
+          adminUserId={adminSession.userId}
+          adminName={adminSession.name}
+          adminEmail={adminSession.email}
+        />
       </div>
     </div>
   );
