@@ -18,13 +18,14 @@ vi.mock("@/lib/auth/auth", () => ({
 
 vi.mock("@/lib/db/connect", () => ({ default: vi.fn() }));
 
-const { mockFind, mockSort, mockUpdateMany, mockFindById, mockCreate } = vi.hoisted(() => ({
-  mockFind: vi.fn(),
-  mockSort: vi.fn(),
-  mockUpdateMany: vi.fn(),
-  mockFindById: vi.fn(),
-  mockCreate: vi.fn(),
-}));
+const { mockFind, mockSort, mockUpdateMany, mockFindById, mockCreate } =
+  vi.hoisted(() => ({
+    mockFind: vi.fn(),
+    mockSort: vi.fn(),
+    mockUpdateMany: vi.fn(),
+    mockFindById: vi.fn(),
+    mockCreate: vi.fn(),
+  }));
 
 vi.mock("@/lib/models/ProspectiveCustomer", () => ({
   default: {
@@ -41,9 +42,11 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
 import { verifySession } from "@/lib/dal/prospects";
 
-const mockHeaders = headers as ReturnType<typeof vi.fn>;
-const mockGetSession = auth.api.getSession as ReturnType<typeof vi.fn>;
-const mockRedirect = redirect as ReturnType<typeof vi.fn>;
+const mockHeaders = headers as unknown as ReturnType<typeof vi.fn>;
+const mockGetSession = auth.api.getSession as unknown as ReturnType<
+  typeof vi.fn
+>;
+const mockRedirect = redirect as unknown as ReturnType<typeof vi.fn>;
 
 describe("verifySession", () => {
   beforeEach(() => {
@@ -59,20 +62,30 @@ describe("verifySession", () => {
 
     const result = await verifySession();
 
-    expect(result).toEqual({ userId: "user-123", email: "alice@example.com", name: "Alice Smith" });
+    expect(result).toEqual({
+      userId: "user-123",
+      email: "alice@example.com",
+      name: "Alice Smith",
+    });
   });
 
   it("redirects to / when no session exists", async () => {
     mockHeaders.mockResolvedValue({ get: () => null });
     mockGetSession.mockResolvedValue(null);
-    mockRedirect.mockImplementation(() => { throw new Error("NEXT_REDIRECT"); });
+    mockRedirect.mockImplementation(() => {
+      throw new Error("NEXT_REDIRECT");
+    });
 
     await expect(verifySession()).rejects.toThrow("NEXT_REDIRECT");
     expect(mockRedirect).toHaveBeenCalledWith("/");
   });
 });
 
-import { getSubmissionsByUserId, getThreadsByUserId, createUserReply } from "@/lib/dal/prospects";
+import {
+  getSubmissionsByUserId,
+  getThreadsByUserId,
+  createUserReply,
+} from "@/lib/dal/prospects";
 
 describe("getSubmissionsByUserId", () => {
   beforeEach(() => {
@@ -102,7 +115,10 @@ describe("getSubmissionsByUserId", () => {
 
     expect(mockFind).toHaveBeenCalledWith({ userId: "user-abc" });
     expect(results).toHaveLength(1);
-    expect(results[0]).toMatchObject({ id: "doc-1", description: "Need a website" });
+    expect(results[0]).toMatchObject({
+      id: "doc-1",
+      description: "Need a website",
+    });
   });
 
   it("sorts results by createdAt descending", async () => {
@@ -134,8 +150,14 @@ describe("getSubmissionsByUserId", () => {
     const results = await getSubmissionsByUserId();
 
     expect(mockSort).toHaveBeenCalledWith({ createdAt: -1 });
-    expect(results[0]).toMatchObject({ id: "doc-2", description: "Newer request" });
-    expect(results[1]).toMatchObject({ id: "doc-1", description: "Older request" });
+    expect(results[0]).toMatchObject({
+      id: "doc-2",
+      description: "Newer request",
+    });
+    expect(results[1]).toMatchObject({
+      id: "doc-1",
+      description: "Older request",
+    });
   });
 
   it("returns empty array when no submissions exist", async () => {
@@ -155,7 +177,9 @@ describe("getSubmissionsByUserId", () => {
   it("redirects to / when no session", async () => {
     mockHeaders.mockResolvedValue({ get: () => null });
     mockGetSession.mockResolvedValue(null);
-    mockRedirect.mockImplementation(() => { throw new Error("NEXT_REDIRECT"); });
+    mockRedirect.mockImplementation(() => {
+      throw new Error("NEXT_REDIRECT");
+    });
 
     await expect(getSubmissionsByUserId()).rejects.toThrow("NEXT_REDIRECT");
   });
@@ -175,7 +199,12 @@ describe("getThreadsByUserId", () => {
 
   function setupFindMock(rootDocs: object[], replyDocs: object[] = []) {
     mockFind.mockImplementation((filter: Record<string, unknown>) => {
-      if (filter && filter.parentId !== null && typeof filter.parentId === "object" && "$in" in (filter.parentId as object)) {
+      if (
+        filter &&
+        filter.parentId !== null &&
+        typeof filter.parentId === "object" &&
+        "$in" in (filter.parentId as object)
+      ) {
         return { sort: mockSortReplies };
       }
       return { sort: mockSort };
@@ -189,7 +218,11 @@ describe("getThreadsByUserId", () => {
 
     await getThreadsByUserId("user-abc");
 
-    expect(mockFind).toHaveBeenCalledWith({ userId: "user-abc", archivedAt: null, parentId: null });
+    expect(mockFind).toHaveBeenCalledWith({
+      userId: "user-abc",
+      archivedAt: null,
+      parentId: null,
+    });
   });
 
   it("returns threads sorted by most recent activity (latest reply createdAt)", async () => {
@@ -304,7 +337,7 @@ describe("getThreadsByUserId", () => {
 
     expect(results).toEqual([]);
     expect(mockFind).toHaveBeenCalledWith(
-      expect.objectContaining({ archivedAt: null })
+      expect.objectContaining({ archivedAt: null }),
     );
   });
 
@@ -365,7 +398,11 @@ describe("createUserReply", () => {
     };
     mockCreate.mockResolvedValue(replyDoc);
 
-    const result = await createUserReply("root-1", "user-abc", "Great, thanks!");
+    const result = await createUserReply(
+      "root-1",
+      "user-abc",
+      "Great, thanks!",
+    );
 
     expect(result).toMatchObject({
       id: "reply-new",
@@ -378,14 +415,18 @@ describe("createUserReply", () => {
   it("throws when root submission does not belong to requesting user", async () => {
     mockFindById.mockResolvedValue({ ...rootDoc, userId: "other-user" });
 
-    await expect(createUserReply("root-1", "user-abc", "Trying to reply")).rejects.toThrow();
+    await expect(
+      createUserReply("root-1", "user-abc", "Trying to reply"),
+    ).rejects.toThrow();
     expect(mockCreate).not.toHaveBeenCalled();
   });
 
   it("throws when root submission does not exist", async () => {
     mockFindById.mockResolvedValue(null);
 
-    await expect(createUserReply("root-1", "user-abc", "Hello")).rejects.toThrow();
+    await expect(
+      createUserReply("root-1", "user-abc", "Hello"),
+    ).rejects.toThrow();
     expect(mockCreate).not.toHaveBeenCalled();
   });
 });

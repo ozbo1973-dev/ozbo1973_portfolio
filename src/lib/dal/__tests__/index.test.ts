@@ -18,7 +18,14 @@ vi.mock("@/lib/auth/auth", () => ({
 
 vi.mock("@/lib/db/connect", () => ({ default: vi.fn() }));
 
-const { mockFind, mockSort, mockUpdateMany, mockFindOneAndDelete, mockDeleteMany, mockFindByIdAndUpdate } = vi.hoisted(() => ({
+const {
+  mockFind,
+  mockSort,
+  mockUpdateMany,
+  mockFindOneAndDelete,
+  mockDeleteMany,
+  mockFindByIdAndUpdate,
+} = vi.hoisted(() => ({
   mockFind: vi.fn(),
   mockSort: vi.fn(),
   mockUpdateMany: vi.fn(),
@@ -41,10 +48,17 @@ vi.mock("@/lib/models/ProspectiveCustomer", () => ({
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth/auth";
 import { getSubmissionsByUserId } from "@/lib/dal/prospects";
-import { deleteSubmission, deleteAllSubmissionsByUser, userArchiveSubmission, getArchivedThreadsByUserId } from "@/lib/dal/index";
+import {
+  deleteSubmission,
+  deleteAllSubmissionsByUser,
+  userArchiveSubmission,
+  getArchivedThreadsByUserId,
+} from "@/lib/dal/index";
 
-const mockHeaders = headers as ReturnType<typeof vi.fn>;
-const mockGetSession = auth.api.getSession as ReturnType<typeof vi.fn>;
+const mockHeaders = headers as unknown as ReturnType<typeof vi.fn>;
+const mockGetSession = auth.api.getSession as unknown as ReturnType<
+  typeof vi.fn
+>;
 
 describe("getSubmissionsByUserId", () => {
   beforeEach(() => {
@@ -84,7 +98,10 @@ describe("getSubmissionsByUserId", () => {
       userId: "user-abc",
       description: "Need a website",
     });
-    expect(results[1]).toMatchObject({ id: "doc-2", description: "Second inquiry" });
+    expect(results[1]).toMatchObject({
+      id: "doc-2",
+      description: "Second inquiry",
+    });
   });
 
   it("returns an empty array when no submissions exist for the session user", async () => {
@@ -132,12 +149,18 @@ describe("deleteSubmission", () => {
 
   it("returns { deleted: true } when no admin replies exist and submission belongs to user", async () => {
     mockFind.mockResolvedValue([]);
-    mockFindOneAndDelete.mockResolvedValue({ _id: "doc-1", userId: "user-abc" });
+    mockFindOneAndDelete.mockResolvedValue({
+      _id: "doc-1",
+      userId: "user-abc",
+    });
 
     const result = await deleteSubmission("doc-1", "user-abc");
 
     expect(result).toEqual({ deleted: true });
-    expect(mockFindOneAndDelete).toHaveBeenCalledWith({ _id: "doc-1", userId: "user-abc" });
+    expect(mockFindOneAndDelete).toHaveBeenCalledWith({
+      _id: "doc-1",
+      userId: "user-abc",
+    });
   });
 
   it("returns { deleted: false } when submission belongs to another user", async () => {
@@ -150,9 +173,7 @@ describe("deleteSubmission", () => {
   });
 
   it("returns { deleted: false, blocked: true } when admin replies exist", async () => {
-    mockFind.mockResolvedValue([
-      { _id: "reply-1", userId: "admin-id" },
-    ]);
+    mockFind.mockResolvedValue([{ _id: "reply-1", userId: "admin-id" }]);
 
     const result = await deleteSubmission("doc-1", "user-abc");
 
@@ -163,7 +184,10 @@ describe("deleteSubmission", () => {
   it("allows delete when only user replies exist (no admin replies)", async () => {
     // No admin replies (userId not excluded), so find returns empty for admin check
     mockFind.mockResolvedValue([]);
-    mockFindOneAndDelete.mockResolvedValue({ _id: "doc-1", userId: "user-abc" });
+    mockFindOneAndDelete.mockResolvedValue({
+      _id: "doc-1",
+      userId: "user-abc",
+    });
 
     const result = await deleteSubmission("doc-1", "user-abc");
 
@@ -185,11 +209,11 @@ describe("userArchiveSubmission", () => {
 
     expect(mockFindByIdAndUpdate).toHaveBeenCalledWith(
       "root-1",
-      expect.objectContaining({ archivedAt: expect.any(Date) })
+      expect.objectContaining({ archivedAt: expect.any(Date) }),
     );
     expect(mockUpdateMany).toHaveBeenCalledWith(
       { parentId: "root-1" },
-      expect.objectContaining({ archivedAt: expect.any(Date) })
+      expect.objectContaining({ archivedAt: expect.any(Date) }),
     );
   });
 
@@ -220,7 +244,12 @@ describe("getArchivedThreadsByUserId", () => {
 
   function setupFindMock(rootDocs: object[], replyDocs: object[] = []) {
     mockFind.mockImplementation((filter: Record<string, unknown>) => {
-      if (filter && filter.parentId !== null && typeof filter.parentId === "object" && "$in" in (filter.parentId as object)) {
+      if (
+        filter &&
+        filter.parentId !== null &&
+        typeof filter.parentId === "object" &&
+        "$in" in (filter.parentId as object)
+      ) {
         return { sort: mockSortReplies };
       }
       return { sort: mockSort };
@@ -235,7 +264,11 @@ describe("getArchivedThreadsByUserId", () => {
     await getArchivedThreadsByUserId("user-abc");
 
     expect(mockFind).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: "user-abc", archivedAt: { $ne: null }, parentId: null })
+      expect.objectContaining({
+        userId: "user-abc",
+        archivedAt: { $ne: null },
+        parentId: null,
+      }),
     );
   });
 

@@ -10,7 +10,19 @@ vi.mock("next/navigation", () => ({
 
 vi.mock("@/lib/db/connect", () => ({ default: vi.fn() }));
 
-const { mockFind, mockSort, mockFindOne, mockFindMongo, mockToArray, mockFindByIdAndUpdate, mockFindByIdAndDelete, mockFindById, mockUpdateMany, mockDeleteMany, mockCreate } = vi.hoisted(() => ({
+const {
+  mockFind,
+  mockSort,
+  mockFindOne,
+  mockFindMongo,
+  mockToArray,
+  mockFindByIdAndUpdate,
+  mockFindByIdAndDelete,
+  mockFindById,
+  mockUpdateMany,
+  mockDeleteMany,
+  mockCreate,
+} = vi.hoisted(() => ({
   mockFind: vi.fn(),
   mockSort: vi.fn(),
   mockFindOne: vi.fn(),
@@ -58,17 +70,30 @@ vi.mock("@/lib/models/ProspectiveCustomer", () => ({
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
-import { verifyAdminSession, getInbox, getArchived, archiveSubmission, adminDeleteSubmission, getThread, createAdminReply, getRootSubmissionOwner } from "@/lib/dal/admin";
+import {
+  verifyAdminSession,
+  getInbox,
+  getArchived,
+  archiveSubmission,
+  adminDeleteSubmission,
+  getThread,
+  createAdminReply,
+  getRootSubmissionOwner,
+} from "@/lib/dal/admin";
 
-const mockHeaders = headers as ReturnType<typeof vi.fn>;
-const mockGetSession = auth.api.getSession as ReturnType<typeof vi.fn>;
-const mockRedirect = redirect as ReturnType<typeof vi.fn>;
+const mockHeaders = headers as unknown as ReturnType<typeof vi.fn>;
+const mockGetSession = auth.api.getSession as unknown as ReturnType<
+  typeof vi.fn
+>;
+const mockRedirect = redirect as unknown as ReturnType<typeof vi.fn>;
 
 describe("verifyAdminSession", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockHeaders.mockResolvedValue({ get: () => null });
-    mockRedirect.mockImplementation(() => { throw new Error("NEXT_REDIRECT"); });
+    mockRedirect.mockImplementation(() => {
+      throw new Error("NEXT_REDIRECT");
+    });
   });
 
   it("redirects to / when no session exists", async () => {
@@ -83,7 +108,11 @@ describe("verifyAdminSession", () => {
       session: { userId: "aaaaaaaaaaaaaaaaaaaaaaaa" },
       user: { email: "alice@example.com", name: "Alice" },
     });
-    mockFindOne.mockResolvedValue({ id: "aaaaaaaaaaaaaaaaaaaaaaaa", email: "alice@example.com", name: "Alice" });
+    mockFindOne.mockResolvedValue({
+      id: "aaaaaaaaaaaaaaaaaaaaaaaa",
+      email: "alice@example.com",
+      name: "Alice",
+    });
 
     await expect(verifyAdminSession()).rejects.toThrow("NEXT_REDIRECT");
     expect(mockRedirect).toHaveBeenCalledWith("/");
@@ -94,7 +123,12 @@ describe("verifyAdminSession", () => {
       session: { userId: "aaaaaaaaaaaaaaaaaaaaaaaa" },
       user: { email: "alice@example.com", name: "Alice" },
     });
-    mockFindOne.mockResolvedValue({ id: "aaaaaaaaaaaaaaaaaaaaaaaa", email: "alice@example.com", name: "Alice", role: "user" });
+    mockFindOne.mockResolvedValue({
+      id: "aaaaaaaaaaaaaaaaaaaaaaaa",
+      email: "alice@example.com",
+      name: "Alice",
+      role: "user",
+    });
 
     await expect(verifyAdminSession()).rejects.toThrow("NEXT_REDIRECT");
     expect(mockRedirect).toHaveBeenCalledWith("/");
@@ -105,11 +139,20 @@ describe("verifyAdminSession", () => {
       session: { userId: "bbbbbbbbbbbbbbbbbbbbbbbb" },
       user: { email: "admin@example.com", name: "Admin User" },
     });
-    mockFindOne.mockResolvedValue({ id: "bbbbbbbbbbbbbbbbbbbbbbbb", email: "admin@example.com", name: "Admin User", role: "admin" });
+    mockFindOne.mockResolvedValue({
+      id: "bbbbbbbbbbbbbbbbbbbbbbbb",
+      email: "admin@example.com",
+      name: "Admin User",
+      role: "admin",
+    });
 
     const result = await verifyAdminSession();
 
-    expect(result).toEqual({ userId: "bbbbbbbbbbbbbbbbbbbbbbbb", email: "admin@example.com", name: "Admin User" });
+    expect(result).toEqual({
+      userId: "bbbbbbbbbbbbbbbbbbbbbbbb",
+      email: "admin@example.com",
+      name: "Admin User",
+    });
   });
 
   it("redirects when user doc not found in DB", async () => {
@@ -124,7 +167,10 @@ describe("verifyAdminSession", () => {
   });
 });
 
-function setupFindMockWithReplies(rootDocs: object[], replyDocs: object[] = []) {
+function setupFindMockWithReplies(
+  rootDocs: object[],
+  replyDocs: object[] = [],
+) {
   mockFind.mockImplementation((filter: Record<string, unknown>) => {
     if (filter && "parentId" in filter && filter.parentId !== null) {
       return replyDocs;
@@ -170,11 +216,20 @@ describe("getInbox", () => {
     };
     setupFindMockWithReplies([doc]);
     mockFindMongo.mockReturnValue({ toArray: mockToArray });
-    mockToArray.mockResolvedValue([{ _id: { toString: () => "aaaaaaaaaaaaaaaaaaaaaaaa" }, name: "Alice Smith", email: "alice@example.com" }]);
+    mockToArray.mockResolvedValue([
+      {
+        _id: { toString: () => "aaaaaaaaaaaaaaaaaaaaaaaa" },
+        name: "Alice Smith",
+        email: "alice@example.com",
+      },
+    ]);
 
     const results = await getInbox();
 
-    expect(results[0].sender).toEqual({ name: "Alice Smith", email: "alice@example.com" });
+    expect(results[0].sender).toEqual({
+      name: "Alice Smith",
+      email: "alice@example.com",
+    });
   });
 
   it("handles orphan submissions with fallback sender label", async () => {
@@ -217,7 +272,13 @@ describe("getInbox", () => {
     };
     setupFindMockWithReplies([doc], []);
     mockFindMongo.mockReturnValue({ toArray: mockToArray });
-    mockToArray.mockResolvedValue([{ _id: { toString: () => validUserId }, name: "Alice", email: "alice@example.com" }]);
+    mockToArray.mockResolvedValue([
+      {
+        _id: { toString: () => validUserId },
+        name: "Alice",
+        email: "alice@example.com",
+      },
+    ]);
 
     const results = await getInbox();
 
@@ -240,7 +301,13 @@ describe("getInbox", () => {
     ];
     setupFindMockWithReplies([doc], replyDocs);
     mockFindMongo.mockReturnValue({ toArray: mockToArray });
-    mockToArray.mockResolvedValue([{ _id: { toString: () => validUserId }, name: "Alice", email: "alice@example.com" }]);
+    mockToArray.mockResolvedValue([
+      {
+        _id: { toString: () => validUserId },
+        name: "Alice",
+        email: "alice@example.com",
+      },
+    ]);
 
     const results = await getInbox();
 
@@ -260,7 +327,10 @@ describe("getArchived", () => {
 
     await getArchived();
 
-    expect(mockFind).toHaveBeenCalledWith({ archivedAt: { $ne: null }, parentId: null });
+    expect(mockFind).toHaveBeenCalledWith({
+      archivedAt: { $ne: null },
+      parentId: null,
+    });
   });
 
   it("sorts by archivedAt descending", async () => {
@@ -285,11 +355,20 @@ describe("getArchived", () => {
     };
     setupFindMockWithReplies([doc]);
     mockFindMongo.mockReturnValue({ toArray: mockToArray });
-    mockToArray.mockResolvedValue([{ _id: { toString: () => "eeeeeeeeeeeeeeeeeeeeeeee" }, name: "Bob Jones", email: "bob@example.com" }]);
+    mockToArray.mockResolvedValue([
+      {
+        _id: { toString: () => "eeeeeeeeeeeeeeeeeeeeeeee" },
+        name: "Bob Jones",
+        email: "bob@example.com",
+      },
+    ]);
 
     const results = await getArchived();
 
-    expect(results[0].sender).toEqual({ name: "Bob Jones", email: "bob@example.com" });
+    expect(results[0].sender).toEqual({
+      name: "Bob Jones",
+      email: "bob@example.com",
+    });
     expect(results[0].archivedAt).toBe(archivedAt);
   });
 
@@ -316,7 +395,7 @@ describe("archiveSubmission", () => {
 
     expect(mockFindByIdAndUpdate).toHaveBeenCalledWith(
       "sub-1",
-      expect.objectContaining({ archivedAt: expect.any(Date) })
+      expect.objectContaining({ archivedAt: expect.any(Date) }),
     );
   });
 
@@ -325,7 +404,7 @@ describe("archiveSubmission", () => {
 
     expect(mockUpdateMany).toHaveBeenCalledWith(
       { parentId: "sub-1" },
-      expect.objectContaining({ archivedAt: expect.any(Date) })
+      expect.objectContaining({ archivedAt: expect.any(Date) }),
     );
   });
 
@@ -416,8 +495,16 @@ describe("getThread", () => {
     mockFind.mockReturnValue({ sort: mockSort });
     mockFindMongo.mockReturnValue({ toArray: mockToArray });
     mockToArray.mockResolvedValue([
-      { _id: { toString: () => USER_ID }, name: "Alice", email: "alice@example.com" },
-      { _id: { toString: () => ADMIN_ID }, name: "Admin User", email: "admin@example.com" },
+      {
+        _id: { toString: () => USER_ID },
+        name: "Alice",
+        email: "alice@example.com",
+      },
+      {
+        _id: { toString: () => ADMIN_ID },
+        name: "Admin User",
+        email: "admin@example.com",
+      },
     ]);
 
     const result = await getThread("root-1");
@@ -457,7 +544,11 @@ describe("getThread", () => {
     mockFind.mockReturnValue({ sort: mockSort });
     mockFindMongo.mockReturnValue({ toArray: mockToArray });
     mockToArray.mockResolvedValue([
-      { _id: { toString: () => USER_ID }, name: "Alice", email: "alice@example.com" },
+      {
+        _id: { toString: () => USER_ID },
+        name: "Alice",
+        email: "alice@example.com",
+      },
     ]);
 
     const result = await getThread("root-1");
@@ -471,19 +562,37 @@ describe("getThread", () => {
     mockFind.mockReturnValue({ sort: mockSort });
     mockFindMongo.mockReturnValue({ toArray: mockToArray });
     mockToArray.mockResolvedValue([
-      { _id: { toString: () => USER_ID }, name: "Alice", email: "alice@example.com" },
-      { _id: { toString: () => ADMIN_ID }, name: "Admin User", email: "admin@example.com" },
+      {
+        _id: { toString: () => USER_ID },
+        name: "Alice",
+        email: "alice@example.com",
+      },
+      {
+        _id: { toString: () => ADMIN_ID },
+        name: "Admin User",
+        email: "admin@example.com",
+      },
     ]);
 
     const result = await getThread("root-1");
 
-    expect(result!.root.sender).toEqual({ name: "Alice", email: "alice@example.com" });
-    expect(result!.replies[0].sender).toEqual({ name: "Admin User", email: "admin@example.com" });
+    expect(result!.root.sender).toEqual({
+      name: "Alice",
+      email: "alice@example.com",
+    });
+    expect(result!.replies[0].sender).toEqual({
+      name: "Admin User",
+      email: "admin@example.com",
+    });
   });
 });
 
 describe("createAdminReply", () => {
-  const adminSession = { userId: "admin-user-id", email: "admin@example.com", name: "Admin" };
+  const adminSession = {
+    userId: "admin-user-id",
+    email: "admin@example.com",
+    name: "Admin",
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -509,7 +618,11 @@ describe("createAdminReply", () => {
   });
 
   it("returns the created reply record", async () => {
-    const result = await createAdminReply("root-1", "Admin reply body", adminSession);
+    const result = await createAdminReply(
+      "root-1",
+      "Admin reply body",
+      adminSession,
+    );
 
     expect(result.id).toBe("reply-new");
     expect(result.userId).toBe("admin-user-id");
@@ -517,9 +630,16 @@ describe("createAdminReply", () => {
   });
 
   it("includes sender info from the admin session", async () => {
-    const result = await createAdminReply("root-1", "Admin reply body", adminSession);
+    const result = await createAdminReply(
+      "root-1",
+      "Admin reply body",
+      adminSession,
+    );
 
-    expect(result.sender).toEqual({ name: "Admin", email: "admin@example.com" });
+    expect(result.sender).toEqual({
+      name: "Admin",
+      email: "admin@example.com",
+    });
   });
 });
 
@@ -531,8 +651,14 @@ describe("getRootSubmissionOwner", () => {
   });
 
   it("returns email and name when root submission and user both exist", async () => {
-    mockFindById.mockResolvedValue({ _id: { toString: () => "root-1" }, userId: VALID_USER_ID });
-    mockFindOne.mockResolvedValue({ email: "alice@example.com", name: "Alice" });
+    mockFindById.mockResolvedValue({
+      _id: { toString: () => "root-1" },
+      userId: VALID_USER_ID,
+    });
+    mockFindOne.mockResolvedValue({
+      email: "alice@example.com",
+      name: "Alice",
+    });
 
     const result = await getRootSubmissionOwner("root-1");
 
@@ -548,7 +674,10 @@ describe("getRootSubmissionOwner", () => {
   });
 
   it("returns null when the user document does not exist", async () => {
-    mockFindById.mockResolvedValue({ _id: { toString: () => "root-1" }, userId: VALID_USER_ID });
+    mockFindById.mockResolvedValue({
+      _id: { toString: () => "root-1" },
+      userId: VALID_USER_ID,
+    });
     mockFindOne.mockResolvedValue(null);
 
     const result = await getRootSubmissionOwner("root-1");
