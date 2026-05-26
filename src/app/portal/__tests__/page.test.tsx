@@ -53,8 +53,11 @@ const { mockVerifySession, mockGetThreadsByUserId } = vi.hoisted(() => ({
   mockGetThreadsByUserId: vi.fn(),
 }));
 
-vi.mock("@/lib/dal/prospects", () => ({
+vi.mock("@/lib/dal/session", () => ({
   verifySession: mockVerifySession,
+}));
+
+vi.mock("@/lib/dal/prospects", () => ({
   getThreadsByUserId: mockGetThreadsByUserId,
 }));
 

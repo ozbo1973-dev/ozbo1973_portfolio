@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { verifySession } from "@/lib/dal/prospects";
+import { verifySession } from "@/lib/dal/session";
 import { createProspect } from "@/lib/dal/index";
 import type { ProspectRecord } from "@/lib/dal/index";
 

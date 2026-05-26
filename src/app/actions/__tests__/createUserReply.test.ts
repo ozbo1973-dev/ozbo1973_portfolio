@@ -7,8 +7,11 @@ const { mockVerifySession, mockCreateUserReply, mockSendReplyNotification } =
     mockSendReplyNotification: vi.fn(),
   }));
 
-vi.mock("@/lib/dal/prospects", () => ({
+vi.mock("@/lib/dal/session", () => ({
   verifySession: mockVerifySession,
+}));
+
+vi.mock("@/lib/dal/prospects", () => ({
   createUserReply: mockCreateUserReply,
 }));
 

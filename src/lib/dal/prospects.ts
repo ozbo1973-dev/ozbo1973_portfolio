@@ -1,8 +1,5 @@
 import "server-only";
-import { cache } from "react";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth/auth";
+import { verifySession } from "@/lib/dal/session";
 import connectDB from "@/lib/db/connect";
 import ProspectiveCustomer from "@/lib/models/ProspectiveCustomer";
 
@@ -32,13 +29,6 @@ export interface UserThread {
   replies: UserThreadRecord[];
   latestActivity: Date;
 }
-
-export const verifySession = cache(async (): Promise<{ userId: string; email: string; name: string }> => {
-  const h = await headers();
-  const session = await auth.api.getSession({ headers: h });
-  if (!session) redirect("/");
-  return { userId: session.session.userId, email: session.user.email, name: session.user.name ?? "" };
-});
 
 export async function createProspect(data: ProspectData): Promise<ProspectRecord> {
   await connectDB();

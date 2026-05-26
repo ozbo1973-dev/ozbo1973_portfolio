@@ -1,6 +1,6 @@
 "use server";
 
-import { verifySession } from "@/lib/dal/prospects";
+import { verifySession } from "@/lib/dal/session";
 import { userArchiveSubmission } from "@/lib/dal/index";
 
 export interface ArchiveSubmissionResult {

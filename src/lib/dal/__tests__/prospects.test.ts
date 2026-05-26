@@ -40,7 +40,7 @@ vi.mock("@/lib/models/ProspectiveCustomer", () => ({
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
-import { verifySession } from "@/lib/dal/prospects";
+import { verifySession } from "@/lib/dal/session";
 
 const mockHeaders = headers as unknown as ReturnType<typeof vi.fn>;
 const mockGetSession = auth.api.getSession as unknown as ReturnType<

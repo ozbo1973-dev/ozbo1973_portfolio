@@ -1,4 +1,5 @@
-import { verifySession, getThreadsByUserId } from "@/lib/dal/prospects";
+import { verifySession } from "@/lib/dal/session";
+import { getThreadsByUserId } from "@/lib/dal/prospects";
 import { getArchivedThreadsByUserId } from "@/lib/dal/index";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";

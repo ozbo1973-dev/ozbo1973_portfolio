@@ -1,6 +1,6 @@
 "use server";
 
-import { verifySession } from "@/lib/dal/prospects";
+import { verifySession } from "@/lib/dal/session";
 import { deleteUser } from "@/lib/dal/users";
 
 export interface DeleteAccountResult {

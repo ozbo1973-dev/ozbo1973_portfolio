@@ -1,7 +1,8 @@
 "use server";
 
 import { z } from "zod";
-import { verifySession, createUserReply } from "@/lib/dal/prospects";
+import { verifySession } from "@/lib/dal/session";
+import { createUserReply } from "@/lib/dal/prospects";
 import type { UserThreadRecord } from "@/lib/dal/prospects";
 import { sendReplyNotification } from "@/lib/contact/sendNotifications";
 
