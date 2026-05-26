@@ -25,6 +25,7 @@ const {
   mockFindOneAndDelete,
   mockFindByIdAndUpdate,
   mockFindOneAndUpdate,
+  mockDeleteMany,
 } = vi.hoisted(() => ({
   mockFind: vi.fn(),
   mockSort: vi.fn(),
@@ -32,6 +33,7 @@ const {
   mockFindOneAndDelete: vi.fn(),
   mockFindByIdAndUpdate: vi.fn(),
   mockFindOneAndUpdate: vi.fn(),
+  mockDeleteMany: vi.fn(),
 }));
 
 vi.mock("@/lib/models/ProspectiveCustomer", () => ({
@@ -42,6 +44,7 @@ vi.mock("@/lib/models/ProspectiveCustomer", () => ({
     find: mockFind,
     updateMany: mockUpdateMany,
     findOneAndDelete: mockFindOneAndDelete,
+    deleteMany: mockDeleteMany,
   },
 }));
 
@@ -140,6 +143,7 @@ describe("deleteSubmission", () => {
     mockGetSession.mockResolvedValue(makeSession());
     mockFind.mockResolvedValue([]);
     mockFindOneAndDelete.mockResolvedValue({ _id: "doc-1", userId: "user-abc" });
+    mockDeleteMany.mockResolvedValue({ deletedCount: 0 });
 
     const result = await deleteSubmission("doc-1");
 
@@ -165,6 +169,37 @@ describe("deleteSubmission", () => {
 
     expect(result).toEqual({ deleted: false, blocked: true });
     expect(mockFindOneAndDelete).not.toHaveBeenCalled();
+  });
+
+  it("cascades to delete User Replies when the root delete succeeds", async () => {
+    mockGetSession.mockResolvedValue(makeSession());
+    mockFind.mockResolvedValue([]);
+    mockFindOneAndDelete.mockResolvedValue({ _id: "doc-1", userId: "user-abc" });
+    mockDeleteMany.mockResolvedValue({ deletedCount: 2 });
+
+    await deleteSubmission("doc-1");
+
+    expect(mockDeleteMany).toHaveBeenCalledWith({ parentId: "doc-1", userId: "user-abc" });
+  });
+
+  it("does not cascade when blocked by an Admin Reply", async () => {
+    mockGetSession.mockResolvedValue(makeSession());
+    mockFind.mockResolvedValue([{ _id: "reply-1", userId: "admin-id" }]);
+
+    await deleteSubmission("doc-1");
+
+    expect(mockFindOneAndDelete).not.toHaveBeenCalled();
+    expect(mockDeleteMany).not.toHaveBeenCalled();
+  });
+
+  it("does not cascade when root delete finds no matching document", async () => {
+    mockGetSession.mockResolvedValue(makeSession());
+    mockFind.mockResolvedValue([]);
+    mockFindOneAndDelete.mockResolvedValue(null);
+
+    await deleteSubmission("doc-1");
+
+    expect(mockDeleteMany).not.toHaveBeenCalled();
   });
 
   it("redirects when no session exists", async () => {

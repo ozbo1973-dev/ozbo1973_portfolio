@@ -136,6 +136,9 @@ export async function deleteSubmission(id: string): Promise<DeleteSubmissionOutc
     return { deleted: false, blocked: true };
   }
   const deleted = await ProspectiveCustomer.findOneAndDelete({ _id: id, userId });
+  if (deleted !== null) {
+    await ProspectiveCustomer.deleteMany({ parentId: id, userId });
+  }
   return { deleted: deleted !== null };
 }
 
