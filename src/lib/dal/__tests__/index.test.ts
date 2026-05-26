@@ -23,14 +23,12 @@ const {
   mockSort,
   mockUpdateMany,
   mockFindOneAndDelete,
-  mockDeleteMany,
   mockFindByIdAndUpdate,
 } = vi.hoisted(() => ({
   mockFind: vi.fn(),
   mockSort: vi.fn(),
   mockUpdateMany: vi.fn(),
   mockFindOneAndDelete: vi.fn(),
-  mockDeleteMany: vi.fn(),
   mockFindByIdAndUpdate: vi.fn(),
 }));
 
@@ -41,7 +39,6 @@ vi.mock("@/lib/models/ProspectiveCustomer", () => ({
     find: mockFind,
     updateMany: mockUpdateMany,
     findOneAndDelete: mockFindOneAndDelete,
-    deleteMany: mockDeleteMany,
   },
 }));
 
@@ -50,7 +47,6 @@ import { auth } from "@/lib/auth/auth";
 import { getSubmissionsByUserId } from "@/lib/dal/prospects";
 import {
   deleteSubmission,
-  deleteAllSubmissionsByUser,
   userArchiveSubmission,
   getArchivedThreadsByUserId,
 } from "@/lib/dal/index";
@@ -300,35 +296,3 @@ describe("getArchivedThreadsByUserId", () => {
   });
 });
 
-describe("deleteAllSubmissionsByUser", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("removes all submissions for the given user and returns the count", async () => {
-    mockDeleteMany.mockResolvedValue({ deletedCount: 3 });
-
-    const count = await deleteAllSubmissionsByUser("user-abc");
-
-    expect(mockDeleteMany).toHaveBeenCalledWith({ userId: "user-abc" });
-    expect(count).toBe(3);
-  });
-
-  it("scopes the delete query to userId so other users' submissions are not affected", async () => {
-    mockDeleteMany.mockResolvedValue({ deletedCount: 2 });
-
-    await deleteAllSubmissionsByUser("user-abc");
-
-    const callArg = mockDeleteMany.mock.calls[0][0];
-    expect(callArg).toEqual({ userId: "user-abc" });
-    expect(callArg).not.toHaveProperty("email");
-  });
-
-  it("returns 0 when the user has no submissions", async () => {
-    mockDeleteMany.mockResolvedValue({ deletedCount: 0 });
-
-    const count = await deleteAllSubmissionsByUser("user-no-submissions");
-
-    expect(count).toBe(0);
-  });
-});

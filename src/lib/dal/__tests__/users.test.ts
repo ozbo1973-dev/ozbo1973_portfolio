@@ -5,7 +5,7 @@ const { mockDeleteAllSubmissionsByUser, mockDeleteUser } = vi.hoisted(() => ({
   mockDeleteUser: vi.fn(),
 }));
 
-vi.mock("@/lib/dal/index", () => ({
+vi.mock("@/lib/dal/prospects-unverified", () => ({
   deleteAllSubmissionsByUser: mockDeleteAllSubmissionsByUser,
 }));
 

@@ -19,11 +19,6 @@ export async function getSubmissionsByUserId(userId: string): Promise<ProspectRe
   }));
 }
 
-export async function updateProspectUserId(id: string, userId: string): Promise<void> {
-  await connectDB();
-  await ProspectiveCustomer.findByIdAndUpdate(id, { userId });
-}
-
 export type DeleteSubmissionOutcome =
   | { deleted: true }
   | { deleted: false; blocked?: true };
@@ -62,8 +57,3 @@ export async function getArchivedThreadsByUserId(userId: string): Promise<UserTh
   return buildUserThreads(rootDocs);
 }
 
-export async function deleteAllSubmissionsByUser(userId: string): Promise<number> {
-  await connectDB();
-  const result = await ProspectiveCustomer.deleteMany({ userId });
-  return result.deletedCount;
-}
