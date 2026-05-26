@@ -24,7 +24,7 @@ vi.mock("@/lib/auth/auth", () => ({
   registerMagicLinkCapture: vi.fn(),
 }));
 
-vi.mock("@/lib/auth/getUserIdByEmail", () => ({
+vi.mock("@/lib/auth/getUserByEmail", () => ({
   getUserByEmail: vi.fn(),
 }));
 
@@ -32,7 +32,7 @@ import { headers } from "next/headers";
 import { createProspect } from "@/lib/dal/prospects";
 import { sendNotifications } from "@/lib/contact/sendNotifications";
 import { auth, registerMagicLinkCapture } from "@/lib/auth/auth";
-import { getUserByEmail } from "@/lib/auth/getUserIdByEmail";
+import { getUserByEmail } from "@/lib/auth/getUserByEmail";
 import { submitContactForm } from "@/app/actions/submitContactForm";
 
 const mockHeaders = headers as ReturnType<typeof vi.fn>;

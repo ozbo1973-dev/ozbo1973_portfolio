@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { getUserIdAndRoleByEmail } from "@/lib/auth/getUserIdByEmail";
+import { getUserByEmail } from "@/lib/auth/getUserByEmail";
 import { auth, registerMagicLinkCapture } from "@/lib/auth/auth";
 import { sendMagicLinkEmail } from "@/lib/contact/sendNotifications";
 
@@ -11,7 +11,7 @@ export interface SignInResult {
 
 export async function signIn(email: string): Promise<SignInResult> {
   const normalizedEmail = email.toLowerCase();
-  const user = await getUserIdAndRoleByEmail(normalizedEmail);
+  const user = await getUserByEmail(normalizedEmail);
 
   if (user) {
     const callbackURL = user.role === "admin" ? "/admin" : "/portal";
