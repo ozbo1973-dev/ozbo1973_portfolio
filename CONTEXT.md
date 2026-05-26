@@ -78,6 +78,7 @@ _Avoid_: Read submission, dismissed submission, closed submission
 
 ## Invariants
 
+- **The DAL is the session verification boundary for user-scoped data.** Functions in `dal/prospects.ts` call `verifySession()` internally; Server Actions do not re-verify. The exception is `dal/prospects-unverified.ts`, which holds functions called from trusted server paths (magic-link capture, user cascade delete) — see ADR-0009.
 - **Email is always stored lowercase.** Normalization happens at the action entry point (`submitContactForm`, `signIn`) before any DB write or query. Never normalize only at query time.
 - **A returning email on the contact form creates a new Submission but not a new User.** BetterAuth reuses the existing User record and sends a fresh Magic Link.
 - **Client-side forms use `onSubmit` + `startTransition`.** Never use `form action={asyncFn}` without `startTransition`.
