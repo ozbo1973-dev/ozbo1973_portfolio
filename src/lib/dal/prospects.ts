@@ -121,6 +121,49 @@ export async function getThreadsByUserId(userId: string): Promise<UserThread[]> 
   return threads.sort((a, b) => b.latestActivity.getTime() - a.latestActivity.getTime());
 }
 
+export type DeleteSubmissionOutcome =
+  | { deleted: true }
+  | { deleted: false; blocked?: true };
+
+export async function deleteSubmission(id: string): Promise<DeleteSubmissionOutcome> {
+  const { userId } = await verifySession();
+  await connectDB();
+  const adminReplies = await ProspectiveCustomer.find({
+    parentId: id,
+    userId: { $ne: userId },
+  });
+  if (adminReplies.length > 0) {
+    return { deleted: false, blocked: true };
+  }
+  const deleted = await ProspectiveCustomer.findOneAndDelete({ _id: id, userId });
+  return { deleted: deleted !== null };
+}
+
+export async function userArchiveSubmission(id: string): Promise<void> {
+  const { userId } = await verifySession();
+  await connectDB();
+  const archivedAt = new Date();
+  const root = await ProspectiveCustomer.findOneAndUpdate(
+    { _id: id, userId },
+    { archivedAt },
+  );
+  if (!root) return;
+  await ProspectiveCustomer.updateMany({ parentId: id }, { archivedAt });
+}
+
+export async function getArchivedThreadsByUserId(): Promise<UserThread[]> {
+  const { userId } = await verifySession();
+  await connectDB();
+
+  const rootDocs = await ProspectiveCustomer.find({
+    userId,
+    archivedAt: { $ne: null },
+    parentId: null,
+  }).sort({ archivedAt: -1 });
+
+  return buildUserThreads(rootDocs);
+}
+
 export async function createUserReply(
   rootId: string,
   userId: string,

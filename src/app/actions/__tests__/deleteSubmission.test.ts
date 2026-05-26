@@ -1,15 +1,10 @@
 import { vi, describe, it, expect, beforeEach } from "vitest";
 
-const { mockVerifySession, mockDeleteSubmission } = vi.hoisted(() => ({
-  mockVerifySession: vi.fn(),
+const { mockDeleteSubmission } = vi.hoisted(() => ({
   mockDeleteSubmission: vi.fn(),
 }));
 
-vi.mock("@/lib/dal/session", () => ({
-  verifySession: mockVerifySession,
-}));
-
-vi.mock("@/lib/dal/index", () => ({
+vi.mock("@/lib/dal/prospects", () => ({
   deleteSubmission: mockDeleteSubmission,
 }));
 
@@ -18,7 +13,6 @@ import { deleteSubmissionAction } from "../deleteSubmission";
 describe("deleteSubmissionAction", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockVerifySession.mockResolvedValue({ userId: "user-abc", email: "alice@example.com" });
   });
 
   it("returns success true when submission is deleted", async () => {
@@ -26,8 +20,16 @@ describe("deleteSubmissionAction", () => {
 
     const result = await deleteSubmissionAction("sub-1");
 
-    expect(mockDeleteSubmission).toHaveBeenCalledWith("sub-1", "user-abc");
     expect(result).toEqual({ success: true });
+  });
+
+  it("passes only the domain id to the DAL — does not pass userId", async () => {
+    mockDeleteSubmission.mockResolvedValue({ deleted: true });
+
+    await deleteSubmissionAction("sub-1");
+
+    expect(mockDeleteSubmission).toHaveBeenCalledWith("sub-1");
+    expect(mockDeleteSubmission).toHaveBeenCalledTimes(1);
   });
 
   it("returns success false when submission does not belong to user", async () => {
@@ -44,13 +46,5 @@ describe("deleteSubmissionAction", () => {
     const result = await deleteSubmissionAction("sub-1");
 
     expect(result).toEqual({ success: false, blocked: true, error: expect.any(String) });
-  });
-
-  it("redirects when session is invalid", async () => {
-    mockVerifySession.mockImplementation(() => {
-      throw new Error("NEXT_REDIRECT:/");
-    });
-
-    await expect(deleteSubmissionAction("sub-1")).rejects.toThrow("NEXT_REDIRECT:/");
   });
 });

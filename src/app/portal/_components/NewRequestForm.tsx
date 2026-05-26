@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { submitPortalRequest } from "@/app/actions/submitPortalRequest";
-import type { ProspectRecord } from "@/lib/dal/index";
+import type { ProspectRecord } from "@/lib/dal/prospects";
 
 interface NewRequestFormProps {
   onSubmitted?: (submission: ProspectRecord) => void;

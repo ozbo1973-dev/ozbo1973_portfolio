@@ -9,7 +9,7 @@ vi.mock("@/lib/dal/session", () => ({
   verifySession: mockVerifySession,
 }));
 
-vi.mock("@/lib/dal/index", () => ({
+vi.mock("@/lib/dal/prospects", () => ({
   createProspect: mockCreateProspect,
 }));
 
