@@ -56,11 +56,6 @@ export async function getSubmissionsByUserId(): Promise<ProspectRecord[]> {
   }));
 }
 
-export async function updateProspectUserId(id: string, userId: string): Promise<void> {
-  await connectDB();
-  await ProspectiveCustomer.findByIdAndUpdate(id, { userId });
-}
-
 function toUserThreadRecord(doc: {
   _id: { toString(): string };
   userId: string;
