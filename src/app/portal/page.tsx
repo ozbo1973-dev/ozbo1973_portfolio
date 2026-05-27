@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default async function PortalPage() {
   const { userId, email } = await verifySession();
   const [threads, archivedThreads] = await Promise.all([
-    getThreadsByUserId(userId),
+    getThreadsByUserId(),
     getArchivedThreadsByUserId(),
   ]);
 

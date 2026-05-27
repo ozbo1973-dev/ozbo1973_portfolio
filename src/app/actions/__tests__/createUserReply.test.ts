@@ -52,12 +52,11 @@ describe("createUserReplyAction", () => {
     expect(result).toEqual({ success: true, reply: replyRecord });
   });
 
-  it("calls createUserReply with rootId, userId from session, and body", async () => {
+  it("calls createUserReply with rootId and body", async () => {
     await createUserReplyAction("root-1", "Thanks for the update!");
 
     expect(mockCreateUserReply).toHaveBeenCalledWith(
       "root-1",
-      "user-abc",
       "Thanks for the update!",
     );
   });

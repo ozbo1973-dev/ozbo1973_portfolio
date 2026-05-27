@@ -103,7 +103,8 @@ export async function buildUserThreads(rootDocs: Array<{
   });
 }
 
-export async function getThreadsByUserId(userId: string): Promise<UserThread[]> {
+export async function getThreadsByUserId(): Promise<UserThread[]> {
+  const { userId } = await verifySession();
   await connectDB();
 
   const rootDocs = await ProspectiveCustomer.find({
@@ -164,9 +165,9 @@ export async function getArchivedThreadsByUserId(): Promise<UserThread[]> {
 
 export async function createUserReply(
   rootId: string,
-  userId: string,
   body: string,
 ): Promise<UserThreadRecord> {
+  const { userId } = await verifySession();
   await connectDB();
   const rootDoc = await ProspectiveCustomer.findById(rootId);
   if (!rootDoc || rootDoc.userId !== userId) {

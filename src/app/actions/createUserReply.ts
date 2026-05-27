@@ -26,7 +26,7 @@ export async function createUserReplyAction(
   }
 
   try {
-    const reply = await createUserReply(rootId, session.userId, parsed.data.body);
+    const reply = await createUserReply(rootId, parsed.data.body);
     sendReplyNotification({
       to: process.env.NOTIFICATION_EMAIL!,
       senderName: session.name,

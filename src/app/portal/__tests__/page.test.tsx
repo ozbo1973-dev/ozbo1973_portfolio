@@ -104,10 +104,10 @@ describe("PortalPage", () => {
       expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
     });
 
-    it("calls getThreadsByUserId with the current user id", async () => {
+    it("calls getThreadsByUserId once with no arguments", async () => {
       render(await PortalPage());
 
-      expect(mockGetThreadsByUserId).toHaveBeenCalledWith("user-abc");
+      expect(mockGetThreadsByUserId).toHaveBeenCalledWith();
       expect(mockGetThreadsByUserId).toHaveBeenCalledTimes(1);
     });
 
