@@ -1,4 +1,4 @@
-import { deleteAllSubmissionsByUser } from "@/lib/dal/index";
+import { deleteAllSubmissionsByUser } from "@/lib/dal/prospects-unverified";
 import { auth } from "@/lib/auth/auth";
 
 export async function deleteUser(userId: string): Promise<void> {

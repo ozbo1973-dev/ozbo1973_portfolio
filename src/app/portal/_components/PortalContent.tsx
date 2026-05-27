@@ -4,7 +4,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import ThreadCard from "./ThreadCard";
 import NewRequestForm from "./NewRequestForm";
-import type { ProspectRecord } from "@/lib/dal/index";
+import type { ProspectRecord } from "@/lib/dal/prospects";
 import type { UserThread } from "@/lib/dal/prospects";
 
 interface PortalContentProps {

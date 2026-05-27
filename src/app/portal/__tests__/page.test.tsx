@@ -53,16 +53,16 @@ const { mockVerifySession, mockGetThreadsByUserId } = vi.hoisted(() => ({
   mockGetThreadsByUserId: vi.fn(),
 }));
 
-vi.mock("@/lib/dal/prospects", () => ({
+vi.mock("@/lib/dal/session", () => ({
   verifySession: mockVerifySession,
-  getThreadsByUserId: mockGetThreadsByUserId,
 }));
 
 const { mockGetArchivedThreadsByUserId } = vi.hoisted(() => ({
   mockGetArchivedThreadsByUserId: vi.fn(),
 }));
 
-vi.mock("@/lib/dal/index", () => ({
+vi.mock("@/lib/dal/prospects", () => ({
+  getThreadsByUserId: mockGetThreadsByUserId,
   getArchivedThreadsByUserId: mockGetArchivedThreadsByUserId,
 }));
 
@@ -104,10 +104,10 @@ describe("PortalPage", () => {
       expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
     });
 
-    it("calls getThreadsByUserId with the current user id", async () => {
+    it("calls getThreadsByUserId once with no arguments", async () => {
       render(await PortalPage());
 
-      expect(mockGetThreadsByUserId).toHaveBeenCalledWith("user-abc");
+      expect(mockGetThreadsByUserId).toHaveBeenCalledWith();
       expect(mockGetThreadsByUserId).toHaveBeenCalledTimes(1);
     });
 

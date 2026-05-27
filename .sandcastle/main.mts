@@ -25,7 +25,7 @@ import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
 // ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
-const BRANCH_STRATEGY = "feature/conversation-threading-r2";
+const BRANCH_STRATEGY = "refactor/cleanup-2-r1";
 // Maximum number of implement→review cycles to run before stopping.
 // Each cycle works on one issue. Raise this to process more issues per run.
 const MAX_ITERATIONS = 5;
