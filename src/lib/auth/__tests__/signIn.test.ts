@@ -29,8 +29,12 @@ import { signIn } from "@/lib/auth/actions/signIn";
 
 const mockHeaders = headers as ReturnType<typeof vi.fn>;
 const mockGetUserByEmail = getUserByEmail as ReturnType<typeof vi.fn>;
-const mockSignInMagicLink = auth.api.signInMagicLink as ReturnType<typeof vi.fn>;
-const mockRegisterMagicLinkCapture = registerMagicLinkCapture as ReturnType<typeof vi.fn>;
+const mockSignInMagicLink = auth.api.signInMagicLink as unknown as ReturnType<
+  typeof vi.fn
+>;
+const mockRegisterMagicLinkCapture = registerMagicLinkCapture as ReturnType<
+  typeof vi.fn
+>;
 const mockSendMagicLinkEmail = sendMagicLinkEmail as ReturnType<typeof vi.fn>;
 
 function makeHeadersMap(overrides: Record<string, string> = {}) {
@@ -42,7 +46,9 @@ describe("signIn", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockHeaders.mockResolvedValue(makeHeadersMap());
-    mockRegisterMagicLinkCapture.mockResolvedValue("https://example.com/magic?token=abc");
+    mockRegisterMagicLinkCapture.mockResolvedValue(
+      "https://example.com/magic?token=abc",
+    );
     mockSendMagicLinkEmail.mockResolvedValue(undefined);
   });
 
@@ -63,7 +69,9 @@ describe("signIn", () => {
 
     expect(mockSignInMagicLink).toHaveBeenCalledOnce();
     expect(mockSignInMagicLink).toHaveBeenCalledWith(
-      expect.objectContaining({ body: expect.objectContaining({ email: "registered@example.com" }) })
+      expect.objectContaining({
+        body: expect.objectContaining({ email: "registered@example.com" }),
+      }),
     );
   });
 
@@ -91,7 +99,9 @@ describe("signIn", () => {
 
     expect(mockGetUserByEmail).toHaveBeenCalledWith("user@example.com");
     expect(mockSignInMagicLink).toHaveBeenCalledWith(
-      expect.objectContaining({ body: expect.objectContaining({ email: "user@example.com" }) })
+      expect.objectContaining({
+        body: expect.objectContaining({ email: "user@example.com" }),
+      }),
     );
   });
 
@@ -102,7 +112,9 @@ describe("signIn", () => {
     await signIn("admin@example.com");
 
     expect(mockSignInMagicLink).toHaveBeenCalledWith(
-      expect.objectContaining({ body: expect.objectContaining({ callbackURL: "/admin" }) })
+      expect.objectContaining({
+        body: expect.objectContaining({ callbackURL: "/admin" }),
+      }),
     );
   });
 
@@ -113,7 +125,9 @@ describe("signIn", () => {
     await signIn("user@example.com");
 
     expect(mockSignInMagicLink).toHaveBeenCalledWith(
-      expect.objectContaining({ body: expect.objectContaining({ callbackURL: "/portal" }) })
+      expect.objectContaining({
+        body: expect.objectContaining({ callbackURL: "/portal" }),
+      }),
     );
   });
 });
