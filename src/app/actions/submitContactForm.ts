@@ -7,7 +7,7 @@ import { runSecurityGuard, recordGuardRejection } from "@/lib/contact/guard";
 import { createProspect } from "@/lib/dal/prospects";
 import { sendNotifications } from "@/lib/contact/sendNotifications";
 import { auth, registerMagicLinkCapture } from "@/lib/auth/auth";
-import { getUserByEmail } from "@/lib/auth/getUserIdByEmail";
+import { getUserByEmail } from "@/lib/auth/getUserByEmail";
 
 const submissionSchema = z.object({
   firstName: z.string().min(1, "First name is required"),

@@ -1,7 +1,7 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import SectionWrapper from "./wrapper";
 import { SectionMainButton } from "./main-button";
-import { UserRound } from "lucide-react";
 import { SECTION_IDS } from "@/lib/config";
 
 export default function AboutSection() {
@@ -14,31 +14,34 @@ export default function AboutSection() {
           "px-4 md:px-8 lg:px-4",
           "py-4 md:py-1 lg:py-16",
           "flex flex-col lg:flex-row",
-          "justify-center items-center lg:items-start",
-          "gap-20 md:gap-12 lg:gap-36"
+          "justify-center items-center",
+          "gap-20 md:gap-12 lg:gap-36",
         )}
       >
-        {/* Image Placeholder — swap for Next.js Image when ready */}
+        {/* Portrait */}
         <div
           className={cn(
-            "w-full relative overflow-hidden",
-            "h-48 md:h-72 lg:h-[402px]",
-            "max-w-[350px] md:max-w-[450px] lg:max-w-[550px]"
+            "relative shrink-0",
+            "w-full h-48 md:h-72 lg:h-[402px]",
+            "max-w-[350px] md:max-w-[450px] lg:max-w-[550px]",
           )}
         >
           <div
+            aria-hidden
             className={cn(
-              "absolute inset-0",
-              "bg-card",
-              "border-2 border-dashed border-primary/60",
-              "flex flex-col items-center justify-center gap-3"
+              "absolute -inset-2 lg:-inset-3",
+              "translate-x-3 translate-y-3 lg:translate-x-4 lg:translate-y-4",
+              "bg-primary/20 rounded-sm",
             )}
-          >
-            <UserRound className="text-primary/70 w-16 h-16" strokeWidth={1} />
-            <span className="text-foreground/40 text-xs uppercase tracking-widest font-['Mulish']">
-              Photo coming soon
-            </span>
-          </div>
+          />
+          <Image
+            src="/images/bovero-headshot.png"
+            alt="Brady Bovero headshot"
+            fill
+            sizes="(max-width: 768px) 350px, (max-width: 1024px) 450px, 550px"
+            priority
+            className="relative object-cover object-top rounded-sm ring-1 ring-primary/30"
+          />
         </div>
 
         {/* Text Content */}
@@ -48,7 +51,7 @@ export default function AboutSection() {
             "max-w-[600px]",
             "text-xl md:text-2xl font-normal font-['Inter'] leading-7",
             "text-foreground text-center lg:text-left",
-            "border-l-4 border-primary/50 pl-4 lg:pl-6"
+            "border-l-4 border-primary/50 pl-4 lg:pl-6",
           )}
         >
           With 20+ years of experience in solutioning problems with coding and

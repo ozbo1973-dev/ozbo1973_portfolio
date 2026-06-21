@@ -1,5 +1,5 @@
-import { verifySession, getThreadsByUserId } from "@/lib/dal/prospects";
-import { getArchivedThreadsByUserId } from "@/lib/dal/index";
+import { verifySession } from "@/lib/dal/session";
+import { getThreadsByUserId, getArchivedThreadsByUserId } from "@/lib/dal/prospects";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import DeleteAccountButton from "./_components/DeleteAccountButton";
@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 export default async function PortalPage() {
   const { userId, email } = await verifySession();
   const [threads, archivedThreads] = await Promise.all([
-    getThreadsByUserId(userId),
-    getArchivedThreadsByUserId(userId),
+    getThreadsByUserId(),
+    getArchivedThreadsByUserId(),
   ]);
 
   return (

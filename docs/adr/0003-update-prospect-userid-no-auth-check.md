@@ -10,7 +10,7 @@ Accepted
 
 ## Decision
 
-Do not add an auth check to `updateProspectUserId()`. Its only call site is `submitContactForm`, a server action that:
+`updateProspectUserId()` now lives in `src/lib/dal/prospects-unverified.ts`, the explicit boundary file for DAL functions that intentionally bypass session verification. Do not add an auth check to `updateProspectUserId()`. Its only call site is `submitContactForm`, a server action that:
 
 1. Runs a security guard (IP, user-agent, honeypot, referer) before any DB access
 2. Creates the ProspectiveCustomer record itself in the same execution

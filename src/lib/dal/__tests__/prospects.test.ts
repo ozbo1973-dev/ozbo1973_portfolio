@@ -40,7 +40,7 @@ vi.mock("@/lib/models/ProspectiveCustomer", () => ({
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/auth";
-import { verifySession } from "@/lib/dal/prospects";
+import { verifySession } from "@/lib/dal/session";
 
 const mockHeaders = headers as unknown as ReturnType<typeof vi.fn>;
 const mockGetSession = auth.api.getSession as unknown as ReturnType<
@@ -216,7 +216,7 @@ describe("getThreadsByUserId", () => {
   it("queries only active (archivedAt: null) root submissions for the user", async () => {
     setupFindMock([]);
 
-    await getThreadsByUserId("user-abc");
+    await getThreadsByUserId();
 
     expect(mockFind).toHaveBeenCalledWith({
       userId: "user-abc",
@@ -257,7 +257,7 @@ describe("getThreadsByUserId", () => {
     };
     setupFindMock([rootDoc1, rootDoc2], [replyForRoot1]);
 
-    const results = await getThreadsByUserId("user-abc");
+    const results = await getThreadsByUserId();
 
     expect(results).toHaveLength(2);
     expect(results[0].root.id).toBe("root-1");
@@ -287,7 +287,7 @@ describe("getThreadsByUserId", () => {
     };
     setupFindMock([rootDoc1, rootDoc2], []);
 
-    const results = await getThreadsByUserId("user-abc");
+    const results = await getThreadsByUserId();
 
     expect(results[0].root.id).toBe("root-1");
     expect(results[1].root.id).toBe("root-2");
@@ -323,7 +323,7 @@ describe("getThreadsByUserId", () => {
     };
     setupFindMock([rootDoc], [reply1, reply2]);
 
-    const results = await getThreadsByUserId("user-abc");
+    const results = await getThreadsByUserId();
 
     expect(results[0].replies).toHaveLength(2);
     expect(results[0].replies[0].id).toBe("reply-1");
@@ -333,7 +333,7 @@ describe("getThreadsByUserId", () => {
   it("excludes archived threads (archivedAt not null)", async () => {
     setupFindMock([]);
 
-    const results = await getThreadsByUserId("user-abc");
+    const results = await getThreadsByUserId();
 
     expect(results).toEqual([]);
     expect(mockFind).toHaveBeenCalledWith(
@@ -344,15 +344,29 @@ describe("getThreadsByUserId", () => {
   it("returns empty array when no active submissions exist", async () => {
     setupFindMock([]);
 
-    const results = await getThreadsByUserId("user-abc");
+    const results = await getThreadsByUserId();
 
     expect(results).toEqual([]);
+  });
+
+  it("redirects to / when no session", async () => {
+    mockGetSession.mockResolvedValue(null);
+    mockRedirect.mockImplementation(() => {
+      throw new Error("NEXT_REDIRECT");
+    });
+
+    await expect(getThreadsByUserId()).rejects.toThrow("NEXT_REDIRECT");
   });
 });
 
 describe("createUserReply", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockHeaders.mockResolvedValue({ get: () => null });
+    mockGetSession.mockResolvedValue({
+      session: { userId: "user-abc" },
+      user: { email: "alice@example.com", name: "Alice" },
+    });
   });
 
   const rootDoc = {
@@ -377,7 +391,7 @@ describe("createUserReply", () => {
     };
     mockCreate.mockResolvedValue(replyDoc);
 
-    await createUserReply("root-1", "user-abc", "Great, thanks!");
+    await createUserReply("root-1", "Great, thanks!");
 
     expect(mockCreate).toHaveBeenCalledWith({
       userId: "user-abc",
@@ -398,11 +412,7 @@ describe("createUserReply", () => {
     };
     mockCreate.mockResolvedValue(replyDoc);
 
-    const result = await createUserReply(
-      "root-1",
-      "user-abc",
-      "Great, thanks!",
-    );
+    const result = await createUserReply("root-1", "Great, thanks!");
 
     expect(result).toMatchObject({
       id: "reply-new",
@@ -416,7 +426,7 @@ describe("createUserReply", () => {
     mockFindById.mockResolvedValue({ ...rootDoc, userId: "other-user" });
 
     await expect(
-      createUserReply("root-1", "user-abc", "Trying to reply"),
+      createUserReply("root-1", "Trying to reply"),
     ).rejects.toThrow();
     expect(mockCreate).not.toHaveBeenCalled();
   });
@@ -424,9 +434,19 @@ describe("createUserReply", () => {
   it("throws when root submission does not exist", async () => {
     mockFindById.mockResolvedValue(null);
 
-    await expect(
-      createUserReply("root-1", "user-abc", "Hello"),
-    ).rejects.toThrow();
+    await expect(createUserReply("root-1", "Hello")).rejects.toThrow();
     expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it("redirects to / when no session", async () => {
+    mockGetSession.mockResolvedValue(null);
+    mockRedirect.mockImplementation(() => {
+      throw new Error("NEXT_REDIRECT");
+    });
+
+    await expect(createUserReply("root-1", "Hello")).rejects.toThrow(
+      "NEXT_REDIRECT",
+    );
+    expect(mockFindById).not.toHaveBeenCalled();
   });
 });

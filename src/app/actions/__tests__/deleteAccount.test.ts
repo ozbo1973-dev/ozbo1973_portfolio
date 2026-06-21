@@ -5,7 +5,7 @@ const { mockVerifySession, mockDeleteUser } = vi.hoisted(() => ({
   mockDeleteUser: vi.fn(),
 }));
 
-vi.mock("@/lib/dal/prospects", () => ({
+vi.mock("@/lib/dal/session", () => ({
   verifySession: mockVerifySession,
 }));
 

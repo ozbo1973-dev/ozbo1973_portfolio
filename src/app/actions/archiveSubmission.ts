@@ -1,7 +1,6 @@
 "use server";
 
-import { verifySession } from "@/lib/dal/prospects";
-import { userArchiveSubmission } from "@/lib/dal/index";
+import { userArchiveSubmission } from "@/lib/dal/prospects";
 
 export interface ArchiveSubmissionResult {
   success: boolean;
@@ -9,9 +8,8 @@ export interface ArchiveSubmissionResult {
 }
 
 export async function archiveSubmissionAction(id: string): Promise<ArchiveSubmissionResult> {
-  const { userId } = await verifySession();
   try {
-    await userArchiveSubmission(id, userId);
+    await userArchiveSubmission(id);
     return { success: true };
   } catch {
     return { success: false, error: "Failed to archive submission." };

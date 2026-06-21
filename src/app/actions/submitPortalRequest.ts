@@ -1,9 +1,9 @@
 "use server";
 
 import { z } from "zod";
-import { verifySession } from "@/lib/dal/prospects";
-import { createProspect } from "@/lib/dal/index";
-import type { ProspectRecord } from "@/lib/dal/index";
+import { verifySession } from "@/lib/dal/session";
+import { createProspect } from "@/lib/dal/prospects";
+import type { ProspectRecord } from "@/lib/dal/prospects";
 
 const schema = z.object({
   description: z.string().trim().min(1, "Project description is required"),
