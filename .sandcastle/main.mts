@@ -25,21 +25,21 @@ import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
 // ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
-const BRANCH_STRATEGY = "refactor/cleanup-2-r1";
+
 // Maximum number of implement→review cycles to run before stopping.
 // Each cycle works on one issue. Raise this to process more issues per run.
-const MAX_ITERATIONS = 5;
+const MAX_ITERATIONS = 10;
 
 // Hooks run inside the sandbox before the agent starts each iteration.
 // npm install ensures the sandbox always has fresh dependencies.
 const hooks = {
-  sandbox: { onSandboxReady: [{ command: "pnpm install" }] },
+  sandbox: { onSandboxReady: [{ command: "npm install" }] },
 };
 
-// Copying node_modules times out on Windows (too many files/symlinks).
-// The pnpm install hook above handles dependencies inside the sandbox instead.
-// const copyToWorktree = ["node_modules"];
-const copyToWorktree: string[] = [];
+// Copy node_modules from the host into the worktree before each sandbox
+// starts. Avoids a full npm install from scratch; the hook above handles
+// platform-specific binaries and any packages added since the last copy.
+const copyToWorktree = ["node_modules"];
 
 // ---------------------------------------------------------------------------
 // Main loop
@@ -49,8 +49,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
   console.log(`\n=== Iteration ${iteration}/${MAX_ITERATIONS} ===\n`);
 
   // Generate a unique branch name for this iteration.
-  // const branch = `sandcastle/sequential-reviewer/${Date.now()}`;
-  const branch = BRANCH_STRATEGY + `_${iteration}`;
+  const branch = `sandcastle/sequential-reviewer/${Date.now()}`;
 
   // Create a single sandbox that both the implementer and reviewer share.
   // This gives both agents a real, named branch that persists across phases.
@@ -74,7 +73,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     const implement = await sandbox.run({
       name: "implementer",
       maxIterations: 100,
-      agent: sandcastle.claudeCode("claude-sonnet-4-6", { effort: "medium" }),
+      agent: sandcastle.claudeCode("claude-opus-4-6"),
       promptFile: "./.sandcastle/implement-prompt.md",
     });
 
@@ -96,7 +95,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     await sandbox.run({
       name: "reviewer",
       maxIterations: 1,
-      agent: sandcastle.claudeCode("claude-opus-4-7", { effort: "medium" }),
+      agent: sandcastle.claudeCode("claude-opus-4-6"),
       promptFile: "./.sandcastle/review-prompt.md",
       promptArgs: {
         BRANCH: branch,
