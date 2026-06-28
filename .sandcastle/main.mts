@@ -41,6 +41,10 @@ const hooks = {
 // platform-specific binaries and any packages added since the last copy.
 const copyToWorktree = ["node_modules"];
 
+// Timeout (ms) for copying `copyToWorktree` paths into the worktree.
+// Default is 60_000; node_modules can take longer, especially on Windows.
+const timeouts = { copyToWorktreeMs: 300_000 };
+
 // ---------------------------------------------------------------------------
 // Main loop
 // ---------------------------------------------------------------------------
@@ -58,6 +62,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     sandbox: docker(),
     hooks,
     copyToWorktree,
+    timeouts,
   });
 
   try {
