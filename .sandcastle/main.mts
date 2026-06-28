@@ -33,7 +33,7 @@ const MAX_ITERATIONS = 10;
 // Hooks run inside the sandbox before the agent starts each iteration.
 // npm install ensures the sandbox always has fresh dependencies.
 const hooks = {
-  sandbox: { onSandboxReady: [{ command: "npm install" }] },
+  sandbox: { onSandboxReady: [{ command: "pnpm install" }] },
 };
 
 // Copy node_modules from the host into the worktree before each sandbox
@@ -73,7 +73,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     const implement = await sandbox.run({
       name: "implementer",
       maxIterations: 100,
-      agent: sandcastle.claudeCode("claude-opus-4-6"),
+      agent: sandcastle.claudeCode("claude-Sonnet-4-6"),
       promptFile: "./.sandcastle/implement-prompt.md",
     });
 
@@ -95,7 +95,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     await sandbox.run({
       name: "reviewer",
       maxIterations: 1,
-      agent: sandcastle.claudeCode("claude-opus-4-6"),
+      agent: sandcastle.claudeCode("claude-opus-4-8"),
       promptFile: "./.sandcastle/review-prompt.md",
       promptArgs: {
         BRANCH: branch,
