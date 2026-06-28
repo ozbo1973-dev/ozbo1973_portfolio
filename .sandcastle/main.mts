@@ -36,14 +36,10 @@ const hooks = {
   sandbox: { onSandboxReady: [{ command: "pnpm install" }] },
 };
 
-// Copy node_modules from the host into the worktree before each sandbox
-// starts. Avoids a full npm install from scratch; the hook above handles
-// platform-specific binaries and any packages added since the last copy.
-const copyToWorktree = ["node_modules"];
-
-// Timeout (ms) for copying `copyToWorktree` paths into the worktree.
-// Default is 60_000; node_modules can take longer, especially on Windows.
-const timeouts = { copyToWorktreeMs: 300_000 };
+// node_modules is installed fresh by the onSandboxReady hook above rather than
+// copied from the host. Copying it file-by-file is slow on Windows (no reflink
+// support) and was hitting the copyToWorktree timeout.
+const copyToWorktree: string[] = [];
 
 // ---------------------------------------------------------------------------
 // Main loop
@@ -62,7 +58,6 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     sandbox: docker(),
     hooks,
     copyToWorktree,
-    timeouts,
   });
 
   try {
@@ -78,7 +73,7 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     const implement = await sandbox.run({
       name: "implementer",
       maxIterations: 100,
-      agent: sandcastle.claudeCode("claude-Sonnet-4-6"),
+      agent: sandcastle.claudeCode("claude-sonnet-4-6"),
       promptFile: "./.sandcastle/implement-prompt.md",
     });
 
