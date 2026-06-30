@@ -7,57 +7,41 @@ import {
   SiNextdotjs,
   SiTypescript,
   SiNodedotjs,
+  SiJavascript,
+  SiHtml5,
+  SiCss,
+  SiDocker,
+  SiClaude,
 } from "@icons-pack/react-simple-icons";
+import { Bot, BrainCircuit } from "lucide-react";
+
+const PROGRESS = { Beginner: 40, Intermediate: 65, Advanced: 90 } as const;
+type Level = keyof typeof PROGRESS;
 
 type SkillProps = {
   name: string;
-  level: string;
-  progress: number;
+  level: Level;
   icon: React.ReactNode;
 };
 
 const skills: SkillProps[] = [
-  {
-    name: "React",
-    level: "Advanced",
-    progress: 90,
-    icon: <SiReact className="text-primary w-12 h-12" />,
-  },
-  {
-    name: "Next.js",
-    level: "Advanced",
-    progress: 85,
-    icon: <SiNextdotjs className="text-primary w-12 h-12" />,
-  },
-  {
-    name: "TypeScript",
-    level: "Advanced",
-    progress: 85,
-    icon: <SiTypescript className="text-primary w-12 h-12" />,
-  },
-  {
-    name: "Node.js",
-    level: "Intermediate",
-    progress: 75,
-    icon: <SiNodedotjs className="text-primary w-12 h-12" />,
-  },
-  // {
-  //   name: "Python",
-  //   level: "Intermediate",
-  //   progress: 70,
-  //   icon: <SiPython className="text-primary w-12 h-12" />,
-  // },
-  // {
-  //   name: "AWS",
-  //   level: "Intermediate",
-  //   progress: 65,
-  //   icon: <SiAmazonwebservices className="text-primary w-12 h-12" />,
-  // },
+  { name: "React", level: "Advanced", icon: <SiReact className="text-primary w-12 h-12" /> },
+  { name: "Next.js", level: "Advanced", icon: <SiNextdotjs className="text-primary w-12 h-12" /> },
+  { name: "TypeScript", level: "Advanced", icon: <SiTypescript className="text-primary w-12 h-12" /> },
+  { name: "JavaScript", level: "Intermediate", icon: <SiJavascript className="text-primary w-12 h-12" /> },
+  { name: "HTML", level: "Advanced", icon: <SiHtml5 className="text-primary w-12 h-12" /> },
+  { name: "CSS", level: "Intermediate", icon: <SiCss className="text-primary w-12 h-12" /> },
+  { name: "Node.js", level: "Intermediate", icon: <SiNodedotjs className="text-primary w-12 h-12" /> },
+  { name: "Docker", level: "Beginner", icon: <SiDocker className="text-primary w-12 h-12" /> },
+  { name: "Claude Code", level: "Intermediate", icon: <SiClaude className="text-primary w-12 h-12" /> },
+  { name: "AI Agents", level: "Beginner", icon: <Bot className="text-primary w-12 h-12" /> },
+  { name: "AI Engineer", level: "Beginner", icon: <BrainCircuit className="text-primary w-12 h-12" /> },
 ];
 
 type SkillCardProps = SkillProps & { index: number };
 
-function SkillCard({ name, level, progress, icon, index }: SkillCardProps) {
+function SkillCard({ name, level, icon, index }: SkillCardProps) {
+  const progress = PROGRESS[level];
   return (
     <div
       className={cn(
