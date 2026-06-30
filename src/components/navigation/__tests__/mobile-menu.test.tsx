@@ -85,4 +85,20 @@ describe("MobileMenu", () => {
 
     expect(screen.queryByText("My Portal")).not.toBeInTheDocument();
   });
+
+  it("renders the Contact button when no session", () => {
+    render(<MobileMenu isScrolled={false} />);
+
+    expect(screen.getByRole("button", { name: /contact/i })).toBeInTheDocument();
+  });
+
+  it("hides the Contact button when a session is present", () => {
+    mockUseSession.mockReturnValue({
+      data: { user: { email: "user@example.com", role: "user" } },
+    });
+
+    render(<MobileMenu isScrolled={false} />);
+
+    expect(screen.queryByRole("button", { name: /contact/i })).not.toBeInTheDocument();
+  });
 });

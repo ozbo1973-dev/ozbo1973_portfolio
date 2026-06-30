@@ -102,11 +102,13 @@ export function MobileMenu({ isScrolled }: { isScrolled: boolean }) {
             </>
           )}
 
-          <ContactButton
-            isScrolled={isScrolled}
-            isMobile={true}
-            onClick={() => setOpen(false)}
-          />
+          {!session && (
+            <ContactButton
+              isScrolled={isScrolled}
+              isMobile={true}
+              onClick={() => setOpen(false)}
+            />
+          )}
         </div>
       </SheetContent>
     </Sheet>
