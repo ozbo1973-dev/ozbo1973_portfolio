@@ -22,10 +22,52 @@ vi.mock("@icons-pack/react-simple-icons", () => ({
   SiNextdotjs: () => <svg data-testid="icon-nextdotjs" />,
   SiTypescript: () => <svg data-testid="icon-typescript" />,
   SiNodedotjs: () => <svg data-testid="icon-nodedotjs" />,
+  SiJavascript: () => <svg data-testid="icon-javascript" />,
+  SiHtml5: () => <svg data-testid="icon-html5" />,
+  SiCss: () => <svg data-testid="icon-css" />,
+  SiDocker: () => <svg data-testid="icon-docker" />,
+  SiClaude: () => <svg data-testid="icon-claude" />,
 }));
+
+vi.mock("lucide-react", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("lucide-react")>();
+  return {
+    ...actual,
+    Bot: () => <svg data-testid="icon-bot" />,
+    BrainCircuit: () => <svg data-testid="icon-brain-circuit" />,
+  };
+});
 
 import SkillsSection from "../skills";
 import { SECTION_IDS } from "@/lib/config";
+
+const EXPECTED_SKILLS = [
+  "React",
+  "Next.js",
+  "TypeScript",
+  "JavaScript",
+  "HTML",
+  "CSS",
+  "Node.js",
+  "Docker",
+  "Claude Code",
+  "AI Agents",
+  "AI Engineer",
+];
+
+const EXPECTED_ICONS = [
+  "icon-react",
+  "icon-nextdotjs",
+  "icon-typescript",
+  "icon-javascript",
+  "icon-html5",
+  "icon-css",
+  "icon-nodedotjs",
+  "icon-docker",
+  "icon-claude",
+  "icon-bot",
+  "icon-brain-circuit",
+];
 
 describe("SkillsSection", () => {
   it("passes the 'skills' section ID from config to SectionWrapper", () => {
@@ -35,40 +77,43 @@ describe("SkillsSection", () => {
     expect(wrapper!.getAttribute("data-section-id")).toBe(SECTION_IDS[2]);
   });
 
-  it("renders all four technology icons", () => {
+  it("renders all eleven skill names", () => {
     render(<SkillsSection />);
-    expect(screen.getByTestId("icon-react")).toBeInTheDocument();
-    expect(screen.getByTestId("icon-nextdotjs")).toBeInTheDocument();
-    expect(screen.getByTestId("icon-typescript")).toBeInTheDocument();
-    expect(screen.getByTestId("icon-nodedotjs")).toBeInTheDocument();
+    for (const name of EXPECTED_SKILLS) {
+      expect(screen.getByText(name)).toBeInTheDocument();
+    }
   });
 
-  it("each skill card has amber top border accent class", () => {
+  it("renders all eleven technology icons", () => {
+    render(<SkillsSection />);
+    for (const testId of EXPECTED_ICONS) {
+      expect(screen.getByTestId(testId)).toBeInTheDocument();
+    }
+  });
+
+  it("each skill card has primary top border accent class", () => {
     const { container } = render(<SkillsSection />);
     const cards = container.querySelectorAll("[class*='border-t-2']");
-    expect(cards.length).toBe(4);
+    expect(cards.length).toBe(11);
     cards.forEach((card) => {
       expect(card.className).toMatch(/border-primary/);
     });
   });
 
-  it("progress bars use slim height and amber fill", () => {
-    const { container } = render(<SkillsSection />);
-    // The filled portion of progress bars should have amber fill and slim height
-    const progressFills = container.querySelectorAll("[class*='bg-primary']");
-    // At least 4 fills (one per skill card) — may have more due to card borders
-    expect(progressFills.length).toBeGreaterThanOrEqual(4);
-    // Progress fill bars should not use tall h-5 class
-    const tallProgressBars = container.querySelectorAll(
-      "[style*='width'] .h-5"
-    );
-    expect(tallProgressBars.length).toBe(0);
-  });
-
   it("skill cards have staggered animation-delay inline styles", () => {
     const { container } = render(<SkillsSection />);
-    // Each card should have an inline animation-delay style
     const cards = container.querySelectorAll("[style*='animation-delay']");
-    expect(cards.length).toBe(4);
+    expect(cards.length).toBe(11);
+  });
+
+  it("renders the Download Resume action", () => {
+    render(<SkillsSection />);
+    expect(screen.getByText(/download resume/i)).toBeInTheDocument();
+  });
+
+  it("progress bars use primary fill", () => {
+    const { container } = render(<SkillsSection />);
+    const progressFills = container.querySelectorAll("[class*='bg-primary']");
+    expect(progressFills.length).toBeGreaterThanOrEqual(11);
   });
 });

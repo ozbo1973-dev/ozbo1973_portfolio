@@ -1,0 +1,6 @@
+node_modules
+.next
+.sandcastle
+.git
+.env*.local
+pnpm-workspace.yaml

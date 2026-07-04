@@ -28,18 +28,20 @@ import { docker } from "@ai-hero/sandcastle/sandboxes/docker";
 
 // Maximum number of implement→review cycles to run before stopping.
 // Each cycle works on one issue. Raise this to process more issues per run.
-const MAX_ITERATIONS = 10;
+const MAX_ITERATIONS = 6;
 
 // Hooks run inside the sandbox before the agent starts each iteration.
-// npm install ensures the sandbox always has fresh dependencies.
+// The image bakes a Linux-native pnpm store (via `pnpm fetch` at build time),
+// so this install runs fully offline against that store — no network, no copy.
 const hooks = {
-  sandbox: { onSandboxReady: [{ command: "pnpm install" }] },
+  sandbox: {
+    onSandboxReady: [{ command: "pnpm install --frozen-lockfile --offline" }],
+  },
 };
 
-// Copy node_modules from the host into the worktree before each sandbox
-// starts. Avoids a full npm install from scratch; the hook above handles
-// platform-specific binaries and any packages added since the last copy.
-const copyToWorktree = ["node_modules"];
+// node_modules is materialized in the worktree by the offline install hook
+// above. Nothing is copied from the host (the store is baked into the image).
+const copyToWorktree: string[] = [];
 
 // ---------------------------------------------------------------------------
 // Main loop
@@ -72,8 +74,8 @@ for (let iteration = 1; iteration <= MAX_ITERATIONS; iteration++) {
     // -----------------------------------------------------------------------
     const implement = await sandbox.run({
       name: "implementer",
-      maxIterations: 100,
-      agent: sandcastle.claudeCode("claude-Sonnet-4-6"),
+      maxIterations: 50,
+      agent: sandcastle.claudeCode("claude-sonnet-4-6"),
       promptFile: "./.sandcastle/implement-prompt.md",
     });
 

@@ -14,11 +14,10 @@ import { Button } from "@/components/ui/button";
 import { useNavigation } from "@/context/navigation-context";
 import { navLinks } from "@/lib/config";
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
+import { Menu, LogIn, LayoutDashboard } from "lucide-react";
 import { authClient } from "@/lib/auth/auth-client";
 import { ContactButton } from "./contact-button";
 import { NavButton } from "./nav-button";
-import { LogIn } from "lucide-react";
 import { SignOutButton } from "./sign-out-button";
 
 export function MobileMenu({ isScrolled }: { isScrolled: boolean }) {
@@ -96,17 +95,20 @@ export function MobileMenu({ isScrolled }: { isScrolled: boolean }) {
                 isMobile={true}
                 className="w-full ml-5 justify-start text-lg gap-3 hover:bg-primary/10"
               >
+                <LayoutDashboard className="w-5 h-5 text-primary" />
                 My Portal
               </NavButton>
               <SignOutButton />
             </>
           )}
 
-          <ContactButton
-            isScrolled={isScrolled}
-            isMobile={true}
-            onClick={() => setOpen(false)}
-          />
+          {!session && (
+            <ContactButton
+              isScrolled={isScrolled}
+              isMobile={true}
+              onClick={() => setOpen(false)}
+            />
+          )}
         </div>
       </SheetContent>
     </Sheet>
