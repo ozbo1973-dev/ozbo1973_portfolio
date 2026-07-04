@@ -25,17 +25,61 @@ type SkillProps = {
 };
 
 const skills: SkillProps[] = [
-  { name: "React", level: "Advanced", icon: <SiReact className="text-primary w-12 h-12" /> },
-  { name: "Next.js", level: "Advanced", icon: <SiNextdotjs className="text-primary w-12 h-12" /> },
-  { name: "TypeScript", level: "Advanced", icon: <SiTypescript className="text-primary w-12 h-12" /> },
-  { name: "JavaScript", level: "Intermediate", icon: <SiJavascript className="text-primary w-12 h-12" /> },
-  { name: "HTML", level: "Advanced", icon: <SiHtml5 className="text-primary w-12 h-12" /> },
-  { name: "CSS", level: "Intermediate", icon: <SiCss className="text-primary w-12 h-12" /> },
-  { name: "Node.js", level: "Intermediate", icon: <SiNodedotjs className="text-primary w-12 h-12" /> },
-  { name: "Docker", level: "Beginner", icon: <SiDocker className="text-primary w-12 h-12" /> },
-  { name: "Claude Code", level: "Intermediate", icon: <SiClaude className="text-primary w-12 h-12" /> },
-  { name: "AI Agents", level: "Beginner", icon: <Bot className="text-primary w-12 h-12" /> },
-  { name: "AI Engineer", level: "Beginner", icon: <BrainCircuit className="text-primary w-12 h-12" /> },
+  {
+    name: "React",
+    level: "Advanced",
+    icon: <SiReact className="text-primary w-12 h-12" />,
+  },
+  {
+    name: "Next.js",
+    level: "Advanced",
+    icon: <SiNextdotjs className="text-primary w-12 h-12" />,
+  },
+  {
+    name: "TypeScript",
+    level: "Intermediate",
+    icon: <SiTypescript className="text-primary w-12 h-12" />,
+  },
+  {
+    name: "JavaScript",
+    level: "Intermediate",
+    icon: <SiJavascript className="text-primary w-12 h-12" />,
+  },
+  {
+    name: "HTML",
+    level: "Advanced",
+    icon: <SiHtml5 className="text-primary w-12 h-12" />,
+  },
+  {
+    name: "CSS",
+    level: "Intermediate",
+    icon: <SiCss className="text-primary w-12 h-12" />,
+  },
+  {
+    name: "Node.js",
+    level: "Intermediate",
+    icon: <SiNodedotjs className="text-primary w-12 h-12" />,
+  },
+  {
+    name: "Docker",
+    level: "Beginner",
+    icon: <SiDocker className="text-primary w-12 h-12" />,
+  },
+  {
+    name: "Claude Code",
+    level: "Intermediate",
+    icon: <SiClaude className="text-primary w-12 h-12" />,
+  },
+  {
+    name: "AI Agents",
+    level: "Beginner",
+    icon: <Bot className="text-primary w-12 h-12" />,
+  },
+  {
+    name: "AI Engineer",
+    level: "Beginner",
+    icon: <BrainCircuit className="text-primary w-12 h-12" />,
+  },
 ];
 
 type SkillCardProps = SkillProps & { index: number };
