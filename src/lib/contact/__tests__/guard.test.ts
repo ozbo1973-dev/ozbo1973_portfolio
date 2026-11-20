@@ -1,3 +1,4 @@
+import { describe, it, expect } from "vitest";
 import { runSecurityGuard } from "@/lib/contact/guard";
 import { trackFailedAttempt } from "@/lib/security/rateLimit";
 
