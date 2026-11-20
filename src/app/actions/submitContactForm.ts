@@ -30,7 +30,7 @@ export async function submitContactForm(formData: ContactFormData): Promise<Acti
   const ip = getClientIP(h);
 
   const parsed = submissionSchema.safeParse(formData);
-  if (!parsed.success) return { success: false, error: parsed.error.errors[0].message };
+  if (!parsed.success) return { success: false, error: parsed.error.issues[0].message };
 
   const guard = runSecurityGuard({
     ip,
